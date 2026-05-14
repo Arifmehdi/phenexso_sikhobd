@@ -489,12 +489,12 @@ class AuthController extends Controller
             'email'  => 'required|email|unique:users,email,' . $user->id,
             'mobile' => 'required|unique:users,mobile,' . $user->id,
             'image'  => 'nullable|image|max:2048',
-            'address'      => 'required|string|max:500',
-            'father_name'  => 'required|string',
-            'reg_date'     => 'required|date',
-            'bkash_number' => 'required|string|max:20',
-            'dob'          => 'required|date',
-            'blood_group'  => 'required|string|max:10',
+            'address'      => 'nullable|string|max:500',
+            'father_name'  => 'nullable|string',
+            'reg_date'     => 'nullable|date',
+            'bkash_number' => 'nullable|string|max:20',
+            'dob'          => 'nullable|date',
+            'blood_group'  => 'nullable|string|max:10',
         ]);
 
         if ($validator->fails()) {

@@ -1,242 +1,278 @@
-@extends('website.layouts.sungoods')
+@extends('website.layouts.sikhobd')
 
-@section('title', 'Cart - '. env('APP_NAME') )
-
-@section('met<meta name="description" content="Cart - North Bengal">
-<meta name="keywords" content="cart, shopping">
-@endsection
+@section('title', 'Shopping Cart & Checkout — ' . ($ws->name ?? env('APP_NAME')))
 
 @push('css')
 <style>
-.page-content { padding-top: 30px; padding-bottom: 40px; }
-.step-by { display: flex; justify-content: center; gap: 30px; margin-bottom: 40px; }
-.title-step { font-size: 14px; font-weight: 500; }
-.title-step a { color: #999; text-decoration: none; }
-.title-step.active a, .title-step a:hover { color: #333; }
-.title-step.active a { font-weight: 700; }
-.shop-table { width: 100%; border-collapse: collapse; }
-.shop-table thead th { padding: 15px; text-align: left; font-weight: 600; color: #333; border-bottom: 1px solid #eee; }
-.shop-table tbody td { padding: 20px 15px; border-bottom: 1px solid #eee; vertical-align: middle; }
-.shop-table .product-thumbnail img { width: 80px; height: 80px; object-fit: cover; border-radius: 4px; }
-.shop-table .product-name a { color: #333; font-weight: 500; text-decoration: none; }
-.shop-table .amount { font-weight: 600; color: #333; }
-.cart-actions { display: flex; justify-content: space-between; margin-top: 20px; }
-.cart-summary { background: #f9f9f9; padding: 30px; border-radius: 8px; }
-.order-table { width: 100%; border-collapse: collapse; }
-.order-table th, .order-table td { padding: 12px 0; border-bottom: 1px solid #eee; }
-.summary-total-price { font-size: 18px; font-weight: 700; color: #333; }
-.btn-order { width: 100%; padding: 15px; background: #333; color: #fff; border: none; border-radius: 25px; font-size: 16px; font-weight: 600; cursor: pointer; }
-.cart-empty { text-align: center; padding: 60px 20px; }
-.cart-empty p { font-size: 18px; color: #666; margin-bottom: 20px; }
+    .cart-page { padding: 60px 0; background: #f8fafc; min-height: 80vh; }
+    
+    .modern-card { background: #fff; border-radius: 24px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.02); margin-bottom: 24px; transition: all 0.3s ease; }
+    .modern-card:hover { box-shadow: 0 10px 25px rgba(0,0,0,0.04); }
+    
+    .card-header-clean { padding: 22px 25px; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; gap: 12px; background: #fff; }
+    .card-header-clean i { color: var(--primary); font-size: 16px; }
+    .card-header-clean h2 { font-size: 16px; font-weight: 800; color: var(--primary); margin: 0; text-transform: uppercase; letter-spacing: 0.5px; }
+    
+    .form-content { padding: 30px; }
+    .custom-label { font-weight: 700; color: #334155; font-size: 13px; margin-bottom: 8px; display: block; text-transform: uppercase; letter-spacing: 0.5px; }
+    .custom-input { border-radius: 12px; border: 1px solid #e2e8f0; padding: 12px 15px; font-size: 14px; transition: all 0.2s; background: #fdfdfd; width: 100%; }
+    .custom-input:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 4px rgba(var(--primary-rgb), 0.1); outline: none; }
+    
+    /* Optimized Row Layout */
+    .item-row { padding: 15px 20px; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; gap: 15px; position: relative; }
+    .item-row:last-child { border-bottom: none; }
+    .item-img { width: 45px; height: 45px; border-radius: 8px; object-fit: contain; background: #fff; border: 1px solid #f1f5f9; flex-shrink: 0; }
+    .item-info { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: 15px; }
+    .item-name { font-size: 13px; font-weight: 700; color: var(--primary); text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; }
+    
+    .qty-ctrl { display: flex; align-items: center; background: #f8fafc; border-radius: 8px; padding: 2px; border: 1px solid #e2e8f0; flex-shrink: 0; }
+    .qty-btn { width: 24px; height: 24px; border: none; background: #fff; border-radius: 6px; color: var(--primary); font-weight: 800; cursor: pointer; font-size: 10px; display: flex; align-items: center; justify-content: center; }
+    .qty-val { width: 25px; border: none; background: transparent; text-align: center; font-weight: 700; font-size: 12px; }
+    
+    .item-price-val { font-size: 13px; font-weight: 800; color: var(--primary); min-width: 70px; text-align: right; flex-shrink: 0; }
+    
+    .remove-x { color: #cbd5e1; font-size: 16px; cursor: pointer; transition: 0.2s; flex-shrink: 0; }
+    .remove-x:hover { color: #ef4444; transform: scale(1.1); }
+
+    .summary-box { padding: 20px 25px; }
+    .summary-line { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; color: #64748b; }
+    .summary-line.grand-total { margin-top: 15px; padding-top: 15px; border-top: 1px solid #f1f5f9; font-size: 20px; font-weight: 900; color: var(--primary); }
+    
+    .pay-card { border: 2px solid #f1f5f9; border-radius: 16px; padding: 12px 15px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 10px; width: 100%; margin-bottom: 10px; }
+    .pay-card.active { border-color: var(--primary); background: rgba(var(--primary-rgb), 0.03); }
+    .pay-card input { width: 16px; height: 16px; accent-color: var(--primary); }
+    
+    .action-btn { width: 100%; height: 56px; border-radius: 16px; background: var(--primary); color: #fff; font-weight: 800; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 10px; border: none; transition: all 0.3s; cursor: pointer; box-shadow: 0 4px 15px rgba(var(--primary-rgb), 0.2); margin-top: 15px; }
+    .action-btn:hover { background: #000; transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
+
+    /* Layout Logic: Address Left, Everything Else Right */
+    .checkout-layout { display: flex; gap: 30px; align-items: flex-start; }
+    .col-address { flex: 1; }
+    .col-details-sidebar { flex: 0 0 450px; width: 450px; }
+
+    @media (max-width: 1100px) {
+        .checkout-layout { flex-direction: column; }
+        .col-details-sidebar { width: 100%; flex: 1; }
+        .item-name { max-width: 100%; }
+    }
 </style>
 @endpush
 
 @section('content')
-<!-- BREADCRUMB AREA START -->
-<x-breadcrumb title="Cart" pageName="Cart" bgImage="frontend/img/bg/9.jpg" />
-<!-- BREADCRUMB AREA END -->
-
-@php
-$me = Auth::user();
-$dl = $me ? $me->locations()->first() : null;
-$cartTotal = $cart_total ?? $cartItems->sum(fn($item) => $item->price * $item->quantity);
-@endphp
-
-@if($cartItems->isEmpty())
-<div class=""cart-empty"">
-    <p>Your cart is empty</p>
-    <a href=""{{ route('shop') }}"" class=""btn btn-dark btn-rounded"">Continue Shopping</a>
-</div>
-@else
-<main class=""main cart checkout"">
-    <div class=""page-content pt-7 pb-10"">
-        <div class=""step-by pr-4 pl-4"">
-            <h3 class=""title title-simple title-step active""><a href=""#"">1. Shopping Cart</a></h3>
-            <h3 class=""title title-simple title-step""><a href=""#"">2. Checkout</a></h3>
-            <h3 class=""title title-simple title-step""><a href=""#"">3. Order Complete</a></h3>
+<section class="page-hero">
+    <div class="container text-center">
+        <h1 data-i18n="cart.title" style="font-weight: 900; font-size: 36px; letter-spacing: -1px;">চেকআউট</h1>
+        <div class="crumbs justify-content-center mt-2">
+            <a href="{{ route('home') }}">Home</a> <span class="mx-2 opacity-50">/</span> 
+            <span style="color: var(--accent); font-weight: 700;">Secure Checkout</span>
         </div>
-        
-        <div class=""container mt-7"">
-            @if(session('success'))
-                <div class=""alert alert-success mb-4"">{{ session('success') }}</div>
-            @endif
-            @if(session('error'))
-                <div class=""alert alert-danger mb-4"">{{ session('error') }}</div>
-            @endif
+    </div>
+</section>
 
-            <form id=""checkoutForm"" method=""POST"" action=""""">
-                @csrf
-                <input type=""hidden"" name=""shipping_price"" id=""hidden-shipping-price"" value=""0"">
+<div class="cart-page">
+    <div class="container">
+        @if($cartItems->count() > 0)
+        <form action="{{ route('codOrderStore') }}" method="POST" id="checkoutForm">
+            @csrf
+            <div class="checkout-layout">
                 
-                <div class=""row"">
-                    <div class=""col-lg-8 col-md-12 pr-lg-4 mb-6 mb-lg-0"">
-                        <table class=""shop-table cart-table"">
-                            <thead>
-                                <tr>
-                                    <th><span>Product</span></th>
-                                    <th></th>
-                                    <th><span>Price</span></th>
-                                    <th><span>Quantity</span></th>
-                                    <th>Subtotal</th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($cartItems as $item)
-                                <tr id=""cart-item-{{ $item->id }}"">
-                                    <td class=""product-thumbnail"">
-                                        <a href=""{{ route('productDetails', $item->product->slug) }}"">
-                                            <img src=""{{ route('imagecache', ['template'=>'pnism','filename'=>$item->product->fi()]) }}"" alt=""{{ $item->product->name_en }}"" width=""80"" height=""80"">
-                                        </a>
-                                    </td>
-                                    <td class=""product-name"">
-                                        <a href=""{{ route('productDetails', $item->product->slug) }}"">{{ Str::limit($item->product->name_en, 30) }}</a>
-                                    </td>
-                                    <td class=""product-subtotal"">
-                                        <span class=""amount"">{{ number_format($item->product->final_price,2) }} ?</span>
-                                    </td>
-                                    <td class=""product-quantity"">
-                                        <input type=""number"" value=""{{ $item->quantity }}"" min=""1"" data-id=""{{ $item->id }}"" class=""form-control"" style=""width: 80px;"">
-                                    </td>
-                                    <td class=""product-price"">
-                                        <span class=""amount"" id=""subtotal-{{ $item->id }}"">{{ number_format($item->quantity * $item->product->final_price,2) }} ?</span>
-                                    </td>
-                                    <td class=""product-close"">
-                                        <a href=""javascript:void(0);"" class=""product-remove"" data-id=""{{ $item->id }}""><i class=""fas fa-times""></i></a>
-                                    </td>
-                                </tr>
-                                @empty
-                                <tr>
-                                    <td colspan=""6"" class=""text-center"">Your cart is empty!</td>
-                                </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                        
-                        <div class=""cart-actions mb-6 pt-4"">
-                            <a href=""{{ route('shop') }}"" class=""btn btn-dark btn-md btn-rounded"">Continue Shopping</a>
-                            <button type=""button"" class=""btn btn-outline btn-dark btn-md btn-rounded"" onclick=""updateCart()"">Update Cart</button>
+                <!-- Left Column (Address Only) -->
+                <div class="col-address">
+                    <div class="modern-card">
+                        <div class="card-header-clean">
+                            <i class="fa-solid fa-truck-fast"></i>
+                            <h2>১. শিপিং এবং ডেলিভারি তথ্য</h2>
                         </div>
+                        <div class="form-content">
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <label class="custom-label">পুরো নাম *</label>
+                                    <input type="text" name="name" class="form-control custom-input" value="{{ optional(auth()->user())->name }}" placeholder="আপনার নাম লিখুন" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="custom-label">মোবাইল নম্বর *</label>
+                                    <input type="text" name="mobile" class="form-control custom-input" value="{{ optional(auth()->user())->mobile }}" placeholder="মোবাইল নম্বর" required>
+                                </div>
+                                <div class="col-12">
+                                    <label class="custom-label">ইমেইল ঠিকানা (ঐচ্ছিক)</label>
+                                    <input type="email" name="email" class="form-control custom-input" value="{{ optional(auth()->user())->email }}" placeholder="আপনার ইমেইল">
+                                </div>
+                                <div class="col-12">
+                                    <label class="custom-label">বিস্তারিত ঠিকানা (বাসা, রোড, এলাকা ও জেলা) *</label>
+                                    <textarea name="billing_address" class="form-control custom-input" rows="4" placeholder="আপনার বিস্তারিত ঠিকানা লিখুন" required>{{ auth()->check() && auth()->user()->locations()->first() ? auth()->user()->locations()->first()->address_title : '' }}</textarea>
+                                </div>
+                                <div class="col-12">
+                                    <label class="custom-label">অর্ডার নোট (ঐচ্ছিক)</label>
+                                    <textarea name="order_note" class="form-control custom-input" rows="2" placeholder="অর্ডার সম্পর্কে বিশেষ কোনো তথ্য থাকলে দিন"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-                        <div class=""billing-form mt-6"">
-                            <h3>Billing Details</h3>
-                            <div class=""row"">
-                                <div class=""col-md-6 mb-3"">
-                                    <label>First Name *</label>
-                                    <input type=""text"" class=""form-control"" name=""first_name"" required>
-                                </div>
-                                <div class=""col-md-6 mb-3"">
-                                    <label>Last Name *</label>
-                                    <input type=""text"" class=""form-control"" name=""last_name"" required>
-                                </div>
+                <!-- Right Column (Summary, Items, Payment) -->
+                <div class="col-details-sidebar">
+                    
+                    <!-- Order Summary (Top Right) -->
+                    <div class="modern-card">
+                        <div class="card-header-clean">
+                            <i class="fa-solid fa-receipt"></i>
+                            <h2>অর্ডার সামারি</h2>
+                        </div>
+                        <div class="summary-box">
+                            <div class="summary-line">
+                                <span>সাবটোটাল</span>
+                                <span id="summary-subtotal" class="fw-bold text-dark">৳{{ number_format($cartSubtotal) }}</span>
                             </div>
-                            <div class=""row"">
-                                <div class=""col-md-6 mb-3"">
-                                    <label>Email Address *</label>
-                                    <input type=""email"" class=""form-control"" name=""email"" required>
-                                </div>
-                                <div class=""col-md-6 mb-3"">
-                                    <label>Phone Number *</label>
-                                    <input type=""text"" class=""form-control"" name=""phone"" required>
-                                </div>
+                            <div class="summary-line">
+                                <span>ডেলিভারি চার্জ</span>
+                                <span class="fw-bold text-dark">৳{{ number_format($ws->shipping_charge ?? 0) }}</span>
                             </div>
-                            <div class=""mb-3"">
-                                <label>Address *</label>
-                                <input type=""text"" class=""form-control"" name=""address"" required>
-                            </div>
-                            <div class=""row"">
-                                <div class=""col-md-6 mb-3"">
-                                    <label>Town / City *</label>
-                                    <input type=""text"" class=""form-control"" name=""city"" required>
-                                </div>
-                                <div class=""col-md-6 mb-3"">
-                                    <label>Post Code *</label>
-                                    <input type=""text"" class=""form-control"" name=""post_code"" required>
-                                </div>
-                            </div>
-                            <div class=""mb-3"">
-                                <label>Order Notes (Optional)</label>
-                                <textarea class=""form-control"" rows=""3"" name=""notes""></textarea>
+                            <div class="summary-line grand-total">
+                                <span>সর্বমোট</span>
+                                <span id="summary-total">৳{{ number_format($cartSubtotal + ($ws->shipping_charge ?? 0)) }}</span>
                             </div>
                         </div>
                     </div>
 
-                    <aside class=""col-lg-4"">
-                        <div class=""cart-summary"">
-                            <h3>Your Order</h3>
-                            <table class=""order-table"">
-                                <tbody>
-                                    @forelse($cartItems as $item)
-                                    <tr>
-                                        <td>{{ Str::limit($item->product->name_en, 25) }} x {{ $item->quantity
-                                     }}</td>
-                           @empty 
-                                   <p>Your cart is empty.</p>              <td>{{ number_format($item->quantity * $item->product->final_price,2) }} ?</td>
-                                    </tr>
-                                    @endforelse
-                                    <tr>
-                                        <td><strong>Subtotal</strong></td>
-                                        <td id=""cart-subtotal"">{{ number_format($cartSubtotal,2) }} ?</td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Shipping</strong></td>
-                                        <td>{{ $ws->shipping_charge ?? '0.00' }} ?</td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Total</strong></td>
-                                        <td class=""summary-total-price"" id=""order-total"">{{ number_format($cartSubtotal + ($ws->shipping_charge ?? 0), 2) }} ?</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-
-                            <div class=""mt-4"">
-                                <h4>Payment Methods</h4>
-                                <div class=""form-check mb-2"">
-                                    <input class=""form-check-input"" type=""radio"" name=""payment"" id=""cod"" value=""cod"" checked>
-                                    <label class=""form-check-label"" for=""cod"">Cash on Delivery</label>
-                                </div>
-                                <div class=""form-check mb-3"">
-                                    <input class=""form-check-input"" type=""radio"" name=""payment"" id=""online"" value=""online"">
-                                    <label class=""form-check-label"" for=""online"">Online Payment</label>
-                                </div>
-                            </div>
-
-                            <div class=""form-check mb-4"">
-                                <input type=""checkbox"" class=""form-check-input"" id=""terms-condition"" required>
-                                <label class=""form-check-label"" for=""terms-condition"">I agree to terms & conditions</label>
-                            </div>
-
-                            <button type=""submit"" class=""btn-order"">Place Order</button>
+                    <!-- Product Items (Right Middle) - SINGLE ROW OPTIMIZED -->
+                    <div class="modern-card">
+                        <div class="card-header-clean">
+                            <i class="fa-solid fa-box-open"></i>
+                            <h2>২. অর্ডারকৃত পণ্যসমূহ</h2>
                         </div>
-                    </aside>
-                </div>
-            </form>
-        </div>
-    </div>
-</main>
-@endif
-
-<!-- FEATURE AREA START ( Feature - 3) -->
-<x-footer-feature />
-<!-- FEATURE AREA END -->
-@endsection
-
-@push('js')
-">Place Order</a>
+                        <div class="items-list">
+                            @foreach($cartItems as $item)
+                            <div class="item-row" id="cart-row-{{ $item->id }}">
+                                <img src="{{ route('imagecache', ['template' => 'pnism', 'filename' => $item->product->fi()]) }}" class="item-img" alt="">
+                                <div class="item-info">
+                                    <a href="{{ route('productDetails', $item->product->slug) }}" class="item-name">{{ Str::limit($item->product->name_en, 40) }}</a>
+                                    
+                                    <div class="qty-ctrl">
+                                        <button type="button" class="qty-btn" onclick="updateCartQty({{ $item->id }}, -1)">-</button>
+                                        <input type="text" id="qty-input-{{ $item->id }}" class="qty-val" value="{{ $item->quantity }}" readonly>
+                                        <button type="button" class="qty-btn" onclick="updateCartQty({{ $item->id }}, 1)">+</button>
+                                    </div>
+                                    
+                                    <div class="item-price-val" id="item-subtotal-{{ $item->id }}">৳{{ number_format($item->quantity * $item->product->final_price) }}</div>
+                                    
+                                    <i class="fa-solid fa-xmark remove-x" onclick="removeCartItem({{ $item->id }})"></i>
+                                </div>
+                            </div>
+                            @endforeach
+                        </div>
                     </div>
+
+                    <!-- Payment Methods (Right Bottom) -->
+                    <div class="modern-card">
+                        <div class="card-header-clean">
+                            <i class="fa-solid fa-wallet"></i>
+                            <h2>৩. পেমেন্ট মেথড এবং অর্ডার</h2>
+                        </div>
+                        <div class="form-content" style="padding-top: 20px;">
+                            <label class="pay-card active">
+                                <input type="radio" name="payment_method" value="cod" checked>
+                                <div>
+                                    <div class="fw-bold text-dark" style="font-size: 14px;">Cash on Delivery</div>
+                                    <div class="text-muted small">পণ্য হাতে পেয়ে টাকা দিন</div>
+                                </div>
+                            </label>
+                            <label class="pay-card">
+                                <input type="radio" name="payment_method" value="online">
+                                <div>
+                                    <div class="fw-bold text-dark" style="font-size: 14px;">Online Payment</div>
+                                    <div class="text-muted small">বিকাশ, নগদ বা কার্ড পেমেন্ট</div>
+                                </div>
+                            </label>
+
+                            <div class="form-check mt-3 mb-3">
+                                <input class="form-check-input" type="checkbox" id="termsCheck" required checked>
+                                <label class="form-check-label text-muted small" for="termsCheck">সাইটের শর্তাবলী মেনে নিচ্ছি</label>
+                            </div>
+
+                            <button type="submit" class="action-btn">
+                                অর্ডার সম্পন্ন করুন <i class="fa-solid fa-check-circle"></i>
+                            </button>
+                        </div>
+                    </div>
+
                 </div>
+
             </div>
+        </form>
+        @else
+        <div class="text-center py-5" style="background:#fff; border-radius: 30px; border: 1px solid #e2e8f0;">
+            <img src="https://cdn-icons-png.flaticon.com/512/1170/1170577.png" alt="" style="width: 100px; opacity: 0.2; margin-bottom: 20px;">
+            <h2 style="font-weight: 900; color: #1e293b;">আপনার কার্ট বর্তমানে খালি</h2>
+            <p class="text-muted mb-4">আমাদের কালেকশন থেকে আপনার পছন্দের পণ্য যোগ করুন</p>
+            <a href="{{ route('shop') }}" class="btn btn-primary" style="padding: 15px 40px; border-radius: 16px; font-weight: 800;">শপিং শুরু করুন</a>
         </div>
+        @endif
     </div>
 </div>
-<!-- WISHLIST AREA START -->
-@endif
-
-<!-- FEATURE AREA START ( Feature - 3) -->
-<x-footer-feature />
-<!-- FEATURE AREA END -->
 @endsection
 
 @push('js')
+<script>
+    $(document).ready(function() {
+        $('.pay-card').click(function() {
+            $('.pay-card').removeClass('active');
+            $(this).addClass('active');
+            $(this).find('input').prop('checked', true);
+        });
+    });
 
+    function updateCartQty(cartId, change) {
+        let input = $(`#qty-input-${cartId}`);
+        let newQty = parseInt(input.val()) + change;
+        if (newQty < 1) return;
+        
+        $.ajax({
+            url: "{{ route('cartUpdateQty') }}",
+            method: "POST",
+            data: { _token: "{{ csrf_token() }}", cart: cartId, new_qty: newQty },
+            success: function(res) {
+                if(res.status) {
+                    input.val(newQty);
+                    $('#summary-subtotal').text('৳' + res.cartTotal.toLocaleString());
+                    $('#summary-total').text('৳' + (res.cartTotal + {{ $ws->shipping_charge ?? 0 }}).toLocaleString());
+                    $('.cartCount').text(res.cartCount);
+                    location.reload(); 
+                }
+            }
+        });
+    }
+
+    function removeCartItem(cartId) {
+        Swal.fire({
+            title: 'নিশ্চিত?',
+            text: "পণ্যটি মুছে ফেলতে চান?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: 'var(--primary)',
+            confirmButtonText: 'হ্যাঁ, মুছুন',
+            cancelButtonText: 'না'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: `/cart/remove/item/${cartId}`,
+                    method: "POST",
+                    data: { _token: "{{ csrf_token() }}" },
+                    success: function(res) {
+                        if(res.status) {
+                            $(`#cart-row-${cartId}`).fadeOut(300, function() {
+                                $(this).remove();
+                                if($('.item-row').length == 0) location.reload();
+                            });
+                            $('#summary-subtotal').text('৳' + res.cartTotal.toLocaleString());
+                            $('#summary-total').text('৳' + (res.cartTotal + {{ $ws->shipping_charge ?? 0 }}).toLocaleString());
+                            $('.cartCount').text(res.cartCount);
+                            showCartNotification('পণ্যটি সরানো হয়েছে');
+                        }
+                    }
+                });
+            }
+        })
+    }
+</script>
 @endpush

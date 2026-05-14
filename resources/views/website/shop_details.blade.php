@@ -1,237 +1,348 @@
-@extends('website.layouts.mncofee')
+@extends('website.layouts.sikhobd')
 
-@section('title', $product->name_en . ' - ' . ($ws->name ?? env('APP_NAME')))
+@section('title', $product->name_en . ' — ' . ($ws->name ?? env('APP_NAME')))
 
 @push('css')
 <style>
-    .ad-menu-banner {
-        background-image: url("{{ asset('mncofee/assets/img/aida-images/menu-banner.png') }}") !important;
-        background-size: cover;
-        background-position: center;
-        height: 250px;
-    }
-    .product-main-img {
-        border-radius: 15px;
-        box-shadow: 0 5px 25px rgba(0,0,0,0.08);
+    .product-details-container {
         background: #fff;
-        padding: 20px;
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border);
+        padding: 40px;
+        margin-bottom: 40px;
     }
-    .thumb-img {
-        width: 80px;
-        height: 80px;
-        object-fit: cover;
-        border-radius: 10px;
-        cursor: pointer;
-        border: 2px solid transparent;
-        transition: 0.3s;
-    }
-    .thumb-img:hover, .thumb-img.active {
-        border-color: #A45517;
-    }
-    .product-info-box {
-        padding-left: 30px;
-    }
-    .product-price {
-        font-size: 28px;
-        color: #A45517;
-        font-weight: 700;
-    }
-    .old-price {
-        text-decoration: line-through;
-        color: #999;
-        font-size: 18px;
-        margin-left: 10px;
-    }
-    .btn-buy-now {
-        background-color: #A45517;
-        color: #fff;
-        padding: 12px 40px;
-        border-radius: 50px;
-        border: none;
-        font-weight: 600;
-        transition: 0.3s;
-    }
-    .btn-buy-now:hover {
-        background-color: #a8854d;
-        color: #fff;
-        transform: translateY(-2px);
-    }
-    .qty-input {
-        width: 60px;
-        text-align: center;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        margin: 0 10px;
-    }
-    .qty-btn {
-        width: 35px;
-        height: 35px;
-        border-radius: 50%;
-        border: 1px solid #ddd;
+    .main-image-box {
+        aspect-ratio: 1 / 1;
         background: #fff;
-        display: inline-flex;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        display: flex;
         align-items: center;
         justify-content: center;
+        overflow: hidden;
+        margin-bottom: 20px;
+    }
+    .main-image-box img {
+        max-width: 90%;
+        max-height: 90%;
+        object-fit: contain;
+        transition: transform 0.5s ease;
+    }
+    .thumb-gallery {
+        display: flex;
+        gap: 12px;
+        overflow-x: auto;
+        padding-bottom: 10px;
+    }
+    .thumb-item {
+        width: 80px;
+        height: 80px;
+        border-radius: 12px;
+        border: 2px solid var(--border);
+        background: #fff;
+        cursor: pointer;
+        padding: 8px;
+        flex-shrink: 0;
+        transition: all 0.2s;
+    }
+    .thumb-item.active, .thumb-item:hover {
+        border-color: var(--accent);
+    }
+    .thumb-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+    .product-meta-top {
+        font-size: 14px;
+        color: var(--accent);
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-bottom: 12px;
+        letter-spacing: 0.5px;
+    }
+    .product-main-title {
+        font-size: 32px;
+        font-weight: 800;
+        color: var(--primary);
+        margin-bottom: 16px;
+        line-height: 1.2;
+    }
+    .product-rating {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 24px;
+    }
+    .stars { color: #f59e0b; font-size: 14px; }
+    .review-count { font-size: 14px; color: var(--text-muted); }
+    
+    .price-section {
+        background: var(--bg-soft);
+        padding: 24px;
+        border-radius: var(--radius);
+        margin-bottom: 30px;
+    }
+    .price-now-lg {
+        font-size: 36px;
+        font-weight: 900;
+        color: var(--primary);
+    }
+    .price-was-lg {
+        font-size: 18px;
+        color: var(--text-muted);
+        text-decoration: line-through;
+        margin-left: 12px;
+    }
+    .discount-tag-lg {
+        background: var(--accent);
+        color: #fff;
+        padding: 4px 12px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 700;
+        margin-left: 15px;
+    }
+    
+    .qty-box {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    .qty-selector {
+        display: flex;
+        align-items: center;
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 5px;
+    }
+    .qty-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        border: none;
+        background: var(--bg-soft);
+        color: var(--primary);
+        font-weight: 700;
+        transition: all 0.2s;
+    }
+    .qty-btn:hover { background: var(--border); }
+    .qty-input {
+        width: 50px;
+        border: none;
+        text-align: center;
+        font-weight: 700;
+        font-size: 16px;
+        outline: none;
+    }
+    
+    .buy-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-bottom: 30px;
+    }
+    
+    /* Tabs */
+    .cd-tabs {
+        display: flex;
+        gap: 40px;
+        border-bottom: 1px solid var(--border);
+        margin-bottom: 30px;
+    }
+    .cd-tabs button {
+        background: none;
+        border: none;
+        padding: 15px 0;
+        font-weight: 700;
+        font-size: 16px;
+        color: var(--text-muted);
+        position: relative;
         cursor: pointer;
     }
-    .nav-tabs-custom .nav-link {
-        border: none;
-        color: #333;
-        font-weight: 600;
-        padding: 15px 30px;
-        border-bottom: 3px solid transparent;
+    .cd-tabs button.active {
+        color: var(--primary);
     }
-    .nav-tabs-custom .nav-link.active {
-        color: #A45517;
-        border-bottom-color: #A45517;
-        background: transparent;
+    .cd-tabs button.active::after {
+        content: '';
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: var(--accent);
     }
-    .card-hover {
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+    /* Robust Custom Grid for Side-by-Side */
+    .pd-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
     }
-    .card-hover:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    @media (max-width: 991px) {
+        .pd-grid {
+            grid-template-columns: 1fr;
+            gap: 30px;
+        }
+    }
+
+    /* Related Products Grid */
+    .shop-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+    }
+    @media (max-width: 991px) {
+        .shop-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 575px) {
+        .shop-grid { grid-template-columns: 1fr; }
     }
 </style>
 @endpush
 
 @section('content')
-<!--------------- 
-    Banner 
----------------->
-<section>
-    <div class="ad-menu-banner position-relative">
-        <div class="ad-menu-banner-overlay">
-            <div>
-                <a href="{{ route('home') }}">Home /</a>
-                <a href="{{ route('shop') }}"> Shop /</a>
-                <a class="selected-page" href="#"> {{ $product->name_en }}</a>
-            </div>
+<section class="page-hero">
+    <div class="container">
+        <div class="crumbs" style="margin-bottom: 10px;">
+            <a href="{{ route('home') }}">Home</a> <span>/</span> 
+            <a href="{{ route('shop') }}">Shop</a> <span>/</span> 
+            <span style="color: var(--accent);">{{ $product->name_en }}</span>
         </div>
     </div>
 </section>
 
-<section class="py-5">
+<section class="section">
     <div class="container">
-        <div class="row">
-            <!-- Product Images -->
-            <div class="col-lg-6">
-                <div class="product-main-img text-center mb-4">
-                    <img id="mainImage" src="{{ route('imagecache', ['template' => 'original', 'filename' => $product->fi()]) }}" 
-                         class="img-fluid" alt="{{ $product->name_en }}" style="max-height: 500px;">
-                </div>
-                
-                @if($product->media->count() > 0)
-                <div class="d-flex gap-2 overflow-auto pb-2">
-                    <img src="{{ route('imagecache', ['template' => 'original', 'filename' => $product->fi()]) }}" 
-                         class="thumb-img active" onclick="changeImage(this, '{{ route('imagecache', ['template' => 'original', 'filename' => $product->fi()]) }}')">
-                    @foreach($product->media as $media)
-                        <img src="{{ route('imagecache', ['template' => 'original', 'filename' => $media->file_name]) }}" 
-                             class="thumb-img" onclick="changeImage(this, '{{ route('imagecache', ['template' => 'original', 'filename' => $media->file_name]) }}')">
-                    @endforeach
-                </div>
-                @endif
-            </div>
-
-            <!-- Product Info -->
-            <div class="col-lg-6">
-                <div class="product-info-box">
-                    <h1 class="fw-bold mb-3">{{ strtoupper($product->name_en) }}</h1>
+        <!-- Main Product Section -->
+        <div class="product-details-container">
+            <!-- Using custom pd-grid to FORCE side-by-side -->
+            <div class="pd-grid">
+                <!-- Left: Gallery -->
+                <div>
+                    <div class="main-image-box">
+                        <img id="mainImage" src="{{ route('imagecache', ['template' => 'original', 'filename' => $product->fi()]) }}" alt="{{ $product->name_en }}">
+                    </div>
                     
-                    <div class="d-flex align-items-center mb-4">
-                        <div class="text-warning me-2">
+                    <div class="thumb-gallery">
+                        <div class="thumb-item active" onclick="changeImage(this, '{{ route('imagecache', ['template' => 'original', 'filename' => $product->fi()]) }}')">
+                            <img src="{{ route('imagecache', ['template' => 'original', 'filename' => $product->fi()]) }}" alt="">
+                        </div>
+                        @foreach($product->media as $media)
+                        <div class="thumb-item" onclick="changeImage(this, '{{ route('imagecache', ['template' => 'original', 'filename' => $media->file_name]) }}')">
+                            <img src="{{ route('imagecache', ['template' => 'original', 'filename' => $media->file_name]) }}" alt="">
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+
+                <!-- Right: Content -->
+                <div>
+                    <div class="product-meta-top">{{ $product->categories->first()->name_en ?? 'General Product' }}</div>
+                    <h1 class="product-main-title">{{ $product->name_en }}</h1>
+                    
+                    <div class="product-rating">
+                        <div class="stars">
                             @php $avgRating = $product->averageRating(); @endphp
                             @for($i = 1; $i <= 5; $i++)
                                 <i class="{{ $i <= $avgRating ? 'fas' : 'far' }} fa-star"></i>
                             @endfor
                         </div>
-                        <span class="text-muted">({{ $product->reviews->count() }} Reviews)</span>
+                        <span class="review-count">({{ $product->reviews->count() }} Reviews)</span>
+                        <span style="color: var(--border);">|</span>
+                        <span class="review-count"><i class="fa-solid fa-check-circle" style="color: var(--success);"></i> In Stock</span>
                     </div>
 
-                    <div class="mb-4">
-                        <span class="product-price">৳{{ number_format($product->selling_price, 2) }}</span>
-                        {{--@if($product->discount > 0)
-                            <span class="old-price">৳{{ number_format($product->price, 2) }}</span>
-                        @endif--}}
-                    </div>
-
-                    <p class="text-muted mb-4">
-                        {!! Str::limit(strip_tags($product->description_en), 250) !!}
-                    </p>
-
-                    <div class="mb-4">
-                        <h6 class="fw-bold">Quantity</h6>
-                        <div class="d-flex align-items-center mt-2">
-                            <span class="qty-btn minus"><i class="fas fa-minus"></i></span>
-                            <input type="text" class="qty-input" value="1" id="mainQty">
-                            <span class="qty-btn plus"><i class="fas fa-plus"></i></span>
+                    <div class="price-section">
+                        <div class="d-flex align-items-center">
+                            <span class="price-now-lg">৳{{ number_format($product->selling_price) }}</span>
+                            @if($product->discount > 0)
+                            <span class="price-was-lg">৳{{ number_format($product->price) }}</span>
+                            <span class="discount-tag-lg">{{ $product->discount }}% OFF</span>
+                            @endif
                         </div>
                     </div>
 
-                    <div class="d-flex gap-3 mb-5">
-                        <button class="btn btn-buy-now addToCartDetail" data-url="{{ route('addToCart') }}" data-product="{{ $product->id }}">
-                            <i class="fas fa-shopping-cart me-2"></i> ADD TO CART
+                    <div style="color: var(--text-soft); line-height: 1.6; margin-bottom: 30px;">
+                        {!! Str::limit(strip_tags($product->description_en), 200) !!}
+                    </div>
+
+                    <div class="qty-box">
+                        <span style="font-weight: 700; color: var(--primary);">Quantity:</span>
+                        <div class="qty-selector">
+                            <button class="qty-btn" onclick="updateQty(-1)">-</button>
+                            <input type="text" id="mainQty" class="qty-input" value="1" readonly>
+                            <button class="qty-btn" onclick="updateQty(1)">+</button>
+                        </div>
+                    </div>
+
+                    <div class="buy-actions">
+                        <button class="btn btn-primary addToCartDetail" data-product="{{ $product->id }}" data-url="{{ route('addToCart') }}" style="height: 56px; justify-content: center; font-size: 16px;">
+                            <i class="fa-solid fa-basket-shopping me-2"></i> Add to Cart
+                        </button>
+                        <button class="btn btn-accent buyNowDetail" data-product="{{ $product->id }}" data-url="{{ route('addToCart') }}" style="height: 56px; justify-content: center; font-size: 16px;">
+                            Buy Now
                         </button>
                     </div>
 
-                    <div class="border-top pt-4">
-                        <p class="mb-2"><strong>Categories:</strong> 
+                    <div style="padding-top: 20px; border-top: 1px solid var(--border); display: grid; gap: 10px; font-size: 14px;">
+                        <div><strong style="color: var(--primary);">Categories:</strong> 
                             @foreach($product->categories as $cat)
                                 <a href="{{ route('productCategory', $cat->slug) }}" class="text-decoration-none text-muted">{{ $cat->name_en }}</a>@if(!$loop->last), @endif
                             @endforeach
-                        </p>
+                        </div>
                         @if($product->sku)
-                            <p class="mb-0"><strong>SKU:</strong> <span class="text-muted">{{ $product->sku }}</span></p>
+                        <div><strong style="color: var(--primary);">SKU:</strong> <span class="text-muted">{{ $product->sku }}</span></div>
                         @endif
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Tabs -->
-        <div class="mt-5">
-            <ul class="nav nav-tabs nav-tabs-custom border-bottom" id="productTab" role="tablist">
-                <li class="nav-item">
-                    <button class="nav-link active" id="desc-tab" data-bs-toggle="tab" data-bs-target="#desc" type="button">DESCRIPTION</button>
-                </li>
-                <li class="nav-item">
-                    <button class="nav-link" id="review-tab" data-bs-toggle="tab" data-bs-target="#review" type="button">REVIEWS ({{ $product->reviews->count() }})</button>
-                </li>
-            </ul>
-            <div class="tab-content p-4" id="productTabContent">
-                <div class="tab-pane fade show active" id="desc">
-                    <div class="pro-description">
-                        {!! $product->description_en !!}
-                    </div>
+        <!-- Product Tabs -->
+        <div class="product-details-container">
+            <div class="cd-tabs">
+                <button class="active" data-tab="desc">Description</button>
+                <button data-tab="reviews">Reviews ({{ $product->reviews->count() }})</button>
+                <button data-tab="policy">Shipping & Return</button>
+            </div>
+
+            <div data-tab-content="desc" style="display: block;">
+                <div class="pro-description" style="color: var(--text-soft); line-height: 1.8;">
+                    {!! $product->description_en !!}
                 </div>
-                <div class="tab-pane fade" id="review">
-                    <div class="row">
-                        <div class="col-lg-6">
-                            <h5 class="fw-bold mb-4">Customer Reviews</h5>
-                            @forelse($product->reviews as $review)
-                                <div class="mb-4 pb-4 border-bottom">
-                                    <div class="text-warning mb-2">
-                                        @for($i = 1; $i <= 5; $i++)
-                                            <i class="{{ $i <= $review->rating ? 'fas' : 'far' }} fa-star"></i>
-                                        @endfor
-                                    </div>
-                                    <h6 class="fw-bold">{{ $review->user->name ?? 'Anonymous' }}</h6>
-                                    <p class="text-muted small mb-1">{{ $review->created_at->format('M d, Y') }}</p>
-                                    <p class="mb-0 text-muted">{{ $review->comment }}</p>
-                                </div>
-                            @empty
-                                <p class="text-muted">No reviews yet.</p>
-                            @endforelse
+            </div>
+
+            <div data-tab-content="reviews" style="display: none;">
+                <div class="row">
+                    <div class="col-lg-7">
+                        <h4 style="color: var(--primary); margin-bottom: 25px;">Customer Reviews</h4>
+                        @forelse($product->reviews as $review)
+                        <div style="padding-bottom: 20px; border-bottom: 1px solid var(--border); margin-bottom: 20px;">
+                            <div style="color: #f59e0b; margin-bottom: 8px; font-size: 12px;">
+                                @for($i = 1; $i <= 5; $i++)
+                                <i class="{{ $i <= $review->rating ? 'fas' : 'far' }} fa-star"></i>
+                                @endfor
+                            </div>
+                            <h5 style="font-size: 16px; font-weight: 700; color: var(--primary); margin-bottom: 5px;">{{ $review->user->name ?? 'SikhoBD Learner' }}</h5>
+                            <span style="font-size: 12px; color: var(--text-muted);">{{ $review->created_at->format('M d, Y') }}</span>
+                            <p style="color: var(--text-soft); margin-top: 10px; font-size: 14px;">{{ $review->comment }}</p>
                         </div>
-                        <div class="col-lg-6">
-                            <h5 class="fw-bold mb-4">Write a Review</h5>
-                            <form action="{{ route('reviewsStore') }}" method="POST" class="bg-light p-4 rounded">
+                        @empty
+                        <p style="color: var(--text-muted);">No reviews yet. Be the first to review!</p>
+                        @endforelse
+                    </div>
+                    <div class="col-lg-5">
+                        <div style="background: var(--bg-soft); padding: 30px; border-radius: var(--radius);">
+                            <h4 style="color: var(--primary); margin-bottom: 20px;">Write a Review</h4>
+                            <form action="{{ route('reviewsStore') }}" method="POST">
                                 @csrf
                                 <input type="hidden" name="product_id" value="{{ $product->id }}">
                                 <div class="mb-3">
-                                    <label class="form-label">Rating</label>
-                                    <select name="rating" class="form-select">
+                                    <label class="form-label" style="font-weight: 700; font-size: 14px;">Rating</label>
+                                    <select name="rating" class="form-select" style="border-radius: 10px;">
                                         <option value="5">5 Stars</option>
                                         <option value="4">4 Stars</option>
                                         <option value="3">3 Stars</option>
@@ -240,50 +351,64 @@
                                     </select>
                                 </div>
                                 <div class="mb-3">
-                                    <label class="form-label">Your Review</label>
-                                    <textarea name="comment" class="form-control" rows="4" placeholder="Write your thoughts here..." required></textarea>
+                                    <label class="form-label" style="font-weight: 700; font-size: 14px;">Your Comment</label>
+                                    <textarea name="comment" class="form-control" rows="4" style="border-radius: 12px;" placeholder="What did you like about this product?"></textarea>
                                 </div>
-                                <button type="submit" class="btn btn-primary-custom" style="background-color:#A45517; border:none; color:#fff; padding:10px 30px; border-radius:50px;">SUBMIT REVIEW</button>
+                                <button type="submit" class="btn btn-primary w-100" style="justify-content: center; height: 48px; border-radius: 12px; font-weight: 700;">Submit Review</button>
                             </form>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <div data-tab-content="policy" style="display: none;">
+                <div style="color: var(--text-soft); line-height: 1.8;">
+                    <h5 style="color: var(--primary); margin-bottom: 15px;">Shipping Information</h5>
+                    <p>We deliver products all over Bangladesh within 3-5 working days. Shipping charges may vary based on your location and product weight.</p>
+                    <h5 style="color: var(--primary); margin: 20px 0 15px;">Return Policy</h5>
+                    <p>If you receive a damaged or incorrect product, you can request a return within 7 days of delivery. The product must be in its original packaging and unused.</p>
+                </div>
+            </div>
         </div>
 
-        <!-- Related Products -->
+        <!-- Related Products (Reusing Shop Grid Style) -->
         @if($relatedProducts->count() > 0)
-        <div class="mt-5 pt-5">
-            <h3 class="fw-bold mb-4 text-center">RELATED PRODUCTS</h3>
-            <div class="row g-3">
-                @foreach($relatedProducts->take(4) as $related)
-                <div class="col-6 col-md-3">
-                    <div class="card h-100 border-0 shadow-sm card-hover">
-                        <div class="position-relative overflow-hidden text-center p-2">
-                            <a href="{{ route('productDetails', $related->slug) }}">
-                                <img src="{{ route('imagecache', ['template' => 'pnism', 'filename' => $related->fi()]) }}" 
-                                     class="card-img-top rounded-circle" 
-                                     alt="{{ $related->name_en }}"
-                                     style="width: 120px; height: 120px; object-fit: cover; margin: 0 auto;">
-                            </a>
-                        </div>
-                        <div class="card-body p-3 d-flex flex-column text-center">
-                            <h6 class="card-title text-truncate mb-1" style="font-size: 14px;">
-                                <a href="{{ route('productDetails', $related->slug) }}" class="text-dark text-decoration-none">
-                                    {{ strtoupper($related->name_en) }}
-                                </a>
-                            </h6>
-                            <div class="mb-2">
-                                <span class="fw-bold" style="font-size: 14px; color: #A45517 !important;">
-                                    ৳{{ number_format($related->selling_price, 2) }}
-                                </span>
-                            </div>
-                            <div class="mt-auto productCartItem" data-product="{{ $related->id }}">
-                                @include('frontend.home.includes.productCartItem', ['product' => $related])
-                            </div>
-                        </div>
+        <div class="mt-5">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                <h2 style="color: var(--primary); font-weight: 800;">Related Products</h2>
+                <a href="{{ route('shop') }}" style="color: var(--accent); font-weight: 700; text-decoration: none;">View All <i class="fa-solid fa-arrow-right ms-1"></i></a>
+            </div>
+            
+            <div class="shop-grid">
+                @foreach($relatedProducts->take(3) as $related)
+                <article class="course-card">
+                  <div class="shop-product-thumb">
+                    @if($related->discount > 0)
+                    <span class="course-tag">{{ $related->discount }}% OFF</span>
+                    @elseif($related->feature)
+                    <span class="course-tag">HOT</span>
+                    @endif
+                    
+                    <img src="{{ route('imagecache', ['template' => 'pnimd', 'filename' => $related->fi()]) }}" alt="{{ $related->name_en }}">
+                    
+                    <div class="shop-actions">
+                        <button class="shop-action-btn addToCart" data-url="{{ route('addToCart') }}" data-product="{{ $related->id }}" title="Add to Cart"><i class="fa-solid fa-cart-shopping"></i></button>
                     </div>
-                </div>
+                  </div>
+                  <div class="course-body">
+                    <span style="font-size: 11px; color: var(--accent); font-weight: 700; text-transform: uppercase;">{{ $related->categories->first()->name_en ?? 'Product' }}</span>
+                    <h3 style="margin-top: 5px;"><a href="{{ route('productDetails', $related->slug) }}" style="text-decoration: none; color: inherit;">{{ Str::limit($related->name_en, 40) }}</a></h3>
+                    
+                    <div class="course-foot" style="border: none; padding-top: 10px;">
+                      <div class="shop-price-box">
+                        <span class="price">৳{{ number_format($related->selling_price) }}</span>
+                        @if($related->discount > 0)
+                        <span class="old-price-sm">৳{{ number_format($related->price) }}</span>
+                        @endif
+                      </div>
+                    </div>
+                  </div>
+                </article>
                 @endforeach
             </div>
         </div>
@@ -293,66 +418,99 @@
 @endsection
 
 @push('js')
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     function changeImage(el, src) {
         document.getElementById('mainImage').src = src;
-        $('.thumb-img').removeClass('active');
+        $('.thumb-item').removeClass('active');
         $(el).addClass('active');
     }
 
+    function updateQty(val) {
+        let qty = parseInt($('#mainQty').val());
+        qty = qty + val;
+        if (qty < 1) qty = 1;
+        $('#mainQty').val(qty);
+    }
+
     $(document).ready(function() {
-        // Quantity Controls
-        $('.plus').click(function() {
-            let qty = parseInt($('#mainQty').val());
-            $('#mainQty').val(qty + 1);
+        // Tab switching
+        $('.cd-tabs button').click(function() {
+            $('.cd-tabs button').removeClass('active');
+            $(this).addClass('active');
+            const tab = $(this).data('tab');
+            $('[data-tab-content]').hide();
+            $(`[data-tab-content="${tab}"]`).fadeIn();
         });
 
-        $('.minus').click(function() {
-            let qty = parseInt($('#mainQty').val());
-            if(qty > 1) $('#mainQty').val(qty - 1);
-        });
-
-        // Add to Cart from Detail Page
-        $(document).on("click", ".addToCartDetail", function () {
+        // Add to Cart Logic
+        $('.addToCartDetail').click(function() {
             let btn = $(this);
-            let url = btn.data("url");
-            let product_id = btn.data("product");
-            let qty = parseInt($('#mainQty').val()) || 1;
+            let product_id = btn.data('product');
+            let url = btn.data('url');
+            let qty = $('#mainQty').val();
 
-            $.post(url, { product: product_id, qty: qty, _token: "{{ csrf_token() }}" }, function (res) {
-                if (res.status) {
-                    $(".cartCount").text(res.cartCount);
-                    $(".cartItemsCount").text(res.cartItemsCount);
-
-                    Swal.fire({
-                        toast: true, icon: "success", title: res.message,
-                        position: "top-end", timer: 2000, showConfirmButton: false
-                    });
+            $.ajax({
+                url: url,
+                method: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    product: product_id,
+                    qty: qty
+                },
+                success: function(res) {
+                    if(res.status) {
+                        showCartNotification(res.message);
+                        $('.cartCount').text(res.cartCount);
+                    }
                 }
-            }).fail(() => {
-                Swal.fire("Error", "Could not add to cart.", "error");
             });
         });
-    });
-    
-    // Use standard cart JS for related products
-    $(document).on("click", ".addToCart", function () {
-        let btn = $(this);
-        let url = btn.data("url");
-        let product_id = btn.data("product");
-        let qty = 1;
 
-        $.post(url, { product: product_id, qty: qty, _token: "{{ csrf_token() }}" }, function (res) {
-            if (res.status) {
-                btn.closest(".productCartItem").html(res.productCartItem);
-                $(".cartCount").text(res.cartCount);
-                $(".cartItemsCount").text(res.cartItemsCount);
-                Swal.fire({
-                    toast: true, icon: "success", title: res.message,
-                    position: "top-end", timer: 2000, showConfirmButton: false
-                });
-            }
+        // Buy Now Logic
+        $('.buyNowDetail').click(function() {
+            let btn = $(this);
+            let product_id = btn.data('product');
+            let url = btn.data('url');
+            let qty = $('#mainQty').val();
+
+            $.ajax({
+                url: url,
+                method: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    product: product_id,
+                    qty: qty
+                },
+                success: function(res) {
+                    if(res.status) {
+                        window.location.href = "{{ route('cart') }}";
+                    }
+                }
+            });
+        });
+
+        // Standard Cart (for related products)
+        $(document).on('click', '.addToCart', function(e) {
+            e.preventDefault();
+            let btn = $(this);
+            let product_id = btn.data('product');
+            let url = btn.data('url');
+
+            $.ajax({
+                url: url,
+                method: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    product: product_id,
+                    qty: 1
+                },
+                success: function(res) {
+                    if(res.status) {
+                        showCartNotification(res.message);
+                        $('.cartCount').text(res.cartCount);
+                    }
+                }
+            });
         });
     });
 </script>

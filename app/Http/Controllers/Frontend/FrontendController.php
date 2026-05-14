@@ -260,6 +260,45 @@ class FrontendController extends Controller
         return view('website.contact');
     }
 
+    public function courses(Request $request)
+    {
+        $query = Product::whereActive(true);
+
+        // Category Filter
+        if ($request->has('category')) {
+            $query->whereHas('categories', function($q) use ($request) {
+                $q->whereIn('product_categories.slug', (array)$request->category);
+            });
+        }
+
+        // Price Filter
+        if ($request->has('price')) {
+            if ($request->price == 'free') {
+                $query->where('selling_price', 0);
+            } elseif ($request->price == '1k-5k') {
+                $query->whereBetween('selling_price', [1000, 5000]);
+            } elseif ($request->price == '5k-plus') {
+                $query->where('selling_price', '>', 5000);
+            }
+        }
+
+        $courses = $query->latest()->paginate(12)->appends($request->all());
+        
+        $categories = ProductCategory::whereActive(true)
+            ->whereHas('products')
+            ->orderBy('name_en')
+            ->get();
+
+        $content = \App\Models\PageContent::where('page_slug', 'courses')->first();
+
+        return view('website.courses', compact('courses', 'categories', 'content'));
+    }
+
+    public function courseDetail()
+    {
+        return view('website.course_detail');
+    }
+
     public function service()
     {
         $data['services'] = Hospital::latest()->whereActive(true)->get(); 

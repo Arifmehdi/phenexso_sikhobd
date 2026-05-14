@@ -28,6 +28,7 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
 use App\Http\Controllers\SslCommerzPaymentController;
 use App\Http\Controllers\ContactController;
+use Illuminate\Support\Facades\Mail;
 
 // Route::get('/',[AuthController::class,'index'])->name('login');
 
@@ -119,6 +120,8 @@ Route::get('/',[FrontendController::class, 'index'])->name('home');
 Route::get('/md-message',[FrontendController::class,'mdMessage'])->name('mdMessage');
 Route::get('/testimonial',[FrontendController::class,'testimonial'])->name('testimonial');
 Route::get('/about',[FrontendController::class,'about'])->name('about');
+Route::get('/courses',[FrontendController::class,'courses'])->name('courses');
+Route::get('/course-detail',[FrontendController::class,'courseDetail'])->name('courseDetail');
 Route::get('/shop',[FrontendController::class,'shop'])->name('shop');
 Route::get('/quick-view', [FrontendController::class, 'quickView'])->name('quick.view');
 

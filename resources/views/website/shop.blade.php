@@ -1,360 +1,336 @@
-@extends('website.layouts.mncofee')
+@extends('website.layouts.sikhobd')
 
-@section('title', 'Menu - '. ($ws->name ?? env('APP_NAME')))
+@section('title', 'আওয়ার শপ — ' . ($ws->name ?? env('APP_NAME')))
 
 @push('css')
 <style>
-    .ad-menu-banner {
-        background-image: url("{{ asset('mncofee/assets/img/aida-images/menu-banner.png') }}") !important;
-        background-size: cover;
-        background-position: center;
-        height: 300px;
-    }
-    .card-hover {
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    .card-hover:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
-    }
-    .product-card-img {
-        overflow: hidden;
-        border-radius: 1rem;
+    .shop-product-thumb {
+        aspect-ratio: 1 / 1;
         background: #fff;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        border-bottom: 1px solid var(--border);
     }
-    .product-card-img img {
-        width: 100%;
-        height: 240px;
-        object-fit: cover;
+    .shop-product-thumb img {
+        max-width: 80%;
+        max-height: 80%;
+        object-fit: contain;
         transition: transform 0.3s ease;
     }
-    .product-card-img:hover img {
-        transform: scale(1.03);
+    .course-card:hover .shop-product-thumb img {
+        transform: scale(1.1);
     }
-    .sidebar {
-        background: #fff;
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 0 15px rgba(0,0,0,0.05);
-    }
-    .nav-list .nav-link {
-        color: #333;
-        padding: 8px 0;
-        border-bottom: 1px solid #f1f1f1;
+    .shop-actions {
+        position: absolute;
+        bottom: 10px;
+        left: 0;
+        right: 0;
         display: flex;
-        justify-content: space-between;
+        justify-content: center;
+        gap: 8px;
+        opacity: 0;
+        transform: translateY(10px);
+        transition: all 0.3s ease;
+    }
+    .course-card:hover .shop-actions {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    .shop-action-btn {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        background: #fff;
+        color: var(--primary);
+        display: flex;
         align-items: center;
+        justify-content: center;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border);
+        transition: all 0.2s;
     }
-    .nav-list .nav-link:hover, .nav-list .nav-link.active {
-        color: #A45517;
-    }
-    .btn-primary-custom {
-        background-color: #A45517;
-        border-color: #A45517;
+    .shop-action-btn:hover {
+        background: var(--accent);
         color: #fff;
+        border-color: var(--accent);
     }
-    .btn-primary-custom:hover {
-        background-color: #a8854d;
-        border-color: #a8854d;
-        color: #fff;
+    .shop-price-box {
+        display: flex;
+        align-items: center;
+        gap: 8px;
     }
-    .parent-category[aria-expanded="true"] i {
-        transform: rotate(180deg);
+    .old-price-sm {
+        font-size: 13px;
+        color: var(--text-muted);
+        text-decoration: line-through;
+    }
+    .shop-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+    }
+    @media (max-width: 991px) {
+        .shop-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 575px) {
+        .shop-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Custom Pagination Styling */
+    .pagination {
+        display: flex;
+        gap: 8px;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        justify-content: center;
+    }
+    .page-item .page-link {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        color: var(--text-soft);
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s;
+        background: #fff;
+    }
+    .page-item.active .page-link {
+        background: var(--primary);
+        color: #fff !important;
+        border-color: var(--primary);
+    }
+    .page-item.active .page-link:hover {
+        color: #fff !important;
+    }
+    .page-item .page-link:hover {
+        background: var(--bg-soft);
+        color: var(--accent);
+    }
+    .page-item.disabled .page-link {
+        opacity: 0.5;
+        cursor: not-allowed;
     }
 </style>
 @endpush
 
 @section('content')
-<!--------------- 
-    Banner 
----------------->
-<section>
-    <div class="ad-menu-banner position-relative">
-        <div class="ad-menu-banner-overlay">
-            <div>
-                <a href="{{ route('home') }}">Home /</a>
-                <a class="selected-page" href="{{ route('shop') }}"> Menu</a>
-            </div>
-        </div>
-    </div>
-</section>
-
-<section class="section my-0 py-5">
+  <section class="page-hero">
     <div class="container">
-        <div class="row g-4">
+        <h1 data-i18n="shop.title">আওয়ার শপ</h1>
+        <p data-i18n="shop.subtitle">আপনার প্রয়োজনীয় সব শিক্ষামূলক পণ্য এখন এক জায়গায়</p>
+        <div class="crumbs">
+            <a href="{{ route('home') }}">Home</a> <span>/</span> <span data-i18n="nav.shop">শপ</span>
+        </div>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top: 40px;">
+    <div class="container">
+      <div class="courses-layout">
+        <!-- Reusing the sidebar style from courses page -->
+        <aside class="filter-side">
+          <form action="{{ route('shop') }}" method="GET" id="filterForm">
+            <h3 style="color:var(--primary); margin-bottom:16px; font-size:16px;" data-i18n="filter">ফিল্টার</h3>
             
-            <!-- Sidebar -->
-            <div class="col-lg-3 order-2 order-lg-1 d-none d-lg-block">
-                <aside class="sidebar">
-                    <h5 class="mb-4">Product Categories</h5>
-
-                    <ul class="nav nav-list flex-column">
-                        <li class="nav-item">
-                            <a class="nav-link {{ !request()->segment(2) ? 'active' : '' }}" href="{{ route('shop') }}">
-                                <span>All Products</span>
-                            </a>
-                        </li>
-
-                        @foreach ($productCategories as $category)
-                            @php
-                                $isActiveParent = request()->segment(2) === $category->slug ||
-                                                  ($category->children->isNotEmpty() && $category->children->pluck('slug')->contains(request()->segment(2)));
-                            @endphp
-                            <li class="nav-item">
-                                <a class="nav-link parent-category {{ $isActiveParent ? 'active' : '' }}"
-                                   href="{{ count($category->children) > 0 ? '#category-' . $category->id : route('productCategory', $category->slug) }}"
-                                   @if(count($category->children) > 0) data-bs-toggle="collapse" data-bs-target="#category-{{ $category->id }}" aria-expanded="{{ $isActiveParent ? 'true' : 'false' }}" @endif>
-                                    <span>{{ $category->name_en }} </span>
-                                    @if(count($category->children) > 0)
-                                        <i class="fas fa-chevron-down small transition"></i>
-                                    @endif
-                                </a>
-                                @if(count($category->children) > 0)
-                                    <ul id="category-{{ $category->id }}" class="nav flex-column ms-3 collapse {{ $isActiveParent ? 'show' : '' }}">
-                                        @foreach($category->children as $child)
-                                            <li class="nav-item">
-                                                <a class="nav-link {{ request()->segment(2) === $child->slug ? 'active' : '' }}" href="{{ route('productCategory', $child->slug) }}">{{ $child->name_en }}</a>
-                                            </li>
-                                        @endforeach
-                                    </ul>
-                                @endif
-                            </li>
-                        @endforeach
-                    </ul>
-
-                    <div class="mt-5">
-                        <h5 class="mb-3">Filter by Price</h5>
-                        <form action="{{ route('shop') }}" method="GET">
-                            <div class="d-flex flex-column gap-2">
-                                <input type="number" name="min_price" class="form-control form-control-sm" placeholder="Min Price" value="{{ request('min_price') }}">
-                                <input type="number" name="max_price" class="form-control form-control-sm" placeholder="Max Price" value="{{ request('max_price') }}">
-                                <button type="submit" class="btn btn-sm btn-primary-custom mt-2">Apply</button>
-                            </div>
-                        </form>
-                    </div>
-                </aside>
+            <div class="filter-group">
+              <h4 data-i18n="category">ক্যাটাগরি</h4>
+              <a href="{{ route('shop') }}" style="display: block; margin-bottom: 8px; font-size: 14px; color: {{ !request('category') ? 'var(--accent)' : 'var(--text-soft)' }}; font-weight: 600;">All Products</a>
+              @foreach($allRootCategories as $cat)
+              <label>
+                <input type="checkbox" name="category[]" value="{{ $cat->slug }}" 
+                       {{ in_array($cat->slug, (array)request('category')) ? 'checked' : '' }}
+                       onchange="document.getElementById('filterForm').submit()"> 
+                <span>{{ $cat->name_en }}</span>
+              </label>
+              @endforeach
             </div>
 
-            <!-- Main Content -->
-            <div class="col-12 col-lg-9 order-1 order-lg-2">
-                
-                <!-- Marquee -->
-                @if($offers && $offers->count() > 0)
-                    <div class="bg-light p-2 mb-4 rounded border">
-                        <marquee behavior="scroll" direction="left" scrollamount="5" style="font-weight:bold; color:#A45517;">
-                            @foreach($offers as $key => $offer)
-                                {{ $offer->text }}
-                                @if($key < $offers->count() - 1)
-                                    &nbsp;&nbsp; | &nbsp;&nbsp;
-                                @endif
-                            @endforeach
-                        </marquee>
-                    </div>
+            <div class="filter-group">
+              <h4 data-i18n="price.range">মূল্য</h4>
+              <label>
+                <input type="radio" name="price" value="all" 
+                       {{ request('price') == 'all' || !request('price') ? 'checked' : '' }}
+                       onchange="document.getElementById('filterForm').submit()"> 
+                <span data-i18n="all">সব</span>
+              </label>
+              <label>
+                <input type="radio" name="price" value="0-1000" {{ request('price') == '0-1000' ? 'checked' : '' }} onchange="document.getElementById('filterForm').submit()"> 
+                <span>৳ 0 - 1k</span>
+              </label>
+              <label>
+                <input type="radio" name="price" value="1000-5000" {{ request('price') == '1000-5000' ? 'checked' : '' }} onchange="document.getElementById('filterForm').submit()"> 
+                <span>৳ 1k - 5k</span>
+              </label>
+              <label>
+                <input type="radio" name="price" value="5000-plus" {{ request('price') == '5000-plus' ? 'checked' : '' }} onchange="document.getElementById('filterForm').submit()"> 
+                <span>৳ 5k+</span>
+              </label>
+            </div>
+            
+            <a href="{{ route('shop') }}" class="btn btn-outline btn-sm" style="width:100%; margin-top: 10px; justify-content: center;">Clear Filters</a>
+          </form>
+
+          <div class="filter-group mt-5 d-none d-lg-block">
+            <h4 data-i18n="best_sellers">বেস্ট সেলার</h4>
+            @foreach($topClickedProducts->take(3) as $top)
+            <a href="{{ route('productDetails', $top->slug) }}" style="display: flex; gap: 10px; margin-bottom: 15px; text-decoration: none;">
+                <div style="width: 50px; height: 50px; background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 5px;">
+                    <img src="{{ route('imagecache', ['template' => 'pnism', 'filename' => $top->fi()]) }}" alt="" style="width: 100%; height: 100%; object-fit: contain;">
+                </div>
+                <div style="flex: 1;">
+                    <h5 style="font-size: 13px; color: var(--primary); margin: 0;">{{ Str::limit($top->name_en, 20) }}</h5>
+                    <span style="font-weight: 700; color: var(--accent); font-size: 14px;">৳{{ number_format($top->selling_price) }}</span>
+                </div>
+            </a>
+            @endforeach
+          </div>
+        </aside>
+
+        <div>
+          <!-- Results bar -->
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding: 0 5px;">
+            <div style="font-size: 14px; color: var(--text-muted);">
+                Showing {{ $products->count() }} of {{ $total_products }} results
+            </div>
+            <form action="{{ url()->current() }}" method="GET">
+                <select name="sort" class="form-select-sm" style="border: 1px solid var(--border); border-radius: 8px; padding: 5px 10px;" onchange="this.form.submit()">
+                    <option value="1" {{ request('sort') == 1 ? 'selected' : '' }}>Latest</option>
+                    <option value="3" {{ request('sort') == 3 ? 'selected' : '' }}>Price: High to Low</option>
+                    <option value="4" {{ request('sort') == 4 ? 'selected' : '' }}>Price: Low to High</option>
+                </select>
+            </form>
+          </div>
+
+          <div class="shop-grid">
+            @forelse($products as $product)
+            <article class="course-card">
+              <div class="shop-product-thumb">
+                @if($product->discount > 0)
+                <span class="course-tag">{{ $product->discount }}% OFF</span>
+                @elseif($product->feature)
+                <span class="course-tag">HOT</span>
                 @endif
-
-
-                <!-- Mobile Category Buttons -->
-                <div class="d-lg-none mb-4">
-                    <div class="d-flex overflow-auto pb-2 gap-2">
-                        <a href="{{ route('shop') }}" 
-                           class="btn btn-sm btn-outline-primary rounded-pill text-nowrap {{ !request()->segment(2) ? 'active' : '' }}">
-                            All
-                        </a>
-                        @foreach ($subcategories as $subcategory)
-                            <a href="{{ route('productCategory', $subcategory->slug) }}" 
-                               class="btn btn-sm btn-outline-primary rounded-pill text-nowrap {{ request()->segment(2) == $subcategory->slug ? 'active' : '' }}">
-                                {{ $subcategory->name_en }}
-                            </a>
-                        @endforeach
-                    </div>
+                
+                <img src="{{ route('imagecache', ['template' => 'pnimd', 'filename' => $product->fi()]) }}" alt="{{ $product->name_en }}">
+                
+                <div class="shop-actions">
+                    <button class="shop-action-btn quick-view-btn" data-id="{{ $product->id }}" title="Quick View"><i class="fa-regular fa-eye"></i></button>
+                    <button class="shop-action-btn addToCart" data-url="{{ route('addToCart') }}" data-product="{{ $product->id }}" title="Add to Cart"><i class="fa-solid fa-cart-shopping"></i></button>
                 </div>
-
-
-                <!-- Top filter section -->
-                <div class="row mb-4 align-items-center bg-light p-3 rounded mx-0 border">
-                    <div class="col-md-6">
-                        <form method="GET" class="d-flex align-items-center gap-2">
-                            <select name="sort" id="sort" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
-                                <option value="1" @if(request()->get('sort')==1) selected @endif>Latest</option>
-                                <option value="2" @if(request()->get('sort')==2) selected @endif>Oldest</option>
-                                <option value="3" @if(request()->get('sort')==3) selected @endif>Price: High to Low</option>
-                                <option value="4" @if(request()->get('sort')==4) selected @endif>Price: Low to High</option>
-                            </select>
-                            <input type="hidden" name="min_price" value="{{ request()->get('min_price') }}">
-                            <input type="hidden" name="max_price" value="{{ request()->get('max_price') }}">
-                        </form>
-                    </div>
-                    <div class="col-md-6 text-md-end">
-                        <span class="text-muted small">
-                            Showing {{ $products->firstItem() }} - {{ $products->lastItem() }} of {{ $products->total() }} results
-                        </span>
-                    </div>
+              </div>
+              <div class="course-body">
+                <span style="font-size: 11px; color: var(--accent); font-weight: 700; text-transform: uppercase;">{{ $product->categories->first()->name_en ?? 'Product' }}</span>
+                <h3 style="margin-top: 5px;"><a href="{{ route('productDetails', $product->slug) }}" style="text-decoration: none; color: inherit;">{{ Str::limit($product->name_en, 40) }}</a></h3>
+                
+                <div class="course-foot" style="border: none; padding-top: 10px;">
+                  <div class="shop-price-box">
+                    <span class="price">৳{{ number_format($product->selling_price) }}</span>
+                    @if($product->discount > 0)
+                    <span class="old-price-sm">৳{{ number_format($product->price) }}</span>
+                    @endif
+                  </div>
+                  <button class="btn btn-accent btn-sm addToCart" data-url="{{ route('addToCart') }}" data-product="{{ $product->id }}">Buy Now</button>
                 </div>
+              </div>
+            </article>
+            @empty
+            <div style="grid-column: 1/-1; text-align: center; padding: 60px; background: var(--bg-soft); border-radius: var(--radius-lg);">
+                <i class="fa-solid fa-box-open" style="font-size: 48px; color: var(--text-muted); margin-bottom: 20px;"></i>
+                <h3 style="color: var(--text-soft);">No products found matching your criteria.</h3>
+                <a href="{{ route('shop') }}" class="btn btn-primary" style="margin-top: 20px;">Reset Filters</a>
+            </div>
+            @endforelse
+          </div>
+          
+          @if($products->hasPages())
+          <div style="margin-top: 40px; display: flex; justify-content: center;">
+              {{ $products->links() }}
+          </div>
+          @endif
+        </div>
+      </div>
+    </div>
+  </section>
 
-                <!-- Products Grid -->
-                <div class="row g-3">
-                    @forelse ($products as $product)
-                        <div class="col-6 col-md-4 col-lg-4">
-                            <div class="card h-100 border-0 shadow-sm card-hover">
-                                <div class="position-relative overflow-hidden text-center p-2 product-card-img">
-                                    <a href="{{ route('productDetails', $product->slug) }}">
-                                        <img src="{{ route('imagecache', ['template' => 'pnimd', 'filename' => $product->fi()]) }}" 
-                                             class="card-img-top" 
-                                             alt="{{ $product->name_en }}">
-                                    </a>
-                                </div>
-                                <div class="card-body p-3 d-flex flex-column text-center">
-                                    <small class="text-uppercase text-muted mb-1" style="font-size: 10px;">
-                                        @foreach ($product->categories as $cat)
-                                            {{ $cat->name_en }}@if(!$loop->last), @endif
-                                        @endforeach
-                                    </small>
-                                    <h6 class="card-title text-truncate mb-1" style="font-size: 14px;">
-                                        <a href="{{ route('productDetails', $product->slug) }}" class="text-dark text-decoration-none">
-                                            {{ strtoupper($product->name_en) }}
-                                        </a>
-                                    </h6>
-                                    <div class="mb-2">
-                                        {{--@if($product->discount > 0)
-                                            <span class="text-muted text-decoration-line-through small me-1" style="font-size: 11px;">
-                                                ৳{{ number_format($product->price, 2) }}
-                                            </span>
-                                        @endif--}}
-                                        <span class="fw-bold text-primary" style="font-size: 14px; color: #A45517 !important;">
-                                            ৳{{ number_format($product->selling_price, 2) }}
-                                        </span>
-                                    </div>
-                                    <div class="mt-auto productCartItem" data-product="{{ $product->id }}">
-                                        @include('frontend.home.includes.productCartItem')
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    @empty
-                        <div class="col-12 text-center py-5">
-                            <p class="text-muted">No products found.</p>
-                        </div>
-                    @endforelse
-                </div>
-
-                <!-- Pagination -->
-                <div class="mt-5 d-flex justify-content-center">
-                    {{ $products->links() }}
-                </div>
-
+<!-- Quick View Modal (Simplified) -->
+<div class="modal fade" id="quickViewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content" style="border-radius: var(--radius-lg); border: none; overflow: hidden;">
+            <div class="modal-body p-0" id="quickViewContent">
+                <!-- Content loaded via AJAX -->
             </div>
         </div>
     </div>
-</section>
+</div>
 @endsection
 
 @push('js')
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        }
-    });
-
-    // Reveal quantity controls
-    $(document).on("click", ".reveal-qty-controls", function () {
-        $(this).closest(".add-to-cart-initial-btn").addClass("d-none");
-        $(this).closest(".cart-action-wrapper").find(".qty-selector-wrapper").removeClass("d-none");
-    });
-
-    // Manual quantity increment
-    $(document).on("click", ".qty-plus-btn", function () {
-        let input = $(this).siblings(".product_qty");
-        input.val(parseInt(input.val()) + 1);
-    });
-
-    // Manual quantity decrement
-    $(document).on("click", ".qty-minus-btn", function () {
-        let input = $(this).siblings(".product_qty");
-        let val = parseInt(input.val());
-        if (val > 1) {
-            input.val(val - 1);
-        }
-    });
-
-    // Add to Cart
-    $(document).on("click", ".addToCart", function () {
-        let btn = $(this);
-        let url = btn.data("url");
-        let product_id = btn.data("product");
-        let qty = parseInt(btn.closest(".cart-action-wrapper").find(".product_qty").val()) || 1;
-
-        $.post(url, { product: product_id, qty: qty }, function (res) {
-            if (res.status) {
-                $(`.productCartItem[data-product="${product_id}"]`).html(res.productCartItem);
-                $(".cartCount").text(res.cartCount);
-                $(".cartItemsCount").text(res.cartItemsCount);
-                if(res.cartTotal) {
-                    $(".cartTotalPrice").text(parseFloat(res.cartTotal).toFixed(2) + " tk");
-                }
-
-                Swal.fire({
-                    toast: true, icon: "success", title: res.message,
-                    position: "top-end", timer: 2000, showConfirmButton: false
-                });
-            }
-        }).fail(() => {
-            Swal.fire("Error", "Could not add to cart.", "error");
+    $(document).ready(function() {
+        // Quick View AJAX
+        $('.quick-view-btn').click(function() {
+            let id = $(this).data('id');
+            $('#quickViewModal').modal('show');
+            $('#quickViewContent').html('<div class="p-5 text-center"><i class="fa-solid fa-spinner fa-spin fa-2x"></i></div>');
+            
+            $.get("{{ route('quick.view') }}", {id: id}, function(res) {
+                let html = `
+                    <div class="row g-0">
+                        <div class="col-md-6" style="background: var(--bg-soft); display: flex; align-items: center; justify-content: center;">
+                            <img src="${res.image}" class="img-fluid p-5" alt="" style="max-height: 400px; object-fit: contain;">
+                        </div>
+                        <div class="col-md-6 p-4">
+                            <div class="d-flex justify-content-between">
+                                <span style="font-size: 11px; font-weight: 800; color: var(--accent); text-transform: uppercase;">Quick View</span>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <h2 class="mt-2 mb-3" style="color: var(--primary); font-size: 22px;">${res.name}</h2>
+                            <div class="d-flex align-items-center gap-2 mb-4">
+                                <span style="font-size: 24px; font-weight: 800; color: var(--primary);">৳${res.price}</span>
+                                ${res.old_price ? `<span class="text-muted text-decoration-line-through">৳${res.old_price}</span>` : ''}
+                            </div>
+                            <p class="text-soft mb-4" style="font-size: 14px;">${res.description}</p>
+                            <div class="d-grid gap-3">
+                                <button class="btn btn-accent addToCart" data-product="${id}" data-url="{{ route('addToCart') }}" style="justify-content: center;">Add to Cart</button>
+                                <a href="/product/details/${res.slug}" class="btn btn-outline" style="justify-content: center;">Full Details</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                $('#quickViewContent').html(html);
+            });
         });
-    });
 
-    // Update Cart Item
-    $(document).on('click', '.updateCartItem', function (e) {
-        e.preventDefault();
+        // Add to Cart AJAX
+        $(document).on('click', '.addToCart', function(e) {
+            e.preventDefault();
+            let btn = $(this);
+            let product_id = btn.data('product');
+            let url = btn.data('url');
 
-        let $btn = $(this);
-        let cartId = $btn.data('cart');
-        let url = $btn.data('url');
-        let $wrapper = $btn.closest('.cart-action-wrapper');
-        let qty = parseInt($wrapper.find('.cartQtyDisplay').text()) || 0;
-
-        if ($btn.hasClass('plus')) {
-            qty++;
-        } else if ($btn.hasClass('minus')) {
-            qty--;
-            if (qty < 0) qty = 0;
-        }
-
-        $btn.prop('disabled', true);
-
-        $.ajax({
-            url: url,
-            method: 'POST',
-            data: {
-                cart: cartId,
-                new_qty: qty
-            },
-            success: function (res) {
-                if (res.status) {
-                    if (qty === 0) {
-                        $wrapper.html(`
-                            <input type="hidden" name="product_qty" value="1" class="product_qty">
-                            <button class="btn btn-outline-primary w-100 btn-sm addToCart"
-                                data-url="${res.add_to_cart_url}"
-                                data-product="${res.product_id}">
-                                Buy Now
-                            </button>
-                        `);
-                    } else {
-                        $wrapper.find('.cartQtyDisplay').text(qty);
+            $.ajax({
+                url: url,
+                method: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    product: product_id,
+                    qty: 1
+                },
+                success: function(res) {
+                    if(res.status) {
+                        showCartNotification(res.message);
+                        $('.cartCount').text(res.cartCount);
                     }
-
-                    $('.cartCount').text(res.cartCount);
-                    $('.cartItemsCount').text(res.cartItemsCount);
                 }
-            },
-            error: function () {
-                alert('Something went wrong! Please try again.');
-            },
-            complete: function () {
-                $btn.prop('disabled', false);
-            }
+            });
         });
     });
 </script>

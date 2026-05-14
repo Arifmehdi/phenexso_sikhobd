@@ -1,0 +1,60 @@
+@extends('website.layouts.sikhobd')
+
+@section('title', 'কোর্সসমূহ — ' . ($ws->name ?? env('APP_NAME')))
+
+@section('content')
+  <section class="page-hero">
+    <div class="container">
+      <h1 data-i18n="page.courses.title">সকল কোর্স</h1>
+      <p data-i18n="page.courses.sub">১০০০+ কোর্স — আপনার পছন্দ অনুযায়ী বেছে নিন</p>
+      <div class="crumbs">
+        <a href="{{ route('home') }}">Home</a> <span>/</span> <span data-i18n="nav.courses">কোর্সসমূহ</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top: 40px;">
+    <div class="container">
+      <div class="courses-layout">
+        <aside class="filter-side">
+          <h3 style="color:var(--primary); margin-bottom:16px; font-size:16px;" data-i18n="filter">ফিল্টার</h3>
+          <div class="filter-group">
+            <h4 data-i18n="category">ক্যাটাগরি</h4>
+            <label><input type="checkbox" checked> <span data-i18n="nav.academic">একাডেমিক</span></label>
+            <label><input type="checkbox"> <span data-i18n="nav.skills">স্কিলস</span></label>
+            <label><input type="checkbox"> <span data-i18n="nav.language">ভাষা শিক্ষা</span></label>
+            <label><input type="checkbox"> <span data-i18n="nav.admission">ভর্তি প্রস্তুতি</span></label>
+          </div>
+          <div class="filter-group">
+            <h4 data-i18n="level">লেভেল</h4>
+            <label><input type="checkbox"> <span data-i18n="beginner">বিগিনার</span></label>
+            <label><input type="checkbox"> <span data-i18n="intermediate">ইন্টারমিডিয়েট</span></label>
+            <label><input type="checkbox"> <span data-i18n="advanced">অ্যাডভান্স</span></label>
+          </div>
+          <div class="filter-group">
+            <h4 data-i18n="price.range">মূল্য</h4>
+            <label><input type="radio" name="price" checked> <span data-i18n="all">সব</span></label>
+            <label><input type="radio" name="price"> Free</label>
+            <label><input type="radio" name="price"> ৳ 1k - 5k</label>
+            <label><input type="radio" name="price"> ৳ 5k+</label>
+          </div>
+          <button class="btn btn-primary" style="width:100%;">Apply</button>
+        </aside>
+
+        <div>
+          <div class="courses-grid">
+            <article class="course-card"><div class="course-thumb" style="--c1:#6c5ce7;--c2:#a29bfe;"><span class="course-tag">BESTSELLER</span>HSC '26</div><div class="course-body"><h3>HSC 2026 — Science</h3><div class="course-meta"><span><i class="fa-solid fa-star"></i> 4.9</span><span><i class="fa-solid fa-users"></i> 12k+</span></div><div class="course-foot"><div><span class="price">৳ 6,500</span></div><a href="{{ route('courseDetail') }}" class="btn btn-accent btn-sm" data-i18n="enroll">এনরোল</a></div></div></article>
+            <article class="course-card"><div class="course-thumb" style="--c1:#ff284f;--c2:#ff6b85;"><span class="course-tag">NEW</span>IELTS</div><div class="course-body"><h3>IELTS Complete</h3><div class="course-meta"><span><i class="fa-solid fa-star"></i> 4.8</span><span><i class="fa-solid fa-users"></i> 8k+</span></div><div class="course-foot"><div><span class="price">৳ 4,200</span></div><a href="{{ route('courseDetail') }}" class="btn btn-accent btn-sm" data-i18n="enroll">এনরোল</a></div></div></article>
+            <article class="course-card"><div class="course-thumb" style="--c1:#10b981;--c2:#34d399;"><span class="course-tag">HOT</span>Skill</div><div class="course-body"><h3>Freelancing</h3><div class="course-meta"><span><i class="fa-solid fa-star"></i> 4.7</span><span><i class="fa-solid fa-users"></i> 15k+</span></div><div class="course-foot"><div><span class="price">৳ 2,500</span></div><a href="{{ route('courseDetail') }}" class="btn btn-accent btn-sm" data-i18n="enroll">এনরোল</a></div></div></article>
+            <article class="course-card"><div class="course-thumb" style="--c1:#3b82f6;--c2:#60a5fa;"><span class="course-tag">PRO</span>Web</div><div class="course-body"><h3>Full Stack Web Dev</h3><div class="course-meta"><span><i class="fa-solid fa-star"></i> 4.9</span><span><i class="fa-solid fa-users"></i> 5k+</span></div><div class="course-foot"><div><span class="price">৳ 8,500</span></div><a href="{{ route('courseDetail') }}" class="btn btn-accent btn-sm" data-i18n="enroll">এনরোল</a></div></div></article>
+            <article class="course-card"><div class="course-thumb" style="--c1:#f59e0b;--c2:#fbbf24;"><span class="course-tag">HOT</span>SSC</div><div class="course-body"><h3>SSC 2026 — All Subjects</h3><div class="course-meta"><span><i class="fa-solid fa-star"></i> 4.8</span><span><i class="fa-solid fa-users"></i> 22k+</span></div><div class="course-foot"><div><span class="price">৳ 5,000</span></div><a href="{{ route('courseDetail') }}" class="btn btn-accent btn-sm" data-i18n="enroll">এনরোল</a></div></div></article>
+            <article class="course-card"><div class="course-thumb" style="--c1:#8b5cf6;--c2:#a78bfa;"><span class="course-tag">NEW</span>Design</div><div class="course-body"><h3>UI/UX Design Mastery</h3><div class="course-meta"><span><i class="fa-solid fa-star"></i> 4.6</span><span><i class="fa-solid fa-users"></i> 3k+</span></div><div class="course-foot"><div><span class="price">৳ 3,800</span></div><a href="{{ route('courseDetail') }}" class="btn btn-accent btn-sm" data-i18n="enroll">এনরোল</a></div></div></article>
+            <article class="course-card"><div class="course-thumb" style="--c1:#ec4899;--c2:#f472b6;"><span class="course-tag">FREE</span>Spoken</div><div class="course-body"><h3>Spoken English Basic</h3><div class="course-meta"><span><i class="fa-solid fa-star"></i> 4.7</span><span><i class="fa-solid fa-users"></i> 35k+</span></div><div class="course-foot"><div><span class="price">Free</span></div><a href="{{ route('courseDetail') }}" class="btn btn-accent btn-sm" data-i18n="enroll">এনরোল</a></div></div></article>
+            <article class="course-card"><div class="course-thumb" style="--c1:#06b6d4;--c2:#22d3ee;"><span class="course-tag">PRO</span>BCS</div><div class="course-body"><h3>BCS Preliminary</h3><div class="course-meta"><span><i class="fa-solid fa-star"></i> 4.8</span><span><i class="fa-solid fa-users"></i> 7k+</span></div><div class="course-foot"><div><span class="price">৳ 4,500</span></div><a href="{{ route('courseDetail') }}" class="btn btn-accent btn-sm" data-i18n="enroll">এনরোল</a></div></div></article>
+            <article class="course-card"><div class="course-thumb" style="--c1:#ef4444;--c2:#f87171;"><span class="course-tag">HOT</span>Medical</div><div class="course-body"><h3>Medical Admission Prep</h3><div class="course-meta"><span><i class="fa-solid fa-star"></i> 4.9</span><span><i class="fa-solid fa-users"></i> 6k+</span></div><div class="course-foot"><div><span class="price">৳ 7,200</span></div><a href="{{ route('courseDetail') }}" class="btn btn-accent btn-sm" data-i18n="enroll">এনরোল</a></div></div></article>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+@endsection
