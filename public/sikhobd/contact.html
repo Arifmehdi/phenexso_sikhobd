@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="bn">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>যোগাযোগ — 10 Minute School</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div data-include="header"></div>
+
+<main>
+  <section class="page-hero">
+    <div class="container">
+      <h1 data-i18n="page.contact.title">যোগাযোগ করুন</h1>
+      <p data-i18n="page.contact.sub">যেকোনো প্রশ্ন বা পরামর্শে আমরা সবসময় প্রস্তুত</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="contact-grid">
+        <div class="info-card">
+          <h3 style="color:var(--primary); margin-bottom: 12px;">Get in touch</h3>
+          <p style="color:var(--text-soft); font-size:14px;">We respond within 24 hours.</p>
+          <div class="info-item">
+            <div class="info-icon"><i class="fa-solid fa-phone"></i></div>
+            <div><h4>Phone</h4><p>16910 (24/7 helpline)</p></div>
+          </div>
+          <div class="info-item">
+            <div class="info-icon"><i class="fa-solid fa-envelope"></i></div>
+            <div><h4>Email</h4><p>support@10minuteschool.com</p></div>
+          </div>
+          <div class="info-item">
+            <div class="info-icon"><i class="fa-solid fa-location-dot"></i></div>
+            <div><h4>Office</h4><p>House 53, Road 12, Block C, Banani, Dhaka 1213</p></div>
+          </div>
+          <div class="info-item">
+            <div class="info-icon"><i class="fa-solid fa-clock"></i></div>
+            <div><h4>Hours</h4><p>Sun – Thu, 9:00 AM – 8:00 PM</p></div>
+          </div>
+        </div>
+
+        <form class="contact-form">
+          <h3 style="color:var(--primary); margin-bottom:20px;">Send us a message</h3>
+          <div class="form-row">
+            <div class="field"><label data-i18n="form.name">আপনার নাম</label><input type="text" required></div>
+            <div class="field"><label data-i18n="form.email">ইমেইল</label><input type="email" required></div>
+          </div>
+          <div class="form-row">
+            <div class="field"><label data-i18n="form.phone">ফোন</label><input type="tel"></div>
+            <div class="field"><label data-i18n="form.subject">বিষয়</label><select><option>General</option><option>Course inquiry</option><option>Payment</option><option>Technical</option></select></div>
+          </div>
+          <div class="field"><label data-i18n="form.message">আপনার বার্তা</label><textarea required></textarea></div>
+          <button type="submit" class="btn btn-primary" data-i18n="form.send">বার্তা পাঠান</button>
+        </form>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div data-include="footer"></div>
+<script src="js/partials.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

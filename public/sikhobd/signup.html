@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="bn">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>সাইন আপ — 10 Minute School</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div data-include="header"></div>
+
+<main>
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <h1 data-i18n="page.signup.title">অ্যাকাউন্ট তৈরি করুন</h1>
+      <p class="sub" data-i18n="page.signup.sub">বিনামূল্যে শুরু করুন</p>
+
+      <form>
+        <div class="field"><label data-i18n="form.name">আপনার নাম</label><input type="text" required></div>
+        <div class="field"><label data-i18n="form.email">ইমেইল</label><input type="email" required></div>
+        <div class="field"><label data-i18n="form.phone">ফোন</label><input type="tel"></div>
+        <div class="field"><label data-i18n="form.password">পাসওয়ার্ড</label><input type="password" required></div>
+        <a href="dashboard.html" class="btn btn-accent" style="width:100%; justify-content:center;" data-i18n="nav.signup">সাইন আপ</a>
+      </form>
+
+      <div class="divider" data-i18n="form.or">অথবা</div>
+      <div class="social-auth">
+        <button><i class="fa-brands fa-google"></i> Google</button>
+        <button><i class="fa-brands fa-facebook-f"></i> Facebook</button>
+      </div>
+
+      <p class="meta"><span data-i18n="form.have">অ্যাকাউন্ট আছে?</span> <a href="login.html" data-i18n="nav.login">লগইন</a></p>
+    </div>
+  </div>
+</main>
+
+<script src="js/partials.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

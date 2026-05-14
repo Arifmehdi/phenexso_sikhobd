@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="bn">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ড্যাশবোর্ড — 10 Minute School</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div data-include="header"></div>
+
+<main style="padding-top: 76px;">
+  <div class="dash-wrap">
+    <aside class="dash-side">
+      <div class="dash-user">
+        <div class="avatar">RA</div>
+        <div>
+          <strong>Rakib Ahmed</strong>
+          <span>Premium · HSC '26</span>
+        </div>
+      </div>
+      <nav class="dash-nav">
+        <a href="dashboard.html" class="active"><i class="fa-solid fa-house"></i> <span data-i18n="dash.menu.overview">ওভারভিউ</span></a>
+        <a href="#"><i class="fa-solid fa-book"></i> <span data-i18n="dash.menu.courses">আমার কোর্স</span></a>
+        <a href="#"><i class="fa-solid fa-video"></i> <span data-i18n="dash.menu.live">লাইভ ক্লাস</span></a>
+        <a href="#"><i class="fa-solid fa-certificate"></i> <span data-i18n="dash.menu.cert">সার্টিফিকেট</span></a>
+        <a href="#"><i class="fa-solid fa-file-lines"></i> <span data-i18n="dash.menu.notes">নোটস</span></a>
+        <a href="#"><i class="fa-solid fa-credit-card"></i> <span data-i18n="dash.menu.payment">পেমেন্ট</span></a>
+        <a href="#"><i class="fa-solid fa-user"></i> <span data-i18n="dash.menu.profile">প্রোফাইল</span></a>
+        <a href="#"><i class="fa-solid fa-gear"></i> <span data-i18n="dash.menu.settings">সেটিংস</span></a>
+        <a href="login.html"><i class="fa-solid fa-arrow-right-from-bracket"></i> <span data-i18n="dash.menu.logout">লগআউট</span></a>
+      </nav>
+    </aside>
+
+    <section class="dash-main">
+      <div class="dash-head">
+        <div>
+          <h1 data-i18n="page.dashboard.title">ড্যাশবোর্ড</h1>
+          <p data-i18n="page.dashboard.sub">স্বাগতম! আপনার শেখার অগ্রগতি দেখুন</p>
+        </div>
+        <a href="courses.html" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Browse Courses</a>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="icon"><i class="fa-solid fa-book"></i></div>
+          <div class="num">8</div>
+          <div class="label" data-i18n="dash.stat.enrolled">এনরোলড কোর্স</div>
+          <div class="delta">+2 this month</div>
+        </div>
+        <div class="stat-card success">
+          <div class="icon"><i class="fa-solid fa-check"></i></div>
+          <div class="num">3</div>
+          <div class="label" data-i18n="dash.stat.completed">সম্পন্ন</div>
+          <div class="delta">+1 this week</div>
+        </div>
+        <div class="stat-card warning">
+          <div class="icon"><i class="fa-solid fa-clock"></i></div>
+          <div class="num">142h</div>
+          <div class="label" data-i18n="dash.stat.hours">শিখার সময়</div>
+          <div class="delta">+12h this week</div>
+        </div>
+        <div class="stat-card accent">
+          <div class="icon"><i class="fa-solid fa-certificate"></i></div>
+          <div class="num">5</div>
+          <div class="label" data-i18n="dash.stat.cert">সার্টিফিকেট</div>
+          <div class="delta">2 in progress</div>
+        </div>
+      </div>
+
+      <div class="dash-cols">
+        <div class="panel">
+          <div class="panel-head">
+            <h3 data-i18n="dash.continue">শেখা চালিয়ে যান</h3>
+            <a href="#" data-i18n="dash.viewall">সব দেখুন</a>
+          </div>
+          <div class="course-row">
+            <div class="thumb" style="--c1:#6c5ce7;--c2:#a29bfe;">P</div>
+            <div class="body">
+              <h4>HSC Physics — Chapter 3</h4>
+              <div class="meta">12 of 18 lessons · 2h left</div>
+              <div class="progress"><div style="width:65%"></div></div>
+            </div>
+            <a href="#" class="btn btn-primary btn-sm">Resume</a>
+          </div>
+          <div class="course-row">
+            <div class="thumb" style="--c1:#ff284f;--c2:#ff6b85;">I</div>
+            <div class="body">
+              <h4>IELTS Speaking — Module 2</h4>
+              <div class="meta">5 of 10 lessons · 3h left</div>
+              <div class="progress"><div style="width:50%"></div></div>
+            </div>
+            <a href="#" class="btn btn-primary btn-sm">Resume</a>
+          </div>
+          <div class="course-row">
+            <div class="thumb" style="--c1:#10b981;--c2:#34d399;">F</div>
+            <div class="body">
+              <h4>Freelancing — Getting Clients</h4>
+              <div class="meta">8 of 12 lessons · 1.5h left</div>
+              <div class="progress"><div style="width:75%"></div></div>
+            </div>
+            <a href="#" class="btn btn-primary btn-sm">Resume</a>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <h3 data-i18n="dash.activity">সাম্প্রতিক কার্যক্রম</h3>
+          </div>
+          <div class="act-item">
+            <div class="dot"></div>
+            <div>Completed <strong>Chapter 2: Vectors</strong><time>2 hours ago</time></div>
+          </div>
+          <div class="act-item">
+            <div class="dot"></div>
+            <div>Scored <strong>92%</strong> in mock test<time>Yesterday</time></div>
+          </div>
+          <div class="act-item">
+            <div class="dot"></div>
+            <div>Joined <strong>Live class</strong> with Sajid Sir<time>2 days ago</time></div>
+          </div>
+          <div class="act-item">
+            <div class="dot"></div>
+            <div>Earned <strong>"Fast Learner"</strong> badge<time>3 days ago</time></div>
+          </div>
+          <div class="act-item">
+            <div class="dot"></div>
+            <div>Enrolled in <strong>UI/UX Design Mastery</strong><time>5 days ago</time></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h3>Upcoming Live Classes</h3>
+          <a href="#">View calendar</a>
+        </div>
+        <div class="course-row">
+          <div class="thumb" style="--c1:#3b82f6;--c2:#60a5fa;"><i class="fa-solid fa-video"></i></div>
+          <div class="body"><h4>Physics Doubt Solving</h4><div class="meta">Today · 8:00 PM · Sajid Sir</div></div>
+          <a href="#" class="btn btn-accent btn-sm">Join</a>
+        </div>
+        <div class="course-row">
+          <div class="thumb" style="--c1:#8b5cf6;--c2:#a78bfa;"><i class="fa-solid fa-video"></i></div>
+          <div class="body"><h4>IELTS Writing Workshop</h4><div class="meta">Tomorrow · 7:00 PM · Faria Madam</div></div>
+          <a href="#" class="btn btn-outline btn-sm">Remind me</a>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script src="js/partials.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
