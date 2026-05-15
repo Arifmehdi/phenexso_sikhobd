@@ -153,11 +153,21 @@ class FrontendController extends Controller
             $query->where('name_en', 'like', '%' . $request->get('search') . '%');
         }
 
+        // Category Filter
+        if ($request->has('category')) {
+            $query->whereHas('categories', function($q) use ($request) {
+                $q->whereIn('product_categories.slug', (array)$request->category);
+            });
+        }
+
         // Price filter
         if ($request->has('price')) {
-            $priceRange = explode('-', $request->get('price'));
-            if (count($priceRange) == 2) {
-                $query->whereBetween('final_price', [$priceRange[0], $priceRange[1]]);
+            if ($request->price == '0-1000') {
+                $query->whereBetween('selling_price', [0, 1000]);
+            } elseif ($request->price == '1000-5000') {
+                $query->whereBetween('selling_price', [1000, 5000]);
+            } elseif ($request->price == '5000-plus') {
+                $query->where('selling_price', '>', 5000);
             }
         }
 
@@ -167,40 +177,16 @@ class FrontendController extends Controller
         } elseif ($request->get('sort') == 2) {
             $query->oldest();
         } elseif ($request->get('sort') == 3) {
-            $query->orderBy('final_price', 'desc');
+            $query->orderBy('selling_price', 'desc');
         } elseif ($request->get('sort') == 4) {
-            $query->orderBy('final_price', 'asc');
+            $query->orderBy('selling_price', 'asc');
         } else {
             $query->latest();
         }
 
         $products = $query->paginate(12)->appends($request->all());
 
-        $productCategories = ProductCategory::whereNull('parent_id')
-            ->with('children')
-            ->where('active', 1)
-            ->where('type', 'product')
-            ->orderBy('name_en')
-            ->get();
-        
-        $banner = FrontSlider::whereActive(true)->first();
-        $offers = collect(); // You can populate this if you have an offers table
-
-        $categories = ProductCategory::whereActive(true)->where('type', 'product')->latest()->get();
-        $total_products = Product::whereActive(true)->where('type', 'product')->count();
-        $subcategories = ProductCategory::whereNull('parent_id')
-            ->where('active', 1)
-            ->where('type', 'product')
-            ->orderBy('name_en')
-            ->get();
-        
-            // Top clicked products
-        $topClickedProducts = Product::where('active', true)
-            ->where('type', 'product')
-            ->where('feature', true)
-            ->orderByDesc('click_count')
-            ->limit(6)
-            ->get();
+        $total_products = $query->count();
 
         // Get all root categories for sidebar
         $allRootCategories = ProductCategory::whereNull('parent_id')
@@ -208,31 +194,32 @@ class FrontendController extends Controller
             ->where('type', 'product')
             ->orderBy('name_en')
             ->get();
+        
+        // Top clicked products
+        $topClickedProducts = Product::where('active', true)
+            ->where('type', 'product')
+            ->where('feature', true)
+            ->orderByDesc('click_count')
+            ->limit(6)
+            ->get();
 
         return view("website.shop", compact(
             'products', 
-            'categories', 
             'total_products', 
-            'subcategories',
             'allRootCategories',
-            'topClickedProducts',
-            'productCategories',
-            'banner',
-            'offers'
+            'topClickedProducts'
         ));
 
     }
 
     public function quickView(Request $request)
     {
-        $product = Product::with('categories')->findOrFail($request->id);
+        $product = Product::with('categories', 'reviews')->findOrFail($request->id);
+        
+        $html = view('website.partials.quick_view', compact('product'))->render();
 
         return response()->json([
-            'name'        => $product->name_en,
-            'price'       => number_format($product->final_price, 2),
-            'old_price'   => $product->discount > 0 ? number_format($product->price, 2) : null,
-            'description' => Str::limit($product->description_en, 150),
-            'image'       => route('imagecache', ['template' => 'pnism', 'filename' => $product->fi()])
+            'html' => $html
         ]);
     }
 
@@ -817,10 +804,10 @@ class FrontendController extends Controller
                 $query->oldest();
                 break;
             case 3:
-                $query->orderBy('final_price', 'desc');
+                $query->orderBy('selling_price', 'desc');
                 break;
             case 4:
-                $query->orderBy('final_price', 'asc');
+                $query->orderBy('selling_price', 'asc');
                 break;
             default:
                 $query->latest();
@@ -831,7 +818,7 @@ class FrontendController extends Controller
         if ($request->has('price')) {
             $priceRange = explode('-', $request->get('price'));
             if (count($priceRange) == 2) {
-                $query->whereBetween('final_price', [$priceRange[0], $priceRange[1]]);
+                $query->whereBetween('selling_price', [$priceRange[0], $priceRange[1]]);
             }
         }
 
@@ -1412,7 +1399,7 @@ public function quickAdd(Request $request)
             //     Mail::to($order->email)->send(new OrderConfirmationEmail($order));
             // }
 
-            return redirect()->route('user.dashboard')->with('success', 'Order placed successfully!');
+            return redirect()->route('order.complete')->with('success', 'Order placed successfully!');
         } else {
             $request->validate([
                 'name' => 'required|string|max:255',
@@ -1449,6 +1436,11 @@ public function quickAdd(Request $request)
     }
 
 
+
+    public function orderComplete()
+    {
+        return view('website.order_complete');
+    }
 
     private function getUserLocation($user)
     {

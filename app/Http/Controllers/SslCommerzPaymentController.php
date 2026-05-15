@@ -193,11 +193,10 @@ class SslCommerzPaymentController  extends Controller
             // 4. Commit before redirect
             DB::commit();
 
-            if (Auth::check()) {
-                return redirect()->route('user.dashboard')->with('success', 'Order placed successfully!');
-            } else {
-                return redirect()->route('shop')->with('success', 'Order placed successfully!');
-            }
+            return redirect()->route('order.complete')->with('success', 'Order placed successfully!');
+        } else {
+            return redirect()->route('order.complete')->with('success', 'Order placed successfully!');
+        }
 
             // 5. Prepare SSLCommerz
             $tran_id = $order->id . '-' . time();
@@ -327,7 +326,7 @@ class SslCommerzPaymentController  extends Controller
                 Mail::to($order->email)->send(new OrderConfirmationEmail($order));
             }
 
-            return redirect('/')->with('success', 'Order payment successful!');
+            return redirect()->route('order.complete')->with('success', 'Order payment successful!');
         }
 
         // 6️⃣ If neither order nor appointment found

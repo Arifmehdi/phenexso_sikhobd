@@ -181,6 +181,7 @@ Route::get('product/details/{slug}',[FrontendController::class, 'productDetails'
 
 
 Route::get('cart',[FrontendController::class, 'cart'])->name('cart');
+Route::get('order-complete',[FrontendController::class, 'orderComplete'])->name('order.complete');
 Route::get('checkouts',[FrontendController::class, 'checkouts'])->name('frontend.checkout');
 Route::post('add-to-cart',[FrontendController::class, 'addToCart'])->name('addToCart');
 Route::get('/cart/quick-add', [FrontendController::class, 'quickAdd'])->name('cart.quick.add');

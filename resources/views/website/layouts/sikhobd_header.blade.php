@@ -5,106 +5,41 @@
     </a>
 
     <nav class="nav-desktop">
-      <!-- COURSES — 4 nested levels -->
-      <div class="nav-item">
-        <a href="{{ route('courses') }}" class="nav-link"><span data-i18n="nav.courses">কোর্সসমূহ</span>
-          <svg class="caret" viewBox="0 0 10 10" fill="currentColor"><path d="M1 3l4 4 4-4z"/></svg>
-        </a>
-        <ul class="dropdown">
-          <li class="dropdown-item">
-            <a href="#" class="dropdown-link"><span data-i18n="nav.academic">একাডেমিক</span>
-              <svg class="arrow" viewBox="0 0 10 10" fill="currentColor"><path d="M3 1l4 4-4 4z"/></svg>
-            </a>
+      @foreach($hierarchicalCategories as $cat)
+        <div class="nav-item">
+          <a href="{{ route('courses', ['category' => $cat->slug]) }}" class="nav-link">
+            <span>{{ app()->getLocale() == 'bn' ? $cat->name_bn : $cat->name_en }}</span>
+            @if($cat->children->count() > 0)
+              <svg class="caret" viewBox="0 0 10 10" fill="currentColor"><path d="M1 3l4 4 4-4z"/></svg>
+            @endif
+          </a>
+          @if($cat->children->count() > 0)
             <ul class="dropdown">
-              <li><a href="{{ route('courses') }}" class="dropdown-link" data-i18n="nav.class6">ক্লাস ৬-৮</a></li>
-              <li><a href="{{ route('courses') }}" class="dropdown-link" data-i18n="nav.class9">ক্লাস ৯-১০ (SSC)</a></li>
-              <li><a href="{{ route('courses') }}" class="dropdown-link" data-i18n="nav.class11">ক্লাস ১১-১২ (HSC)</a></li>
-              <li class="dropdown-item">
-                <a href="#" class="dropdown-link"><span data-i18n="nav.admission">ভর্তি প্রস্তুতি</span>
-                  <svg class="arrow" viewBox="0 0 10 10" fill="currentColor"><path d="M3 1l4 4-4 4z"/></svg>
-                </a>
-                <!-- Level 4 -->
-                <ul class="dropdown">
-                  <li><a href="{{ route('courses') }}" class="dropdown-link" data-i18n="nav.medical">মেডিকেল</a></li>
-                  <li class="dropdown-item">
-                    <a href="#" class="dropdown-link"><span data-i18n="nav.engineering">ইঞ্জিনিয়ারিং</span>
+              @foreach($cat->children as $sub)
+                <li class="dropdown-item">
+                  <a href="{{ route('courses', ['category' => $sub->slug]) }}" class="dropdown-link">
+                    <span>{{ app()->getLocale() == 'bn' ? $sub->name_bn : $sub->name_en }}</span>
+                    @if($sub->children->count() > 0)
                       <svg class="arrow" viewBox="0 0 10 10" fill="currentColor"><path d="M3 1l4 4-4 4z"/></svg>
-                    </a>
+                    @endif
+                  </a>
+                  @if($sub->children->count() > 0)
                     <ul class="dropdown">
-                      <li><a href="{{ route('courses') }}" class="dropdown-link" data-i18n="nav.buet">BUET</a></li>
-                      <li><a href="{{ route('courses') }}" class="dropdown-link" data-i18n="nav.ku">KUET</a></li>
-                      <li><a href="{{ route('courses') }}" class="dropdown-link" data-i18n="nav.cu">CUET</a></li>
+                      @foreach($sub->children as $child)
+                        <li>
+                          <a href="{{ route('courses', ['category' => $child->slug]) }}" class="dropdown-link">
+                            {{ app()->getLocale() == 'bn' ? $child->name_bn : $child->name_en }}
+                          </a>
+                        </li>
+                      @endforeach
                     </ul>
-                  </li>
-                  <li><a href="{{ route('courses') }}" class="dropdown-link" data-i18n="nav.varsity">ভার্সিটি</a></li>
-                </ul>
-              </li>
+                  @endif
+                </li>
+              @endforeach
             </ul>
-          </li>
-          <li class="dropdown-item">
-            <a href="#" class="dropdown-link"><span data-i18n="nav.skills">স্কিলস</span>
-              <svg class="arrow" viewBox="0 0 10 10" fill="currentColor"><path d="M3 1l4 4-4 4z"/></svg>
-            </a>
-            <ul class="dropdown">
-              <li><a href="{{ route('courses') }}" class="dropdown-link" data-i18n="nav.freelancing">ফ্রিল্যান্সিং</a></li>
-              <li><a href="{{ route('courses') }}" class="dropdown-link" data-i18n="nav.design">ডিজাইন</a></li>
-              <li class="dropdown-item">
-                <a href="#" class="dropdown-link"><span data-i18n="nav.development">ডেভেলপমেন্ট</span>
-                  <svg class="arrow" viewBox="0 0 10 10" fill="currentColor"><path d="M3 1l4 4-4 4z"/></svg>
-                </a>
-                <ul class="dropdown">
-                  <li class="dropdown-item">
-                    <a href="#" class="dropdown-link"><span data-i18n="nav.web">ওয়েব ডেভেলপমেন্ট</span>
-                      <svg class="arrow" viewBox="0 0 10 10" fill="currentColor"><path d="M3 1l4 4-4 4z"/></svg>
-                    </a>
-                    <ul class="dropdown">
-                      <li><a href="{{ route('courses') }}" class="dropdown-link" data-i18n="nav.frontend">ফ্রন্টএন্ড</a></li>
-                      <li><a href="{{ route('courses') }}" class="dropdown-link" data-i18n="nav.backend">ব্যাকএন্ড</a></li>
-                      <li><a href="{{ route('courses') }}" class="dropdown-link" data-i18n="nav.fullstack">ফুল স্ট্যাক</a></li>
-                    </ul>
-                  </li>
-                  <li><a href="{{ route('courses') }}" class="dropdown-link" data-i18n="nav.mobile">মোবাইল অ্যাপ</a></li>
-                </ul>
-              </li>
-            </ul>
-          </li>
-          <li class="dropdown-item">
-            <a href="#" class="dropdown-link"><span data-i18n="nav.language">ভাষা শিক্ষা</span>
-              <svg class="arrow" viewBox="0 0 10 10" fill="currentColor"><path d="M3 1l4 4-4 4z"/></svg>
-            </a>
-            <ul class="dropdown">
-              <li><a href="{{ route('courses') }}" class="dropdown-link" data-i18n="nav.spoken">Spoken English</a></li>
-              <li><a href="{{ route('courses') }}" class="dropdown-link" data-i18n="nav.ielts">IELTS</a></li>
-              <li><a href="{{ route('courses') }}" class="dropdown-link" data-i18n="nav.arabic">Arabic</a></li>
-            </ul>
-          </li>
-        </ul>
-      </div>
-
-      <div class="nav-item">
-        <a href="#" class="nav-link"><span data-i18n="nav.study">পড়ালেখা</span>
-          <svg class="caret" viewBox="0 0 10 10" fill="currentColor"><path d="M1 3l4 4 4-4z"/></svg>
-        </a>
-        <ul class="dropdown">
-          <li><a href="{{ route('news') }}" class="dropdown-link" data-i18n="nav.blog">ব্লগ</a></li>
-          <li><a href="#" class="dropdown-link" data-i18n="nav.notes">ফ্রি নোটস</a></li>
-          <li><a href="#" class="dropdown-link" data-i18n="nav.test">মডেল টেস্ট</a></li>
-          <li><a href="#" class="dropdown-link" data-i18n="nav.live">লাইভ ক্লাস</a></li>
-        </ul>
-      </div>
-
-      <div class="nav-item">
-        <a href="#" class="nav-link"><span data-i18n="nav.career">দক্ষতা</span>
-          <svg class="caret" viewBox="0 0 10 10" fill="currentColor"><path d="M1 3l4 4 4-4z"/></svg>
-        </a>
-        <ul class="dropdown">
-          <li><a href="#" class="dropdown-link" data-i18n="nav.job">জব প্রস্তুতি</a></li>
-          <li><a href="#" class="dropdown-link" data-i18n="nav.bcs">BCS প্রিলি</a></li>
-          <li><a href="#" class="dropdown-link" data-i18n="nav.bank">ব্যাংক জব</a></li>
-        </ul>
-      </div>
-
-      <div class="nav-item"><a href="#" class="nav-link" data-i18n="nav.pricing">প্রাইসিং</a></div>
+          @endif
+        </div>
+      @endforeach
       <div class="nav-item"><a href="{{ route('shop') }}" class="nav-link" data-i18n="nav.shop">Shop</a></div>
     </nav>
 
@@ -113,11 +48,28 @@
         <button data-lang="bn">বাং</button>
         <button data-lang="en">EN</button>
       </div>
+      
       @auth
-      <a href="{{ route('user.dashboard') }}" class="icon-btn desktop-only" aria-label="Dashboard"><i class="fa-solid fa-user"></i></a>
+      <div class="nav-item user-dropdown desktop-only">
+        <a href="javascript:void(0)" class="icon-btn" aria-label="User Account">
+          <i class="fa-solid fa-circle-user"></i>
+        </a>
+        <ul class="dropdown">
+          @if(auth()->user()->hasRole('admin') || auth()->user()->role == 'admin')
+            <li><a href="{{ route('admin.dashboard') }}" class="dropdown-link"><i class="fa-solid fa-gauge-high me-2"></i> Admin Panel</a></li>
+          @endif
+          <li><a href="{{ route('user.dashboard') }}" class="dropdown-link"><i class="fa-solid fa-user me-2"></i> Dashboard</a></li>
+          <li>
+            <a href="{{ route('logout') }}" class="dropdown-link text-danger">
+              <i class="fa-solid fa-right-from-bracket me-2"></i> Logout
+            </a>
+          </li>
+        </ul>
+      </div>
       @else
       <a href="{{ route('login') }}" class="btn btn-outline btn-sm desktop-only" data-i18n="nav.login">লগইন</a>
       @endauth
+
       <a href="#" class="btn btn-primary desktop-only"><i class="fa-solid fa-download"></i> <span data-i18n="nav.download">ডাউনলোড অ্যাপ</span></a>
       <button class="menu-toggle" id="menuToggle" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
     </div>
@@ -138,69 +90,79 @@
       <button data-lang="en">English</button>
     </div>
     <ul>
-      <li class="m-item">
-        <button class="m-toggle"><span data-i18n="nav.courses">কোর্সসমূহ</span> <svg class="caret" width="12" height="12" viewBox="0 0 10 10" fill="currentColor"><path d="M1 3l4 4 4-4z"/></svg></button>
-        <div class="m-children">
-          <div class="m-item">
-            <button class="m-toggle"><span data-i18n="nav.academic">একাডেমিক</span> <svg class="caret" width="12" height="12" viewBox="0 0 10 10" fill="currentColor"><path d="M1 3l4 4 4-4z"/></svg></button>
+      @auth
+        <li class="m-item">
+          <button class="m-toggle">
+            <i class="fa-solid fa-circle-user me-2"></i> <span>{{ auth()->user()->name }}</span>
+            <svg class="caret" width="12" height="12" viewBox="0 0 10 10" fill="currentColor"><path d="M1 3l4 4 4-4z"/></svg>
+          </button>
+          <div class="m-children">
+            @if(auth()->user()->role == 'admin')
+                <a href="{{ route('admin.dashboard') }}" class="m-link">
+                    <i class="fa-solid fa-gauge-high me-2"></i> Admin Panel
+                </a>
+
+                <a href="{{ route('user.dashboard') }}" class="m-link">
+                    <i class="fa-solid fa-user me-2"></i> Dashboard
+                </a>
+            @else
+                <a href="{{ route('user.dashboard') }}" class="m-link">
+                    <i class="fa-solid fa-user me-2"></i> Dashboard
+                </a>
+            @endif
+            <a href="{{ route('logout') }}" class="m-link text-danger">
+              <i class="fa-solid fa-right-from-bracket me-2"></i> Logout
+            </a>
+          </div>
+        </li>
+      @endauth
+
+      @foreach($hierarchicalCategories as $cat)
+        <li class="m-item">
+          @if($cat->children->count() > 0)
+            <button class="m-toggle">
+              <span>{{ app()->getLocale() == 'bn' ? $cat->name_bn : $cat->name_en }}</span>
+              <svg class="caret" width="12" height="12" viewBox="0 0 10 10" fill="currentColor"><path d="M1 3l4 4 4-4z"/></svg>
+            </button>
             <div class="m-children">
-              <a href="{{ route('courses') }}" class="m-link" data-i18n="nav.class6">ক্লাস ৬-৮</a>
-              <a href="{{ route('courses') }}" class="m-link" data-i18n="nav.class9">ক্লাস ৯-১০ (SSC)</a>
-              <a href="{{ route('courses') }}" class="m-link" data-i18n="nav.class11">ক্লাস ১১-১২ (HSC)</a>
-              <div class="m-item">
-                <button class="m-toggle"><span data-i18n="nav.admission">ভর্তি প্রস্তুতি</span> <svg class="caret" width="12" height="12" viewBox="0 0 10 10" fill="currentColor"><path d="M1 3l4 4 4-4z"/></svg></button>
-                <div class="m-children">
-                  <a href="{{ route('courses') }}" class="m-link" data-i18n="nav.medical">মেডিকেল</a>
+              @foreach($cat->children as $sub)
+                @if($sub->children->count() > 0)
                   <div class="m-item">
-                    <button class="m-toggle"><span data-i18n="nav.engineering">ইঞ্জিনিয়ারিং</span> <svg class="caret" width="12" height="12" viewBox="0 0 10 10" fill="currentColor"><path d="M1 3l4 4 4-4z"/></svg></button>
+                    <button class="m-toggle">
+                      <span>{{ app()->getLocale() == 'bn' ? $sub->name_bn : $sub->name_en }}</span>
+                      <svg class="caret" width="12" height="12" viewBox="0 0 10 10" fill="currentColor"><path d="M1 3l4 4 4-4z"/></svg>
+                    </button>
                     <div class="m-children">
-                      <a href="{{ route('courses') }}" class="m-link" data-i18n="nav.buet">BUET</a>
-                      <a href="{{ route('courses') }}" class="m-link" data-i18n="nav.ku">KUET</a>
-                      <a href="{{ route('courses') }}" class="m-link" data-i18n="nav.cu">CUET</a>
+                      @foreach($sub->children as $child)
+                        <a href="{{ route('courses', ['category' => $child->slug]) }}" class="m-link">
+                          {{ app()->getLocale() == 'bn' ? $child->name_bn : $child->name_en }}
+                        </a>
+                      @endforeach
                     </div>
                   </div>
-                  <a href="{{ route('courses') }}" class="m-link" data-i18n="nav.varsity">ভার্সিটি</a>
-                </div>
-              </div>
+                @else
+                  <a href="{{ route('courses', ['category' => $sub->slug]) }}" class="m-link">
+                    {{ app()->getLocale() == 'bn' ? $sub->name_bn : $sub->name_en }}
+                  </a>
+                @endif
+              @endforeach
             </div>
-          </div>
-          <div class="m-item">
-            <button class="m-toggle"><span data-i18n="nav.skills">স্কিলস</span> <svg class="caret" width="12" height="12" viewBox="0 0 10 10" fill="currentColor"><path d="M1 3l4 4 4-4z"/></svg></button>
-            <div class="m-children">
-              <a href="{{ route('courses') }}" class="m-link" data-i18n="nav.freelancing">ফ্রিল্যান্সিং</a>
-              <a href="{{ route('courses') }}" class="m-link" data-i18n="nav.design">ডিজাইন</a>
-              <div class="m-item">
-                <button class="m-toggle"><span data-i18n="nav.development">ডেভেলপমেন্ট</span> <svg class="caret" width="12" height="12" viewBox="0 0 10 10" fill="currentColor"><path d="M1 3l4 4 4-4z"/></svg></button>
-                <div class="m-children">
-                  <a href="{{ route('courses') }}" class="m-link" data-i18n="nav.web">ওয়েব ডেভেলপমেন্ট</a>
-                  <a href="{{ route('courses') }}" class="m-link" data-i18n="nav.mobile">মোবাইল অ্যাপ</a>
-                </div>
-              </div>
-            </div>
-          </div>
-          <a href="{{ route('courses') }}" class="m-link" data-i18n="nav.language">ভাষা শিক্ষা</a>
-        </div>
-      </li>
-      <li class="m-item">
-        <button class="m-toggle"><span data-i18n="nav.study">পড়ালেখা</span> <svg class="caret" width="12" height="12" viewBox="0 0 10 10" fill="currentColor"><path d="M1 3l4 4 4-4z"/></svg></button>
-        <div class="m-children">
-          <a href="{{ route('news') }}" class="m-link" data-i18n="nav.blog">ব্লগ</a>
-          <a href="#" class="m-link" data-i18n="nav.notes">ফ্রি নোটস</a>
-          <a href="#" class="m-link" data-i18n="nav.test">মডেল টেস্ট</a>
-        </div>
-      </li>
-      <li class="m-item"><a href="#" class="m-link" data-i18n="nav.pricing">প্রাইসিং</a></li>
-      <li class="m-item"><a href="{{ route('user.dashboard') }}" class="m-link" data-i18n="nav.dashboard">ড্যাশবোর্ড</a></li>
+          @else
+            <a href="{{ route('courses', ['category' => $cat->slug]) }}" class="m-link">
+              {{ app()->getLocale() == 'bn' ? $cat->name_bn : $cat->name_en }}
+            </a>
+          @endif
+        </li>
+      @endforeach
+      <li class="m-item"><a href="{{ route('shop') }}" class="m-link" data-i18n="nav.shop">Shop</a></li>
       <li class="m-item"><a href="{{ route('about') }}" class="m-link" data-i18n="nav.about">আমাদের সম্পর্কে</a></li>
       <li class="m-item"><a href="{{ route('contact') }}" class="m-link" data-i18n="nav.contact">যোগাযোগ</a></li>
     </ul>
   </div>
   <div class="drawer-footer">
-    @auth
-    <a href="{{ route('user.dashboard') }}" class="btn btn-outline" data-i18n="nav.dashboard">ড্যাশবোর্ড</a>
-    @else
-    <a href="{{ route('login') }}" class="btn btn-outline" data-i18n="nav.login">লগইন</a>
-    @endauth
-    <a href="#" class="btn btn-primary"><i class="fa-solid fa-download"></i> <span data-i18n="nav.download">ডাউনলোড অ্যাপ</span></a>
+    @guest
+      <a href="{{ route('login') }}" class="btn btn-outline" style="width: 100%; justify-content: center; margin-bottom: 10px;" data-i18n="nav.login">লগইন</a>
+    @endguest
+    <a href="#" class="btn btn-primary" style="width: 100%; justify-content: center;"><i class="fa-solid fa-download"></i> <span data-i18n="nav.download">ডাউনলোড অ্যাপ</span></a>
   </div>
 </aside>

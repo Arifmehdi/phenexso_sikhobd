@@ -148,6 +148,7 @@ class ProductController extends Controller
         // Update category fields
         $category->type         = $request->type;
         $category->parent_id    = $request->parent_id;
+        $category->position    = $request->position;
         $category->name_en = $request->name_en;
         $category->name_bn = $request->name_bn;
         $category->slug = getSlug($request->slug, $category, true);

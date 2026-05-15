@@ -55,6 +55,18 @@ class AppServiceProvider extends ServiceProvider
 
             View::share('cartItems', $cartItems);
             View::share('cartCount', $cartCount);
+
+            $hierarchicalCategories = \App\Models\ProductCategory::where('active', true)
+                ->where('type', 'course')
+                ->whereNull('parent_id')
+                ->with(['children' => function($query) {
+                    $query->where('active', true)->where('type', 'course')->with(['children' => function($q) {
+                        $q->where('active', true)->where('type', 'course');
+                    }]);
+                }])
+                ->orderBy('position')
+                ->get();
+            View::share('hierarchicalCategories', $hierarchicalCategories);
         });
 
         // Share product categories only with specific views
@@ -66,7 +78,7 @@ class AppServiceProvider extends ServiceProvider
                 ->having('products_count', '>', 0)
                 ->orderBy('name_en')
                 ->get();
-            
+
             $view->with('productCategories', $productCategories);
         });
 

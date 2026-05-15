@@ -18,40 +18,62 @@
       <div class="courses-layout">
         <aside class="filter-side">
           <h3 style="color:var(--primary); margin-bottom:16px; font-size:16px;" data-i18n="filter">ফিল্টার</h3>
-          <div class="filter-group">
-            <h4 data-i18n="category">ক্যাটাগরি</h4>
-            <label><input type="checkbox" checked> <span data-i18n="nav.academic">একাডেমিক</span></label>
-            <label><input type="checkbox"> <span data-i18n="nav.skills">স্কিলস</span></label>
-            <label><input type="checkbox"> <span data-i18n="nav.language">ভাষা শিক্ষা</span></label>
-            <label><input type="checkbox"> <span data-i18n="nav.admission">ভর্তি প্রস্তুতি</span></label>
-          </div>
-          <div class="filter-group">
-            <h4 data-i18n="level">লেভেল</h4>
-            <label><input type="checkbox"> <span data-i18n="beginner">বিগিনার</span></label>
-            <label><input type="checkbox"> <span data-i18n="intermediate">ইন্টারমিডিয়েট</span></label>
-            <label><input type="checkbox"> <span data-i18n="advanced">অ্যাডভান্স</span></label>
-          </div>
-          <div class="filter-group">
-            <h4 data-i18n="price.range">মূল্য</h4>
-            <label><input type="radio" name="price" checked> <span data-i18n="all">সব</span></label>
-            <label><input type="radio" name="price"> Free</label>
-            <label><input type="radio" name="price"> ৳ 1k - 5k</label>
-            <label><input type="radio" name="price"> ৳ 5k+</label>
-          </div>
-          <button class="btn btn-primary" style="width:100%;">Apply</button>
+          <form action="{{ route('courses') }}" method="GET">
+            <div class="filter-group">
+              <h4 data-i18n="category">ক্যাটাগরি</h4>
+              @foreach($categories as $cat)
+                <label>
+                  <input type="checkbox" name="category[]" value="{{ $cat->slug }}" 
+                    {{ (is_array(request('category')) && in_array($cat->slug, request('category'))) || request('category') == $cat->slug ? 'checked' : '' }}> 
+                  <span>{{ app()->getLocale() == 'bn' ? $cat->name_bn : $cat->name_en }}</span>
+                </label>
+              @endforeach
+            </div>
+            <div class="filter-group">
+              <h4 data-i18n="price.range">মূল্য</h4>
+              <label><input type="radio" name="price" value="all" {{ request('price') == 'all' || !request('price') ? 'checked' : '' }}> <span data-i18n="all">সব</span></label>
+              <label><input type="radio" name="price" value="free" {{ request('price') == 'free' ? 'checked' : '' }}> Free</label>
+              <label><input type="radio" name="price" value="1k-5k" {{ request('price') == '1k-5k' ? 'checked' : '' }}> ৳ 1k - 5k</label>
+              <label><input type="radio" name="price" value="5k-plus" {{ request('price') == '5k-plus' ? 'checked' : '' }}> ৳ 5k+</label>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%;">Apply</button>
+          </form>
         </aside>
 
         <div>
           <div class="courses-grid">
-            <article class="course-card"><div class="course-thumb" style="--c1:#6c5ce7;--c2:#a29bfe;"><span class="course-tag">BESTSELLER</span>HSC '26</div><div class="course-body"><h3>HSC 2026 — Science</h3><div class="course-meta"><span><i class="fa-solid fa-star"></i> 4.9</span><span><i class="fa-solid fa-users"></i> 12k+</span></div><div class="course-foot"><div><span class="price">৳ 6,500</span></div><a href="{{ route('courseDetail') }}" class="btn btn-accent btn-sm" data-i18n="enroll">এনরোল</a></div></div></article>
-            <article class="course-card"><div class="course-thumb" style="--c1:#ff284f;--c2:#ff6b85;"><span class="course-tag">NEW</span>IELTS</div><div class="course-body"><h3>IELTS Complete</h3><div class="course-meta"><span><i class="fa-solid fa-star"></i> 4.8</span><span><i class="fa-solid fa-users"></i> 8k+</span></div><div class="course-foot"><div><span class="price">৳ 4,200</span></div><a href="{{ route('courseDetail') }}" class="btn btn-accent btn-sm" data-i18n="enroll">এনরোল</a></div></div></article>
-            <article class="course-card"><div class="course-thumb" style="--c1:#10b981;--c2:#34d399;"><span class="course-tag">HOT</span>Skill</div><div class="course-body"><h3>Freelancing</h3><div class="course-meta"><span><i class="fa-solid fa-star"></i> 4.7</span><span><i class="fa-solid fa-users"></i> 15k+</span></div><div class="course-foot"><div><span class="price">৳ 2,500</span></div><a href="{{ route('courseDetail') }}" class="btn btn-accent btn-sm" data-i18n="enroll">এনরোল</a></div></div></article>
-            <article class="course-card"><div class="course-thumb" style="--c1:#3b82f6;--c2:#60a5fa;"><span class="course-tag">PRO</span>Web</div><div class="course-body"><h3>Full Stack Web Dev</h3><div class="course-meta"><span><i class="fa-solid fa-star"></i> 4.9</span><span><i class="fa-solid fa-users"></i> 5k+</span></div><div class="course-foot"><div><span class="price">৳ 8,500</span></div><a href="{{ route('courseDetail') }}" class="btn btn-accent btn-sm" data-i18n="enroll">এনরোল</a></div></div></article>
-            <article class="course-card"><div class="course-thumb" style="--c1:#f59e0b;--c2:#fbbf24;"><span class="course-tag">HOT</span>SSC</div><div class="course-body"><h3>SSC 2026 — All Subjects</h3><div class="course-meta"><span><i class="fa-solid fa-star"></i> 4.8</span><span><i class="fa-solid fa-users"></i> 22k+</span></div><div class="course-foot"><div><span class="price">৳ 5,000</span></div><a href="{{ route('courseDetail') }}" class="btn btn-accent btn-sm" data-i18n="enroll">এনরোল</a></div></div></article>
-            <article class="course-card"><div class="course-thumb" style="--c1:#8b5cf6;--c2:#a78bfa;"><span class="course-tag">NEW</span>Design</div><div class="course-body"><h3>UI/UX Design Mastery</h3><div class="course-meta"><span><i class="fa-solid fa-star"></i> 4.6</span><span><i class="fa-solid fa-users"></i> 3k+</span></div><div class="course-foot"><div><span class="price">৳ 3,800</span></div><a href="{{ route('courseDetail') }}" class="btn btn-accent btn-sm" data-i18n="enroll">এনরোল</a></div></div></article>
-            <article class="course-card"><div class="course-thumb" style="--c1:#ec4899;--c2:#f472b6;"><span class="course-tag">FREE</span>Spoken</div><div class="course-body"><h3>Spoken English Basic</h3><div class="course-meta"><span><i class="fa-solid fa-star"></i> 4.7</span><span><i class="fa-solid fa-users"></i> 35k+</span></div><div class="course-foot"><div><span class="price">Free</span></div><a href="{{ route('courseDetail') }}" class="btn btn-accent btn-sm" data-i18n="enroll">এনরোল</a></div></div></article>
-            <article class="course-card"><div class="course-thumb" style="--c1:#06b6d4;--c2:#22d3ee;"><span class="course-tag">PRO</span>BCS</div><div class="course-body"><h3>BCS Preliminary</h3><div class="course-meta"><span><i class="fa-solid fa-star"></i> 4.8</span><span><i class="fa-solid fa-users"></i> 7k+</span></div><div class="course-foot"><div><span class="price">৳ 4,500</span></div><a href="{{ route('courseDetail') }}" class="btn btn-accent btn-sm" data-i18n="enroll">এনরোল</a></div></div></article>
-            <article class="course-card"><div class="course-thumb" style="--c1:#ef4444;--c2:#f87171;"><span class="course-tag">HOT</span>Medical</div><div class="course-body"><h3>Medical Admission Prep</h3><div class="course-meta"><span><i class="fa-solid fa-star"></i> 4.9</span><span><i class="fa-solid fa-users"></i> 6k+</span></div><div class="course-foot"><div><span class="price">৳ 7,200</span></div><a href="{{ route('courseDetail') }}" class="btn btn-accent btn-sm" data-i18n="enroll">এনরোল</a></div></div></article>
+            @forelse($courses as $course)
+              <article class="course-card">
+                <div class="course-thumb" style="--c1:#6c5ce7;--c2:#a29bfe;">
+                  @if($course->feature)
+                    <span class="course-tag">FEATURED</span>
+                  @endif
+                  <img src="{{ route('imagecache', ['template' => 'medium', 'filename' => $course->fi()]) }}" alt="{{ $course->name_en }}" style="width:100%; height:100%; object-fit:cover; border-radius:12px 12px 0 0;">
+                </div>
+                <div class="course-body">
+                  <h3>{{ app()->getLocale() == 'bn' ? $course->name_bn : $course->name_en }}</h3>
+                  <div class="course-meta">
+                    <span><i class="fa-solid fa-star"></i> {{ number_format($course->averageRating(), 1) }}</span>
+                    <span><i class="fa-solid fa-users"></i> {{ $course->click_count }} views</span>
+                  </div>
+                  <div class="course-foot">
+                    <div>
+                      @if($course->isFree())
+                        <span class="price">Free</span>
+                      @else
+                        <span class="price">৳ {{ number_format($course->final_price) }}</span>
+                      @endif
+                    </div>
+                    <a href="{{ route('productDetails', $course->slug) }}" class="btn btn-accent btn-sm" data-i18n="enroll">এনরোল</a>
+                  </div>
+                </div>
+              </article>
+            @empty
+              <p>No courses found.</p>
+            @endforelse
+          </div>
+          <div style="margin-top: 30px;">
+            {{ $courses->links() }}
           </div>
         </div>
       </div>
