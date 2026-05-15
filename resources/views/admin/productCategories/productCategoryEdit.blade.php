@@ -12,123 +12,137 @@
 <section class="content py-3">
     <div class="row">
         <div class="col-md-8 mx-auto">
+
+            <!-- Header Card -->
             <div class="card mb-2 shadow-lg">
-                <div class="card-header px-2 py-2">
-                    <h3 class="card-title text-muted"><i class="fas fa-edit text-primary"></i> Edit Product Category</h3>
-                    <a href="{{ route('admin.productCategoriesAll') }}" class="btn btn-outline-secondary btn-xs float-right">Back</a>
+                <div class="card-header- d-flex justify-content-between align-items-center px-2 py-2">
+                    <h3 class="card-title text-sm text-bold text-muted pt-1">
+                        <i class="fas fa-edit text-primary"></i> Edit Category: {{ $category->name_en }}
+                    </h3>
+                    <a href="{{ route('admin.productCategoriesAll') }}" class="btn btn-outline-primary btn-xs">
+                        <i class="fa fa-arrow-left"></i> Back
+                    </a>
                 </div>
             </div>
 
-            <div class="card shadow-lg card-outline card-primary">
-                <div class="card-body p-3">
-
+            <!-- Form Card -->
+            <div class="card card-primary card-outline shadow-lg">
+                <div class="card-body bg-light px-3">
                     <form action="{{ route('admin.productCategoryUpdate', $category) }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('POST')
 
-                        {{--  Category Name (English)  --}}
-                        <div class="form-group">
-                            <label for="name_en">Category Name (English) <span class="text-danger">*</span></label>
-                            <input type="text" name="name_en" id="name_en" value="{{ old('name_en', $category->name_en) }}" 
-                                class="form-control @error('name_en') is-invalid @enderror" placeholder="Enter  Category Name (English)" 
-                                onkeyup="makeSlug(this.value)">
-                            @error('name_en')
-                                <span class="invalid-feedback">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        {{-- Category Name (Bangla)  --}}
-                        <div class="form-group">
-                            <label for="name_bn">Category Name (Bangla) <span class="text-danger">*</span></label>
-                            <input type="text" name="name_bn" id="name_bn" value="{{ old('name_bn', $category->name_bn) }}" 
-                                class="form-control @error('name_bn') is-invalid @enderror" placeholder="Enter Category Name (Bangla)" >
-                            @error('name_bn')
-                                <span class="invalid-feedback">{{ $message }}</span>
-                            @enderror
-                        </div>
-                       
-
-                        {{-- Slug --}}
-                        <div class="form-group">
-                            <label for="slug">Slug <span class="text-danger">*</span></label>
-                            <input type="text" name="slug" id="slug" value="{{ old('slug', $category->slug) }}" 
-                                class="form-control @error('slug') is-invalid @enderror" placeholder="Enter slug">
-                            @error('slug')
-                                <span class="invalid-feedback">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-<div class="form-group ">
-    <label for="parent_id">
-        Parent Category (Optional)
-    </label>
-    <div >
-        <select name="parent_id" id="parent_id" class="form-control">
-            <option value="">-- None (Main Category) --</option>
-            @foreach($categories as $cat)
-                @if($cat->parent_id === null && $cat->id != $category->id)
-                    <option value="{{ $cat->id }}" 
-                        {{ old('parent_id', $category->parent_id) == $cat->id ? 'selected' : '' }}>
-                        {{ $cat->name_en }}
-                    </option>
-                    
-                    {{-- Subcategories --}}
-                    @foreach($cat->children as $child)
-                        @if($child->id != $category->id)
-                            <option value="{{ $child->id }}" 
-                                {{ old('parent_id', $category->parent_id) == $child->id ? 'selected' : '' }}>
-                                &nbsp;&nbsp;├─ {{ $child->name_en }}
-                            </option>
-                        @endif
-                    @endforeach
-                @endif
-            @endforeach
-        </select>
-        @error('parent_id') 
-            <span class="text-danger">{{ $message }}</span> 
-        @enderror
-    </div>
-</div>
-
-                        {{-- Excerpt --}}
-                        <div class="form-group">
-                            <label for="excerpt">Excerpt</label>
-                            <textarea name="excerpt" id="excerpt" rows="3" class="form-control" placeholder="Short description">{{ old('excerpt', $category->excerpt) }}</textarea>
-                        </div>
-
-                        {{-- Current Image --}}
-                        <div class="form-group">
-                            <label>Current Image</label>
-                            <div>
-                                @if($category->image)
-                                    <img src="{{ asset('storage/product_categories_images/' . $category->image) }}" 
-                                        alt="{{ $category->name_en }}" class="img-thumbnail" style="max-height:150px;">
-                                @else
-                                    <p>No image uploaded</p>
-                                @endif
+                        {{-- Category Type --}}
+                        <div class="form-group row">
+                            <label for="type" class="col-sm-3 col-form-label text-left">Category Type <span class="text-danger">*</span></label>
+                            <div class="col-sm-9">
+                                <select name="type" id="type" class="form-control @error('type') is-invalid @enderror" required>
+                                    <option value="product" {{ old('type', $category->type) == 'product' ? 'selected' : '' }}>Physical Product (Ecommerce)</option>
+                                    <option value="course" {{ old('type', $category->type) == 'course' ? 'selected' : '' }}>Digital Course (E-learning)</option>
+                                </select>
+                                @error('type') <span class="invalid-feedback">{{ $message }}</span> @enderror
                             </div>
                         </div>
 
-                        {{-- Change Image --}}
-                        <div class="form-group">
-                            <label for="image">Change Image</label>
-                            <input type="file" name="image" id="image" class="form-control-file @error('image') is-invalid @enderror">
-                            @error('image')
-                                <span class="invalid-feedback d-block">{{ $message }}</span>
-                            @enderror
+                        <!-- Position -->
+                        <div class="form-group row">
+                            <label for="position" class="col-sm-3 col-form-label text-left">Position</label>
+                            <div class="col-sm-9">
+                                <input type="number" name="position" value="{{ old('position', $category->position) }}" id="position" class="form-control" placeholder="Sort Order">
+                                @error('position') <span class="text-danger">{{ $message }}</span> @enderror
+                            </div>
                         </div>
 
-                        {{-- Active Checkbox --}}
-                        <div class="form-check mb-3">
-                            <input type="checkbox" name="active" id="active" class="form-check-input" {{ old('active', $category->active) ? 'checked' : '' }}>
-                            <label class="form-check-label" for="active">Active</label>
+                        {{-- Category Name (English) --}}
+                        <div class="form-group row">
+                            <label for="name_en" class="col-sm-3 col-form-label text-left">Category Name (English) <span class="text-danger">*</span></label>
+                            <div class="col-sm-9">
+                                <input type="text" name="name_en" value="{{ old('name_en', $category->name_en) }}" class="form-control" placeholder="Name" required onkeyup="makeSlug(this.value)">
+                                @error('name_en') <span class="text-danger">{{ $message }}</span> @enderror
+                            </div>
                         </div>
 
-                        <button type="submit" class="btn btn-primary float-right">Update Category</button>
+                        {{-- Category Name (Bangla) --}}
+                        <div class="form-group row">
+                            <label for="name_bn" class="col-sm-3 col-form-label text-left">Category Name (Bangla)</label>
+                            <div class="col-sm-9">
+                                <input type="text" name="name_bn" value="{{ old('name_bn', $category->name_bn) }}" class="form-control" placeholder="Name">
+                                @error('name_bn') <span class="text-danger">{{ $message }}</span> @enderror
+                            </div>
+                        </div>
+
+                        {{-- Slug --}}
+                        <div class="form-group row">
+                            <label for="slug" class="col-sm-3 col-form-label text-left">Slug <span class="text-danger">*</span></label>
+                            <div class="col-sm-9">
+                                <input type="text" id="slug" name="slug" value="{{ old('slug', $category->slug) }}" class="form-control" placeholder="URL" required>
+                                @error('slug') <span class="text-danger">{{ $message }}</span> @enderror
+                            </div>
+                        </div>
+
+                        <!-- Parent Category -->
+                        <div class="form-group row">
+                            <label for="parent_id" class="col-sm-3 col-form-label text-left">Parent Category</label>
+                            <div class="col-sm-9">
+                                <select name="parent_id" id="parent_id" class="form-control">
+                                    <option value="">-- None (Main Category) --</option>
+                                    @foreach($categories as $cat)
+                                        @if($cat->parent_id === null)
+                                            <option value="{{ $cat->id }}" {{ old('parent_id', $category->parent_id) == $cat->id ? 'selected' : '' }}>
+                                                [{{ strtoupper($cat->type) }}] {{ $cat->name_en }}
+                                            </option>
+                                            {{-- Subcategories --}}
+                                            @foreach($cat->children as $child)
+                                                <option value="{{ $child->id }}" {{ old('parent_id', $category->parent_id) == $child->id ? 'selected' : '' }}>
+                                                    &nbsp;&nbsp;├─ {{ $child->name_en }}
+                                                </option>
+                                            @endforeach
+                                        @endif
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
+                        {{-- Excerpt --}}
+                        <div class="form-group row">
+                            <label for="excerpt" class="col-sm-3 col-form-label text-left">Excerpt</label>
+                            <div class="col-sm-9">
+                                <textarea name="excerpt" rows="2" class="form-control" placeholder="Short description...">{{ old('excerpt', $category->excerpt) }}</textarea>
+                            </div>
+                        </div>
+
+                        {{-- Image --}}
+                        <div class="form-group row">
+                            <label for="image" class="col-sm-3 col-form-label text-left">Update Image</label>
+                            <div class="col-sm-9 text-center">
+                                @if($category->image)
+                                    <img src="{{ route('imagecache', ['template' => 'sbixs', 'filename' => $category->fi()]) }}" class="mb-2 w3-round shadow-sm" alt="">
+                                @endif
+                                <input type="file" name="image" class="form-control">
+                            </div>
+                        </div>
+
+                        {{-- Active --}}
+                        <div class="form-group row">
+                            <label for="active" class="col-sm-3 col-form-label text-left">Active</label>
+                            <div class="col-sm-9">
+                                <div class="form-check">
+                                    <input class="form-check-input" name="active" type="checkbox" id="active" {{ $category->active ? 'checked' : '' }}>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Submit --}}
+                        <div class="form-group row mb-0">
+                            <div class="col-sm-9 offset-sm-3 text-right">
+                                <button type="submit" class="btn btn-primary">Update Category</button>
+                            </div>
+                        </div>
+
                     </form>
-
                 </div>
             </div>
+
         </div>
     </div>
 </section>

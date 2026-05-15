@@ -504,6 +504,25 @@
                     </li>--}}
 
 
+                    {{-- E-learning --}}
+                    <li class="nav-item {{ session('lsbm') == 'elearning' ? ' menu-open ' : ''}}">
+                        <a href="#" class="nav-link {{ session('lsbm') == 'elearning' ? ' active ' : ''}}">
+                            <i class="nav-icon fas fa-graduation-cap"></i>
+                            <p>
+                                E-learning
+                                <i class="fas fa-angle-left right"></i>
+                            </p>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a href="{{ route('admin.enrollments.index') }}" class="nav-link {{ session('lsbsm') == 'enrollments' ? ' active ' : ''}}">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Enrollments</p>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
                     {{-- Products --}}
                     <li class="nav-item {{ session('lsbm') == 'product'? ' menu-open ' : ''}}">
                         <a href="#" class="nav-link {{ session('lsbm') == 'product'? ' active ' : ''}}">

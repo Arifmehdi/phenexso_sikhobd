@@ -16,6 +16,7 @@
     
     <link rel="stylesheet" href="{{ asset('sikhobd/css/style.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     
     <style>
         .floating-cart {
@@ -111,6 +112,7 @@
         }
     </script>
     
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     @stack('js')
 </body>
 </html>

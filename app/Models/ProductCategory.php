@@ -10,6 +10,19 @@ class ProductCategory extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'type',
+        'position',
+        'name_en',
+        'name_bn',
+        'slug',
+        'image',
+        'icon',
+        'parent_id',
+        'active',
+        'feature',
+    ];
+
 
     public function fi()
     {

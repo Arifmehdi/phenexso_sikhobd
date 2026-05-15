@@ -28,6 +28,10 @@
 
                         <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
                             <a href="{{  route('admin.productEdit',$product)}}" class="dropdown-item"><i class="fa fa-edit"></i> Edit</a>
+                            
+                            @if($product->type === 'course')
+                            <a href="{{ route('admin.lessons.index', $product->id) }}" class="dropdown-item text-primary"><i class="fa fa-graduation-cap"></i> Manage Classes</a>
+                            @endif
 
                             <form action="{{ route('admin.productDelete',$product)}}" method="post" onclick="return confirm('Are you sure to delete?')">
                                 @csrf

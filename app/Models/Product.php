@@ -12,6 +12,7 @@ class Product extends Model
     use HasFactory;
 
     protected $fillable = [
+        'type',
         'click_count',
         'name_en',
         'name_bn',
@@ -28,6 +29,9 @@ class Product extends Model
         'discount_price',
         'final_price',
         'selling_price',
+        'duration',
+        'lessons_count',
+        'level',
         'purchase_price',
         'unit',
         'tags',
@@ -39,6 +43,26 @@ class Product extends Model
         'seller_id',
         'rider_id',
     ];
+
+    public function enrollments()
+    {
+        return $this->hasMany(Enrollment::class);
+    }
+
+    public function lessons()
+    {
+        return $this->hasMany(CourseLesson::class);
+    }
+
+    public function isCourse()
+    {
+        return $this->type === 'course';
+    }
+
+    public function isFree()
+    {
+        return $this->selling_price <= 0;
+    }
 
 
     public function fi()

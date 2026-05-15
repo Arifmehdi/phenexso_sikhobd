@@ -7,66 +7,64 @@ use App\Http\Controllers\Controller;
 use App\Models\ProductCategory;
 use App\Models\Product;
 use App\Models\ProductCat;
-use App\Models\Unit;
-use App\Models\Media;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Payment;
+use App\Models\Media;
+use App\Models\Unit;
+use App\Models\Notification;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\{
-    Storage, File, DB, Cache, Auth, Validator
-};
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
-use App\Traits\NotificationTrait;
-
-
+use RealRashid\SweetAlert\Facades\Alert;
+use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
-    use NotificationTrait;
-    // Show All Categories
     /**
-     * Display a paginated list of all product categories.
+     * Display a listing of product categories.
      *
      * @return \Illuminate\View\View
      */
     public function productCategoriesAll()
     {
-        // Set the current menu and submenu for active sidebar highlighting
+        // Set active menu and submenu
         menuSubmenu('product', 'productCategoriesAll');
 
-        // Fetch latest product categories with pagination (30 per page)
-        $categories = ProductCategory::with('children')
-            ->whereNull('parent_id') // ✅ Only top-level categories
+        // Fetch latest categories with children (subcategories) and count products
+        $data['categories'] = ProductCategory::whereNull('parent_id')
+            ->with(['children' => function($query) {
+                $query->withCount('products');
+            }])
+            ->withCount('products')
             ->latest()
             ->paginate(30);
 
-    
-        // Return the view with data
-        return view('admin.productCategories.productCategoriesAll', compact('categories'));
+        return view('admin.productCategories.productCategoriesAll', $data);
     }
 
     /**
-    * Show the form to create a new product category.
-    *
-    * @return \Illuminate\View\View
-    */
+     * Show the form for creating a new product category.
+     *
+     * @return \Illuminate\View\View
+     */
     public function productCategoryCreate()
     {
-        // Set the current menu and submenu for sidebar highlighting
+        // Highlight menu in sidebar
         menuSubmenu('product', 'productCategoriesAll');
-        $categories = ProductCategory::with('children')->get();
-        // Return the view to create a new category
-        return view('admin.productCategories.productCategoryCreate', compact('categories'));
+
+        // Fetch all parent categories for parent dropdown
+        $data['categories'] = ProductCategory::whereNull('parent_id')->orderBy('name_en')->get();
+
+        return view('admin.productCategories.productCategoryCreate', $data);
     }
 
-    /**
-    * Store a newly created product category in storage.
-    *
-    * @param  \Illuminate\Http\Request  $request
-    * @return \Illuminate\Http\RedirectResponse
-    */
     public function productCategoryStore(Request $request)
     {
         // Highlight correct menu in sidebar
@@ -75,12 +73,15 @@ class ProductController extends Controller
         // Validate incoming request
         $request->validate([
             'name_en' => 'required|string|max:255',
+            'type'    => 'required|in:product,course',
             'slug'    => 'required|string|unique:product_categories,slug',
             'image'   => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048'
         ]);
 
         // Initialize new category instance
         $category = new ProductCategory();
+        $category->type         = $request->type;
+        $category->position     = $request->position ?? 0;
         $category->parent_id    = $request->parent_id;
         $category->name_en      = $request->name_en;
         $category->name_bn      = $request->name_bn ?? null;
@@ -134,6 +135,7 @@ class ProductController extends Controller
         // Validate incoming request data
         $validation = Validator::make($request->all(), [
             'name_en' => 'required|string',
+            'type'    => 'required|in:product,course',
             // Unique slug validation but ignore current category ID
             'slug' => 'required|string|unique:product_categories,slug,' . $category->id . ',id',
         ]);
@@ -144,6 +146,7 @@ class ProductController extends Controller
         }
 
         // Update category fields
+        $category->type         = $request->type;
         $category->parent_id    = $request->parent_id;
         $category->name_en = $request->name_en;
         $category->name_bn = $request->name_bn;
@@ -295,6 +298,7 @@ class ProductController extends Controller
         // Validate incoming request data
         $request->validate([
             'name_en'        => 'required|string',
+            'type'           => 'required|in:product,course',
             // 'sku'         => 'required',
             'purchase_price' => 'nullable|numeric',
             'selling_price'  => 'required|numeric',
@@ -308,6 +312,7 @@ class ProductController extends Controller
 
         // Initialize new product instance
         $product = new Product();
+        $product->type = $request->type;
         $product->name_en = $request->name_en;
         $product->name_bn = $request->name_bn ?? null;
         $product->sku = $request->sku ?? null;
@@ -325,6 +330,10 @@ class ProductController extends Controller
         // Calculate discount price and final price
         $product->discount_price = $request->discount ?? 0.00;
         $product->final_price = $request->selling_price - $product->discount;
+
+        $product->duration = $request->duration;
+        $product->lessons_count = $request->lessons_count ?? 0;
+        $product->level = $request->level;
 
         $product->unit = $request->unit;
         $product->excerpt_en = $request->excerpt_en;
@@ -447,6 +456,7 @@ class ProductController extends Controller
         // Validate incoming request data
         $request->validate([
             'name_en' => 'required|string',
+            'type'    => 'required|in:product,course',
             // 'price' => 'required|numeric',
             // 'sku'   => 'required',
             'purchase_price' => 'nullable|numeric',
@@ -459,6 +469,7 @@ class ProductController extends Controller
         ]);
 
         // Update product attributes with request data
+        $product->type = $request->type;
         $product->name_en = $request->name_en;
         $product->name_bn = $request->name_bn ?? null;
         $product->sku = $request->sku ?? null;
@@ -469,7 +480,12 @@ class ProductController extends Controller
         $product->selling_price = $request->selling_price ?? null;
         $product->discount = $request->discount ?? 0.00;
         $product->discount_price = $request->discount ?? 0.00;
-        $product->final_price = $product->price - $product->discount;
+        $product->final_price = ($product->selling_price ?: $product->price) - $product->discount;
+
+        $product->duration = $request->duration;
+        $product->lessons_count = $request->lessons_count ?? 0;
+        $product->level = $request->level;
+
         $product->excerpt_en = $request->excerpt_en;
         $product->stock = $request->stock;
         $product->excerpt_bn = $request->excerpt_bn ?? null;
@@ -480,13 +496,16 @@ class ProductController extends Controller
         $product->active = $request->active ? 1 : 0;
         $product->rider_id = $request->rider_id;
 
-      
-
         // Handle featured image upload if a file is provided
         if ($request->hasFile('featured_image')) {
+            // Delete old image if exists
+            if ($product->featured_image) {
+                Storage::disk('public')->delete('product_images/' . $product->featured_image);
+            }
+            
             $file = $request->file('featured_image');
             $ext = '.' . $file->getClientOriginalExtension();
-            $imageName = $product->id . time() . $ext;
+            $imageName = $product->id . '_' . time() . $ext;
             Storage::disk('public')->put('product_images/' . $imageName, File::get($file));
             $product->featured_image = $imageName;
         }
@@ -1082,6 +1101,27 @@ class ProductController extends Controller
         return view('admin.orders.orderPrint', compact('order', 'items'));
     }
 
-   
+    /**
+     * Create a system notification for a user.
+     * 
+     * @param string $title
+     * @param string $message
+     * @param int $userId
+     * @param string|null $link
+     * @param string $type
+     * @return void
+     */
+    private function createNotification($title, $message, $userId, $link = null, $type = 'general')
+    {
+        Notification::create([
+            'title' => $title,
+            'message' => $message,
+            'user_id' => $userId,
+            'link' => $link,
+            'type' => $type,
+            'status' => 'unread',
+            'addedby_id' => Auth::id()
+        ]);
+    }
 
 }

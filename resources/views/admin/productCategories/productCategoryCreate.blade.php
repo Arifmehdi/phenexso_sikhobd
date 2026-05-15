@@ -28,6 +28,31 @@
                     <form action="{{ route('admin.productCategoryStore') }}" method="POST" enctype="multipart/form-data">
                         @csrf
 
+                        <!-- Category Type -->
+                        <div class="form-group row">
+                            <label for="type" class="col-sm-3 col-form-label text-left">
+                                Category Type <span class="text-danger">*</span>
+                            </label>
+                            <div class="col-sm-9">
+                                <select name="type" id="type" class="form-control" required>
+                                    <option value="product" {{ old('type') == 'product' ? 'selected' : '' }}>Physical Product (Ecommerce)</option>
+                                    <option value="course" {{ old('type') == 'course' ? 'selected' : '' }}>Digital Course (E-learning)</option>
+                                </select>
+                                @error('type') <span class="text-danger">{{ $message }}</span> @enderror
+                            </div>
+                        </div>
+
+                        <!-- Position -->
+                        <div class="form-group row">
+                            <label for="position" class="col-sm-3 col-form-label text-left">
+                                Position
+                            </label>
+                            <div class="col-sm-9">
+                                <input type="number" name="position" value="{{ old('position', 0) }}" id="position" class="form-control" placeholder="Sort Order (e.g. 1, 2, 3)">
+                                @error('position') <span class="text-danger">{{ $message }}</span> @enderror
+                            </div>
+                        </div>
+
                         <!-- Category Name (English)-->
                         <div class="form-group row">
                             <label for="name_en" class="col-sm-3 col-form-label text-left">
@@ -60,6 +85,8 @@
                                 @error('slug') <span class="text-danger">{{ $message }}</span> @enderror
                             </div>
                         </div>
+
+                        <!-- Parent Category Selection -->
                         <div class="form-group row">
                             <label for="parent_id" class="col-sm-3 col-form-label text-left">
                                 Parent Category (Optional)
@@ -71,7 +98,7 @@
                                         @if($category->parent_id === null)
                                             <option value="{{ $category->id }}" 
                                                 {{ old('parent_id') == $category->id ? 'selected' : '' }}>
-                                                {{ $category->name_en }}
+                                                [{{ strtoupper($category->type) }}] {{ $category->name_en }}
                                             </option>
                                             {{-- Subcategories --}}
                                             @foreach($category->children as $child)
@@ -88,6 +115,7 @@
                                 @enderror
                             </div>
                         </div>
+
                         <!-- Excerpt -->
                         <div class="form-group row">
                             <label for="excerpt" class="col-sm-3 col-form-label text-left">Excerpt</label>

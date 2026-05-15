@@ -122,6 +122,7 @@ Route::get('/testimonial',[FrontendController::class,'testimonial'])->name('test
 Route::get('/about',[FrontendController::class,'about'])->name('about');
 Route::get('/courses',[FrontendController::class,'courses'])->name('courses');
 Route::get('/course-detail',[FrontendController::class,'courseDetail'])->name('courseDetail');
+Route::get('/enroll/{slug}', [FrontendController::class, 'enroll'])->name('enroll');
 Route::get('/shop',[FrontendController::class,'shop'])->name('shop');
 Route::get('/quick-view', [FrontendController::class, 'quickView'])->name('quick.view');
 
@@ -633,6 +634,17 @@ Route::middleware(['userRole:admin','auth'])->prefix('admin')->group(function(){
         'update' => 'admin.page_contents.update',
         'destroy' => 'admin.page_contents.destroy',
     ]);
+    // E-learning Management
+    Route::get('/enrollments', [\App\Http\Controllers\Admin\EnrollmentController::class, 'index'])->name('admin.enrollments.index');
+    Route::post('/enrollments/{enrollment}/status', [\App\Http\Controllers\Admin\EnrollmentController::class, 'updateStatus'])->name('admin.enrollments.updateStatus');
+    Route::get('/enrollments/{enrollment}/delete', [\App\Http\Controllers\Admin\EnrollmentController::class, 'destroy'])->name('admin.enrollments.destroy');
+
+    // Course Lessons Management
+    Route::get('/product/{product}/lessons', [\App\Http\Controllers\Admin\CourseLessonController::class, 'index'])->name('admin.lessons.index');
+    Route::post('/product/{product}/lessons/store', [\App\Http\Controllers\Admin\CourseLessonController::class, 'store'])->name('admin.lessons.store');
+    Route::post('/lessons/{lesson}/update', [\App\Http\Controllers\Admin\CourseLessonController::class, 'update'])->name('admin.lessons.update');
+    Route::get('/lessons/{lesson}/delete', [\App\Http\Controllers\Admin\CourseLessonController::class, 'destroy'])->name('admin.lessons.destroy');
+
 });
 
 Route::middleware(['auth', 'retailer'])->prefix('retailer')->group(function () {

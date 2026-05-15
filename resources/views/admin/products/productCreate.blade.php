@@ -48,6 +48,18 @@
                     <div class="col-sm-7">
                         <div class="card card-primary card-outline">
                             <div class="card-body">
+                                {{-- Product Type --}}
+                                <div class="form-group">
+                                    <label for="type">Product Type <span class="text-danger">*</span></label>
+                                    <select name="type" id="type" class="form-control" required onchange="toggleCourseFields(this.value)">
+                                        <option value="product" {{ old('type') == 'product' ? 'selected' : '' }}>Physical Product (Ecommerce)</option>
+                                        <option value="course" {{ old('type') == 'course' ? 'selected' : '' }}>Digital Course (E-learning)</option>
+                                    </select>
+                                    @error('type')
+                                        <span class="text-danger">{{ $message }}</span>
+                                    @enderror
+                                </div>
+
                                 {{-- Product Name (English)--}}
                                 <div class="form-group">
                                     <label for="name_en">Product Name<span class="text-danger">*</span></label>
@@ -64,6 +76,28 @@
                                     @error('slug')
                                         <span class="text-danger">{{ $message }}</span>
                                     @enderror
+                                </div>
+
+                                {{-- Course Specific Fields --}}
+                                <div id="course_fields" style="display: {{ old('type') == 'course' ? 'block' : 'none' }}; border: 1px dashed var(--primary); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                                    <h5 class="text-primary"><i class="fas fa-graduation-cap"></i> E-learning Details</h5>
+                                    <div class="form-group">
+                                        <label for="duration">Duration (e.g. 10 hours, 4 weeks)</label>
+                                        <input type="text" name="duration" value="{{ old('duration') }}" class="form-control" placeholder="Duration">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="lessons_count">Total Lessons (Classes)</label>
+                                        <input type="number" name="lessons_count" value="{{ old('lessons_count', 0) }}" class="form-control" placeholder="Total Lessons">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="level">Course Level</label>
+                                        <select name="level" id="level" class="form-control">
+                                            <option value="">Select Level</option>
+                                            <option value="beginner" {{ old('level') == 'beginner' ? 'selected' : '' }}>Beginner</option>
+                                            <option value="intermediate" {{ old('level') == 'intermediate' ? 'selected' : '' }}>Intermediate</option>
+                                            <option value="advanced" {{ old('level') == 'advanced' ? 'selected' : '' }}>Advanced</option>
+                                        </select>
+                                    </div>
                                 </div>
 
                                 {{-- Product Code --}}
@@ -318,6 +352,14 @@
         let str = val;
         let output = str.replace(/\s+/g, '-').toLowerCase();
         $('#slug').val(output);
+    }
+
+    function toggleCourseFields(type) {
+        if(type === 'course') {
+            $('#course_fields').slideDown();
+        } else {
+            $('#course_fields').slideUp();
+        }
     }
 </script>
 @endpush

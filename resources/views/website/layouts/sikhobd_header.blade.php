@@ -1,8 +1,7 @@
 <header class="site-header">
   <div class="container header-inner">
     <a href="{{ route('home') }}" class="logo">
-      <span class="logo-mark">10</span>
-      Minute <span>School</span>
+      <img src="{{ route('imagecache', ['template' => 'original', 'filename' => $ws->logo_alt()]) }}" alt="{{ $ws->name }}" style="max-height: 40px;">
     </a>
 
     <nav class="nav-desktop">
@@ -128,7 +127,9 @@
 <div class="drawer-overlay" id="drawerOverlay"></div>
 <aside class="drawer" id="drawer">
   <div class="drawer-head">
-    <a href="{{ route('home') }}" class="logo"><span class="logo-mark">10</span> Minute <span>School</span></a>
+    <a href="{{ route('home') }}" class="logo">
+      <img src="{{ route('imagecache', ['template' => 'original', 'filename' => $ws->logo_alt()]) }}" alt="{{ $ws->name }}" style="max-height: 40px;">
+    </a>
     <button class="icon-btn" id="drawerClose"><i class="fa-solid fa-xmark"></i></button>
   </div>
   <div class="drawer-body">

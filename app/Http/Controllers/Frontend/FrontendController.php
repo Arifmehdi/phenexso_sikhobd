@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
+use App\Models\Enrollment;
 use App\Models\AmbulanceService;
 use App\Models\BookAppointment;
 use App\Models\Cart;
@@ -48,29 +49,27 @@ class FrontendController extends Controller
 
     public function index()
     {
-        // $data['categories'] = ProductCategory::where('active', 1)
-        //     ->whereHas('products') // only categories that have at least one product
-        //     ->where('parent_id', null)
-        //     ->select('id', 'name_en', 'name_bn', 'slug', 'image') // select needed fields
-        //     ->get();
-        // $data['products'] = Product::whereActive(true)->get();
-        
-                // Get all active categories with their products
-    $data['categories'] = ProductCategory::where('active', true)
-        ->with(['products' => function($query) {
-            $query->where('active', 1)
-                  ->select('products.id', 'products.name_en',  'products.slug', 'products.featured_image', 'products.price', 'products.discount_price', 'products.selling_price', 'products.feature', 'products.active') // Select only needed fields
-                  ->take(8); // Limit products per category
-        }])
-        ->whereHas('products', function($query) { // Only categories that have products
-            $query->where('active', true);
-        })
-        ->select('id', 'name_en', 'name_bn', 'slug','image', 'active') // Select category fields
-        ->get();
+        // Get all active course categories with their courses
+        $data['categories'] = ProductCategory::where('active', true)
+            ->where('type', 'course')
+            ->whereNull('parent_id')
+            ->with(['products' => function($query) {
+                $query->where('active', 1)
+                      ->where('type', 'course')
+                      ->select('products.id', 'products.name_en', 'products.slug', 'products.featured_image', 'products.price', 'products.discount_price', 'products.selling_price', 'products.feature', 'products.active', 'type')
+                      ->take(8);
+            }])
+            ->whereHas('products', function($query) {
+                $query->where('active', true)->where('type', 'course');
+            })
+            ->select('id', 'name_en', 'name_bn', 'slug','image', 'active')
+            ->get();
 
-        // dd($data['categories']);
-
-        $data['feature_products'] = Product::whereActive(true)->where('feature',true)->limit(20)->get();
+        $data['feature_products'] = Product::whereActive(true)
+            ->where('type', 'course')
+            ->where('feature', true)
+            ->limit(20)
+            ->get();
 
         $data['departments'] = Department::whereActive(true)
             ->select('image','name_en','name_bn','excerpt_en')
@@ -93,23 +92,27 @@ class FrontendController extends Controller
             ->get();
 
         $data['sale_products'] = Product::whereActive(true)
+            ->where('type', 'course')
             ->whereNotNull('discount_price')
             ->latest()
             ->limit(3)
             ->get();
 
         $data['latest_products'] = Product::whereActive(true)
+            ->where('type', 'course')
             ->latest()
             ->limit(3)
             ->get();
 
         $data['best_products'] = Product::whereActive(true)
+            ->where('type', 'course')
             ->where('feature', true)
             ->latest()
             ->limit(3)
             ->get();
 
         $data['popular_products'] = Product::whereActive(true)
+            ->where('type', 'course')
             ->orderByDesc('click_count')
             ->limit(3)
             ->get();
@@ -117,7 +120,7 @@ class FrontendController extends Controller
         $data['content'] = \App\Models\PageContent::where('page_slug', 'home')->first();
 
         return view('website.index', $data);  
-        }
+    }
 
     // For lazy loading products via AJAX
     public function getProductsByCategory($categoryId)
@@ -143,7 +146,7 @@ class FrontendController extends Controller
     
     public function shop(Request $request)
     {
-        $query = Product::whereActive(true);
+        $query = Product::whereActive(true)->where('type', 'product');
 
         // Search
         if ($request->has('search')) {
@@ -176,21 +179,24 @@ class FrontendController extends Controller
         $productCategories = ProductCategory::whereNull('parent_id')
             ->with('children')
             ->where('active', 1)
+            ->where('type', 'product')
             ->orderBy('name_en')
             ->get();
         
         $banner = FrontSlider::whereActive(true)->first();
         $offers = collect(); // You can populate this if you have an offers table
 
-        $categories = ProductCategory::whereActive(true)->latest()->get();
-        $total_products = Product::whereActive(true)->count();
+        $categories = ProductCategory::whereActive(true)->where('type', 'product')->latest()->get();
+        $total_products = Product::whereActive(true)->where('type', 'product')->count();
         $subcategories = ProductCategory::whereNull('parent_id')
             ->where('active', 1)
+            ->where('type', 'product')
             ->orderBy('name_en')
             ->get();
         
             // Top clicked products
         $topClickedProducts = Product::where('active', true)
+            ->where('type', 'product')
             ->where('feature', true)
             ->orderByDesc('click_count')
             ->limit(6)
@@ -199,6 +205,7 @@ class FrontendController extends Controller
         // Get all root categories for sidebar
         $allRootCategories = ProductCategory::whereNull('parent_id')
             ->where('active', 1)
+            ->where('type', 'product')
             ->orderBy('name_en')
             ->get();
 
@@ -262,7 +269,7 @@ class FrontendController extends Controller
 
     public function courses(Request $request)
     {
-        $query = Product::whereActive(true);
+        $query = Product::whereActive(true)->where('type', 'course');
 
         // Category Filter
         if ($request->has('category')) {
@@ -285,6 +292,7 @@ class FrontendController extends Controller
         $courses = $query->latest()->paginate(12)->appends($request->all());
         
         $categories = ProductCategory::whereActive(true)
+            ->where('type', 'course')
             ->whereHas('products')
             ->orderBy('name_en')
             ->get();
@@ -309,6 +317,46 @@ class FrontendController extends Controller
     public function login()
     {
         return view('website.login');
+    }
+
+    public function enroll(Request $request, $slug)
+    {
+        if (!Auth::check()) {
+            return redirect()->route('login')->with('info', 'Please login to enroll in this course.');
+        }
+
+        $course = Product::where('slug', $slug)->where('active', true)->firstOrFail();
+
+        // Check if already enrolled
+        $existing = Enrollment::where('user_id', Auth::id())->where('product_id', $course->id)->first();
+        if ($existing) {
+            return redirect()->back()->with('info', 'You are already enrolled in this course.');
+        }
+
+        // Handle Free Enrollment
+        if ($course->isFree()) {
+            Enrollment::create([
+                'user_id'     => Auth::id(),
+                'product_id'  => $course->id,
+                'enrolled_at' => now(),
+                'status'      => 'active',
+            ]);
+
+            return redirect()->back()->with('success', 'Congratulations! You have successfully enrolled in this course.');
+        }
+
+        // Handle Paid Enrollment (Add to Cart and Go to Checkout)
+        // Check if already in cart
+        $cart = Cart::where('user_id', Auth::id())->where('product_id', $course->id)->first();
+        if (!$cart) {
+            Cart::create([
+                'user_id'    => Auth::id(),
+                'product_id' => $course->id,
+                'quantity'   => 1,
+            ]);
+        }
+
+        return redirect()->route('cart')->with('success', 'Course added to cart. Please complete checkout to enroll.');
     }
 
 
@@ -650,7 +698,7 @@ class FrontendController extends Controller
 
     public function shasthoseba(Request $request)
     {
-        $query = Product::whereActive(true);
+        $query = Product::whereActive(true)->where('type', 'product');
 
         // Sorting
         if ($request->get('sort') == 1) {
@@ -667,21 +715,24 @@ class FrontendController extends Controller
 
         $products = $query->paginate(12)->appends($request->all());
 
-        $categories = ProductCategory::whereActive(true)->latest()->get();
-        $total_products = Product::whereActive(true)->count();
+        $categories = ProductCategory::whereActive(true)->where('type', 'product')->latest()->get();
+        $total_products = Product::whereActive(true)->where('type', 'product')->count();
         $subcategories = ProductCategory::whereNull('parent_id')
             ->where('active', 1)
+            ->where('type', 'product')
             ->orderBy('name_en')
             ->get();
 
         // Get all root categories for sidebar
         $allRootCategories = ProductCategory::whereNull('parent_id')
             ->where('active', 1)
+            ->where('type', 'product')
             ->orderBy('name_en')
             ->get();
 
         // Top clicked products
         $topClickedProducts = Product::where('active', true)
+            ->where('type', 'product')
             ->where('feature', true)
             ->orderByDesc('click_count')
             ->limit(6)
@@ -712,6 +763,9 @@ class FrontendController extends Controller
                 ->first();
 
             if ($category) {
+                // Determine type based on category type
+                $query->where('type', $category->type);
+
                 if (is_null($category->parent_id)) {
                     // 🟢 Case 1: Parent category — show subcategories
                     $subcategories = ProductCategory::where('parent_id', $category->id)
@@ -739,16 +793,21 @@ class FrontendController extends Controller
                 }
             }
         } else {
-            // 🟣 For "All" — show all root categories
+            // 🟣 For "All" — default to product if not specified? 
+            // Or just show based on request? Let's assume shop context
+            $query->where('type', 'product');
             $categories = ProductCategory::whereNull('parent_id')
                 ->where('active', 1)
+                ->where('type', 'product')
                 ->orderBy('name_en')
                 ->get();
         }
 
-        // Root categories for sidebar
+        // Root categories for sidebar - match type
+        $type = $category ? $category->type : 'product';
         $allRootCategories = ProductCategory::whereNull('parent_id')
             ->where('active', 1)
+            ->where('type', $type)
             ->orderBy('name_en')
             ->get();
 
@@ -778,6 +837,7 @@ class FrontendController extends Controller
 
         // Top clicked products
         $topClickedProducts = Product::where('active', true)
+            ->where('type', $type)
             ->where('feature', true)
             ->orderByDesc('click_count')
             ->limit(6)
@@ -810,8 +870,9 @@ class FrontendController extends Controller
         // Increment view count
         $product->increment('click_count');
 
-        // Related products
-        $relatedProducts = Product::whereHas('categories', function ($q) use ($product) {
+        // Related products of same type
+        $relatedProducts = Product::where('type', $product->type)
+            ->whereHas('categories', function ($q) use ($product) {
                 $q->whereIn('product_categories.id', $product->categories->pluck('id'));
             })
             ->where('id', '!=', $product->id)
@@ -819,24 +880,20 @@ class FrontendController extends Controller
             ->take(12)
             ->get();
 
-        // Exclude current + related
-        $excludeProductIds = collect([$product->id])
-            ->merge($relatedProducts->pluck('id'));
+        // Top clicked products of same type
+        $topClickedProducts = Product::where('active', true)
+            ->where('type', $product->type)
+            ->whereNotIn('id', [$product->id])
+            ->where('feature', true)
+            ->orderByDesc('click_count')
+            ->limit(3)
+            ->get();
 
-        // Top clicked products
-            $topClickedProducts = Product::where('active', true)
-                ->whereNotIn('id', [$product->id])
-                ->where('feature', true)
-                ->orderByDesc('click_count')
-                ->limit(3)
-                ->get();
+        if ($product->type === 'course') {
+            return view('website.course_detail', compact('product', 'relatedProducts', 'topClickedProducts'));
+        }
 
-
-        return view('website.shop_details', compact(
-            'product',
-            'relatedProducts',
-            'topClickedProducts'
-        ));
+        return view('website.shop_details', compact('product', 'relatedProducts', 'topClickedProducts'));
     }
 
 
@@ -1434,16 +1491,30 @@ public function quickAdd(Request $request)
     private function storeOrderItems($order, $cartItems, $userId)
     {
         foreach ($cartItems as $cart) {
+            $product = $cart->product;
+            
             OrderItem::create([
                 'order_id'      => $order->id,
                 'user_id'       => $userId,
                 'product_id'    => $cart->product_id,
-                'product_name'  => $cart->product->name_en,
-                'product_price' => $cart->product->selling_price,
+                'product_name'  => $product->name_en,
+                'product_price' => $product->selling_price,
                 'quantity'      => $cart->quantity,
-                'total_cost'    => $cart->product->selling_price * $cart->quantity,
+                'total_cost'    => $product->selling_price * $cart->quantity,
                 'addedby_id'    => $userId,
             ]);
+
+            // If it's a course, create enrollment (status pending/active depending on payment)
+            if ($product->isCourse() && $userId) {
+                Enrollment::updateOrCreate(
+                    ['user_id' => $userId, 'product_id' => $product->id],
+                    [
+                        'order_id'    => $order->id,
+                        'enrolled_at' => ($order->payment_status == 'paid' || $order->payment_method == 'cod') ? now() : null,
+                        'status'      => ($order->payment_status == 'paid' || $order->payment_method == 'cod') ? 'active' : 'pending',
+                    ]
+                );
+            }
         }
     }
 
