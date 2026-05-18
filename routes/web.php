@@ -121,7 +121,7 @@ Route::get('/md-message',[FrontendController::class,'mdMessage'])->name('mdMessa
 Route::get('/testimonial',[FrontendController::class,'testimonial'])->name('testimonial');
 Route::get('/about',[FrontendController::class,'about'])->name('about');
 Route::get('/courses',[FrontendController::class,'courses'])->name('courses');
-Route::get('/course-detail',[FrontendController::class,'courseDetail'])->name('courseDetail');
+Route::get('/course-detail/{slug}',[FrontendController::class,'courseDetail'])->name('courseDetail');
 Route::get('/enroll/{slug}', [FrontendController::class, 'enroll'])->name('enroll');
 Route::get('/shop',[FrontendController::class,'shop'])->name('shop');
 Route::get('/quick-view', [FrontendController::class, 'quickView'])->name('quick.view');

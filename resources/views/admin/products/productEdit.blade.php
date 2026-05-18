@@ -193,7 +193,21 @@
                                     @enderror
                                 </div>
 
-                               
+                                {{-- Instructor Assignment --}}
+                                <div class="form-group instructor-select" style="display: {{ old('type', $product->type) == 'course' ? 'block' : 'none' }};">
+                                    <label for="instructor_id">Assign Instructor (Teacher)</label>
+                                    <select name="instructor_id" id="instructor_id" class="form-control select2">
+                                        <option value="">Select Instructor</option>
+                                        @foreach($instructors as $instructor)
+                                            <option value="{{ $instructor->id }}" {{ old('instructor_id', $product->instructor_id) == $instructor->id ? 'selected' : '' }}>
+                                                {{ $instructor->name }} ({{ $instructor->mobile }})
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('instructor_id')
+                                        <span class="text-danger">{{ $message }}</span>
+                                    @enderror
+                                </div>
 
 
                             </div>
@@ -425,8 +439,10 @@
     function toggleCourseFields(type) {
         if(type === 'course') {
             $('#course_fields').slideDown();
+            $('.instructor-select').slideDown();
         } else {
             $('#course_fields').slideUp();
+            $('.instructor-select').slideUp();
         }
     }
 </script>

@@ -34,6 +34,7 @@
       <div>
         <h4 data-i18n="footer.support">সাপোর্ট</h4>
         <ul>
+          <li><a href="{{ route('wishlist.index') }}">Wishlist</a></li>
           <li><a href="#" data-i18n="footer.help">হেল্প সেন্টার</a></li>
           <li><a href="#" data-i18n="footer.privacy">গোপনীয়তা</a></li>
           <li><a href="#" data-i18n="footer.terms">শর্তাবলী</a></li>

@@ -42,7 +42,13 @@ class Product extends Model
         'editedby_id',
         'seller_id',
         'rider_id',
+        'instructor_id',
     ];
+
+    public function instructor()
+    {
+        return $this->belongsTo(User::class, 'instructor_id');
+    }
 
     public function enrollments()
     {

@@ -123,7 +123,7 @@
                         <div class="footer-menu">
                             <ul>
                                 {{--<li><a href="#">Order Tracking</a></li>--}}
-                                <li><a href="#">Wishlist</a></li>
+                                <li><a href="{{ route('wishlist.index') }}">Wishlist</a></li>
                                 {{--<li><a href="#">My Account</a></li>--}}
                                 <li><a href="/page/return-policy">Return Policy</a></li>
                                 <li><a href="/page/privacy-policy">Privacy Policy</a></li>

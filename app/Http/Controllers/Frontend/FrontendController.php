@@ -293,6 +293,10 @@ class FrontendController extends Controller
         
         $categories = ProductCategory::whereActive(true)
             ->where('type', 'course')
+            ->whereNull('parent_id')
+            ->with(['children' => function($q) {
+                $q->where('active', true);
+            }])
             ->whereHas('products')
             ->orderBy('name_en')
             ->get();
@@ -302,9 +306,21 @@ class FrontendController extends Controller
         return view('website.courses', compact('courses', 'categories', 'content'));
     }
 
-    public function courseDetail()
+    public function courseDetail($slug)
     {
-        return view('website.course_detail');
+        $product = Product::where('slug', $slug)->where('active', true)->with(['instructor', 'reviews.user', 'enrollments'])->firstOrFail();
+        
+        // Related courses
+        $relatedProducts = Product::where('type', 'course')
+            ->whereHas('categories', function ($q) use ($product) {
+                $q->whereIn('product_categories.id', $product->categories->pluck('id'));
+            })
+            ->where('id', '!=', $product->id)
+            ->where('active', true)
+            ->take(4)
+            ->get();
+
+        return view('website.course_detail', compact('product', 'relatedProducts'));
     }
 
     public function service()

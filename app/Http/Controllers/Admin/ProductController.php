@@ -273,6 +273,7 @@ class ProductController extends Controller
         $data['medias'] = Media::latest()->paginate(20);
 
         $data['riders'] = \App\Models\User::where('role', 'rider')->where('is_approve', 1)->get();
+        $data['instructors'] = \App\Models\User::whereIn('role', ['instructor', 'teacher'])->where('is_approve', 1)->get();
 
         $data['units'] = Unit::where('active', true)->get();
 
@@ -307,6 +308,7 @@ class ProductController extends Controller
             'featured_image' => 'nullable|image',
             'additional_images.*' => 'nullable|image',
             'rider_id'       => 'nullable|exists:users,id',
+            'instructor_id'  => 'nullable|exists:users,id',
         ]);
     
 
@@ -346,6 +348,7 @@ class ProductController extends Controller
         $product->editor = $request->editor ? 1 : 0;
         $product->active = $request->active ? 1 : 0;
         $product->rider_id = $request->rider_id;
+        $product->instructor_id = $request->instructor_id;
 
         $product->addedby_id = Auth::id();
 
@@ -430,6 +433,7 @@ class ProductController extends Controller
             'categories' => ProductCategory::latest()->get(),
             'medias'     => Media::latest()->paginate(20),
             'riders'     => \App\Models\User::where('role', 'rider')->where('is_approve', 1)->get(),
+            'instructors' => \App\Models\User::whereIn('role', ['instructor', 'teacher'])->where('is_approve', 1)->get(),
             'units'      => Unit::where('active', true)->get(),
             // Explode tags string into array or null if no tags
             'ots'        => $product->tags ? explode(', ', $product->tags) : null,
@@ -466,6 +470,7 @@ class ProductController extends Controller
             'featured_image' => 'nullable|image',
             'additional_images.*' => 'nullable|image',
             'rider_id' => 'nullable|exists:users,id',
+            'instructor_id' => 'nullable|exists:users,id',
         ]);
 
         // Update product attributes with request data
@@ -495,6 +500,7 @@ class ProductController extends Controller
         $product->editor = $request->editor ? 1 : 0;
         $product->active = $request->active ? 1 : 0;
         $product->rider_id = $request->rider_id;
+        $product->instructor_id = $request->instructor_id;
 
         // Handle featured image upload if a file is provided
         if ($request->hasFile('featured_image')) {
