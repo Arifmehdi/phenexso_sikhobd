@@ -14,6 +14,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('sikhobd/css/style.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
@@ -68,6 +69,62 @@
                 height: 56px;
             }
         }
+
+        /* User Dropdown Styles */
+        .user-dropdown {
+            position: relative;
+            display: inline-block;
+            height: 100%;
+            display: flex;
+            align-items: center;
+        }
+        .user-dropdown .dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background: #fff;
+            min-width: 180px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            border-radius: 12px;
+            padding: 8px 0;
+            z-index: 9999;
+            list-style: none;
+            border: 1px solid var(--border);
+            margin-top: 5px; /* Gap for hover stability */
+        }
+        .user-dropdown::before {
+            content: '';
+            position: absolute;
+            top: 100%;
+            right: 0;
+            width: 100%;
+            height: 10px;
+            background: transparent;
+        }
+        .user-dropdown:hover .dropdown {
+            display: block;
+        }
+        .user-dropdown .dropdown-link {
+            display: flex;
+            align-items: center;
+            padding: 10px 18px;
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .user-dropdown .dropdown-link:hover {
+            background: var(--bg-soft);
+            color: var(--accent);
+        }
+        .user-dropdown .dropdown-link.text-danger {
+            color: #dc3545 !important;
+        }
+        .user-dropdown .dropdown-link.text-danger:hover {
+            background: #fff5f5;
+        }
     </style>
 
     @stack('css')
@@ -88,6 +145,7 @@
     @include('website.layouts.sikhobd_footer')
 
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="{{ asset('sikhobd/js/main.js') }}"></script>
     

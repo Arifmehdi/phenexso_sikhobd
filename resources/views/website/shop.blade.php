@@ -279,33 +279,10 @@
         $('.quick-view-btn').click(function() {
             let id = $(this).data('id');
             $('#quickViewModal').modal('show');
-            $('#quickViewContent').html('<div class="p-5 text-center"><i class="fa-solid fa-spinner fa-spin fa-2x"></i></div>');
+            $('#quickViewContent').html('<div class="p-5 text-center"><i class="fa-solid fa-spinner fa-spin fa-2x" style="color: var(--accent);"></i></div>');
             
             $.get("{{ route('quick.view') }}", {id: id}, function(res) {
-                let html = `
-                    <div class="row g-0">
-                        <div class="col-md-6" style="background: var(--bg-soft); display: flex; align-items: center; justify-content: center;">
-                            <img src="${res.image}" class="img-fluid p-5" alt="" style="max-height: 400px; object-fit: contain;">
-                        </div>
-                        <div class="col-md-6 p-4">
-                            <div class="d-flex justify-content-between">
-                                <span style="font-size: 11px; font-weight: 800; color: var(--accent); text-transform: uppercase;">Quick View</span>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <h2 class="mt-2 mb-3" style="color: var(--primary); font-size: 22px;">${res.name}</h2>
-                            <div class="d-flex align-items-center gap-2 mb-4">
-                                <span style="font-size: 24px; font-weight: 800; color: var(--primary);">৳${res.price}</span>
-                                ${res.old_price ? `<span class="text-muted text-decoration-line-through">৳${res.old_price}</span>` : ''}
-                            </div>
-                            <p class="text-soft mb-4" style="font-size: 14px;">${res.description}</p>
-                            <div class="d-grid gap-3">
-                                <button class="btn btn-accent addToCart" data-product="${id}" data-url="{{ route('addToCart') }}" style="justify-content: center;">Add to Cart</button>
-                                <a href="/product/details/${res.slug}" class="btn btn-outline" style="justify-content: center;">Full Details</a>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                $('#quickViewContent').html(html);
+                $('#quickViewContent').html(res.html);
             });
         });
 

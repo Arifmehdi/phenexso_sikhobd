@@ -74,39 +74,36 @@
         <div>
           <div class="courses-grid">
             @forelse($courses as $course)
-                <article class="course-card">
-                    <div class="course-thumb" style="background-image: url('{{ route('imagecache', ['template' => 'medium', 'filename' => $course->fi()]) }}'); background-size: cover; background-position: center;">
-                        @if($course->feature)
-                            <span class="course-tag">BESTSELLER</span>
-                        @endif
-                    </div>
-                    <div class="course-body">
-                        <h3>{{ $course->name_en }}</h3>
-                        <div class="course-meta">
-                            <span><i class="fa-solid fa-star"></i> {{ number_format($course->averageRating(), 1) }}</span>
-                            <span><i class="fa-solid fa-users"></i> {{ $course->enrollments->count() }}</span>
-                        </div>
-                        <div class="course-foot">
-                            <div>
-                                @if($course->selling_price > 0)
-                                    <span class="price">৳ {{ number_format($course->selling_price, 0) }}</span>
-                                @else
-                                    <span class="price">Free</span>
-                                @endif
-                            </div>
-                            <a href="{{ route('courseDetail', $course->slug) }}" class="btn btn-accent btn-sm" data-i18n="enroll">বিস্তারিত</a>
-                        </div>
-                    </div>
-                </article>
-            @empty
-                <div style="grid-column: 1/-1; text-align: center; padding: 50px;">
-                    <i class="fa-solid fa-graduation-cap" style="font-size: 48px; color: var(--bg-soft); margin-bottom: 20px;"></i>
-                    <h3 style="color: var(--text-soft);">কোন কোর্স পাওয়া যায়নি</h3>
+              <article class="course-card">
+                <div class="course-thumb" style="--c1:#6c5ce7;--c2:#a29bfe;">
+                  @if($course->feature)
+                    <span class="course-tag">FEATURED</span>
+                  @endif
+                  <img src="{{ route('imagecache', ['template' => 'medium', 'filename' => $course->fi()]) }}" alt="{{ $course->name_en }}" style="width:100%; height:100%; object-fit:cover; border-radius:12px 12px 0 0;">
                 </div>
+                <div class="course-body">
+                  <h3>{{ app()->getLocale() == 'bn' ? $course->name_bn : $course->name_en }}</h3>
+                  <div class="course-meta">
+                    <span><i class="fa-solid fa-star"></i> {{ number_format($course->averageRating(), 1) }}</span>
+                    <span><i class="fa-solid fa-users"></i> {{ $course->click_count }} views</span>
+                  </div>
+                  <div class="course-foot">
+                    <div>
+                      @if($course->isFree())
+                        <span class="price">Free</span>
+                      @else
+                        <span class="price">৳ {{ number_format($course->selling_price) }}</span>
+                      @endif
+                    </div>
+                    <a href="{{ route('productDetails', $course->slug) }}" class="btn btn-accent btn-sm" data-i18n="enroll">এনরোল</a>
+                  </div>
+                </div>
+              </article>
+            @empty
+              <p>No courses found.</p>
             @endforelse
           </div>
-          
-          <div style="margin-top: 40px;">
+          <div style="margin-top: 30px;">
             {{ $courses->links() }}
           </div>
         </div>
