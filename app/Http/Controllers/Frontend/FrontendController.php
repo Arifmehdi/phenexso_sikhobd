@@ -295,8 +295,23 @@ class FrontendController extends Controller
 
     public function courseDetail($slug)
     {
-        $product = Product::where('slug', $slug)->where('active', true)->with(['instructor', 'reviews.user', 'enrollments'])->firstOrFail();
-        
+        $product = Product::where('slug', $slug)
+            ->where('active', true)
+            ->with(['instructor', 'reviews.user', 'enrollments', 'sections.lessons'])
+            ->firstOrFail();
+
+        // If user is already enrolled, redirect to player
+        if (Auth::check()) {
+            $isEnrolled = \App\Models\Enrollment::where('user_id', Auth::id())
+                ->where('product_id', $product->id)
+                ->where('status', 'active')
+                ->exists();
+            
+            if ($isEnrolled) {
+                return redirect()->route('course.play', $slug);
+            }
+        }
+
         // Related courses
         $relatedProducts = Product::where('type', 'course')
             ->whereHas('categories', function ($q) use ($product) {
@@ -307,9 +322,89 @@ class FrontendController extends Controller
             ->take(4)
             ->get();
 
-        return view('website.course_detail', compact('product', 'relatedProducts'));
+        $lessons = \App\Models\CourseLesson::where('product_id', $product->id)->where('active', true)->orderBy('priority')->get();
+        $sections = \App\Models\CourseSection::where('product_id', $product->id)->where('active', true)->with(['lessons' => function($q) {
+            $q->where('active', true)->orderBy('priority');
+        }])->orderBy('priority')->get();
+
+        $completions = [];
+        if (Auth::check()) {
+            $completions = \App\Models\LessonCompletion::where('user_id', Auth::id())
+                ->whereIn('course_lesson_id', $lessons->pluck('id'))
+                ->pluck('course_lesson_id')
+                ->toArray();
+        }
+
+        return view('website.course_detail', compact('product', 'relatedProducts', 'lessons', 'sections', 'completions'));
     }
 
+    public function coursePlay($slug)
+    {
+        $product = Product::where('slug', $slug)
+            ->where('active', true)
+            ->with(['sections.lessons'])
+            ->firstOrFail();
+
+        // Security: Check if user is enrolled
+        $isEnrolled = \App\Models\Enrollment::where('user_id', Auth::id())
+            ->where('product_id', $product->id)
+            ->where('status', 'active')
+            ->exists();
+
+        if (!$isEnrolled) {
+            return redirect()->route('courseDetail', $slug)->with('error', 'Please enroll in the course to start learning.');
+        }
+
+        $lessons = \App\Models\CourseLesson::where('product_id', $product->id)->where('active', true)->orderBy('priority')->get();
+        $sections = \App\Models\CourseSection::where('product_id', $product->id)->where('active', true)->with(['lessons' => function($q) {
+            $q->where('active', true)->orderBy('priority');
+        }])->orderBy('priority')->get();
+
+        $completions = \App\Models\LessonCompletion::where('user_id', Auth::id())
+            ->whereIn('course_lesson_id', $lessons->pluck('id'))
+            ->pluck('course_lesson_id')
+            ->toArray();
+
+        return view('website.course_play', compact('product', 'lessons', 'sections', 'completions'));
+    }
+
+    public function toggleLessonCompletion(Request $request)
+    {
+        if (!Auth::check()) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $lessonId = $request->lesson_id;
+        $lesson = \App\Models\CourseLesson::findOrFail($lessonId);
+
+        // Check if user is enrolled in the course this lesson belongs to
+        $isEnrolled = \App\Models\Enrollment::where('user_id', Auth::id())
+            ->where('product_id', $lesson->product_id)
+            ->where('status', 'active')
+            ->exists();
+
+        if (!$isEnrolled) {
+            return response()->json(['error' => 'Not enrolled in this course'], 403);
+        }
+
+        $completion = \App\Models\LessonCompletion::where('user_id', Auth::id())
+            ->where('course_lesson_id', $lessonId)
+            ->first();
+
+        if ($completion) {
+            $completion->delete();
+            $status = 'uncompleted';
+        } else {
+            \App\Models\LessonCompletion::create([
+                'user_id' => Auth::id(),
+                'course_lesson_id' => $lessonId,
+                'completed_at' => now(),
+            ]);
+            $status = 'completed';
+        }
+
+        return response()->json(['status' => $status]);
+    }
     public function service()
     {
         $data['services'] = Hospital::latest()->whereActive(true)->get(); 

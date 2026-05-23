@@ -1,333 +1,548 @@
 @extends('website.layouts.sikhobd')
 
-@section('title', 'ইউজার ড্যাশবোর্ড — ' . ($ws->name ?? env('APP_NAME')))
+@section('title', 'ড্যাশবোর্ড — ' . ($ws->name ?? env('APP_NAME')))
 
 @push('css')
 <style>
-    .dashboard-page { padding: 60px 0; background: #f8fafc; min-height: 80vh; }
-    
-    /* Sidebar Styling */
-    .dashboard-sidebar { background: #fff; border-radius: 24px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.02); }
-    .user-profile-mini { padding: 30px; text-align: center; border-bottom: 1px solid #f1f5f9; background: var(--bg-soft); }
-    .user-avatar { width: 80px; height: 80px; border-radius: 50%; border: 4px solid #fff; box-shadow: var(--shadow-sm); margin-bottom: 15px; object-fit: cover; }
-    .user-name { font-size: 18px; font-weight: 800; color: var(--primary); margin-bottom: 5px; }
-    .user-email { font-size: 13px; color: var(--text-muted); }
-
-    .dash-nav { padding: 15px; }
-    .dash-nav-link { display: flex; align-items: center; gap: 12px; padding: 12px 20px; border-radius: 12px; color: #64748b; font-weight: 600; font-size: 14px; text-decoration: none; transition: all 0.2s; margin-bottom: 5px; }
-    .dash-nav-link i { font-size: 16px; opacity: 0.7; width: 20px; text-align: center; }
-    .dash-nav-link:hover { background: var(--bg-soft); color: var(--primary); }
-    .dash-nav-link.active { background: var(--primary); color: #fff; box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.2); }
-    .dash-nav-link.active i { opacity: 1; }
-    .dash-nav-link.text-danger:hover { background: #fef2f2; color: #ef4444; }
-
-    /* Card Styling */
-    .dash-card { background: #fff; border-radius: 24px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.02); margin-bottom: 24px; }
-    .dash-card-header { padding: 25px 30px; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; justify-content: space-between; }
-    .dash-card-header h2 { font-size: 18px; font-weight: 800; color: var(--primary); margin: 0; display: flex; align-items: center; gap: 10px; }
-    .dash-card-body { padding: 30px; }
-
-    /* Stat Widgets */
-    .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
-    .stat-item { padding: 25px; border-radius: 20px; background: #fff; border: 1px solid #e2e8f0; text-align: center; transition: all 0.3s; }
-    .stat-item:hover { transform: translateY(-5px); border-color: var(--primary); }
-    .stat-icon { width: 50px; height: 50px; border-radius: 14px; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; font-size: 20px; }
-    .stat-icon.blue { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
-    .stat-icon.orange { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
-    .stat-icon.purple { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; }
-    .stat-val { font-size: 24px; font-weight: 900; color: var(--primary); display: block; }
-    .stat-label { font-size: 13px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-
-    /* Table Styling */
     .custom-table { width: 100%; border-collapse: collapse; }
-    .custom-table th { padding: 15px 20px; background: var(--bg-soft); color: var(--text-muted); font-size: 12px; font-weight: 700; text-transform: uppercase; text-align: left; }
-    .custom-table td { padding: 18px 20px; border-bottom: 1px solid #f1f5f9; font-size: 14px; vertical-align: middle; }
+    .custom-table th { padding: 14px 18px; background: var(--bg-muted); color: var(--text-soft); font-size: 12px; font-weight: 700; text-transform: uppercase; text-align: left; letter-spacing: 0.3px; }
+    .custom-table td { padding: 16px 18px; border-bottom: 1px solid var(--border); font-size: 14px; vertical-align: middle; }
     .order-id { font-weight: 800; color: var(--primary); }
-    
-    .status-pill { padding: 6px 12px; border-radius: 50px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+    .status-pill { padding: 4px 12px; border-radius: 50px; font-size: 11px; font-weight: 700; text-transform: uppercase; display: inline-block; }
     .status-pending { background: #fff7ed; color: #c2410c; }
     .status-approved { background: #f0fdf4; color: #15803d; }
     .status-rejected { background: #fef2f2; color: #b91c1c; }
-
-    .btn-circle { width: 34px; height: 34px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: var(--bg-soft); color: var(--primary); transition: all 0.2s; border: none; text-decoration: none; }
+    .custom-input { padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 14px; background: var(--bg); color: var(--text); transition: border .15s, box-shadow .15s; width: 100%; }
+    .custom-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(43, 37, 83, .08); }
+    .custom-label { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px; display: block; }
+    .action-btn { padding: 12px 28px; background: var(--primary); color: #fff; border: none; border-radius: var(--radius-full); font-weight: 600; font-size: 14px; transition: all .2s; }
+    .action-btn:hover { background: var(--primary-dark); transform: translateY(-1px); }
+    .avatar-sm { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; }
+    .tab-pane { min-height: 300px; }
+    .empty-state { text-align: center; padding: 60px 20px; }
+    .empty-state i { font-size: 48px; color: var(--border); margin-bottom: 16px; }
+    .empty-state h5 { color: var(--text-soft); margin-bottom: 12px; }
+    .dash-main { min-height: calc(100vh - 76px); }
+    .tab-pane .panel { margin-bottom: 0; }
+    .panel + .panel { margin-top: 24px; }
+    .dash-cols-custom { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .btn-circle { width: 34px; height: 34px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: var(--bg-muted); color: var(--primary); transition: all 0.2s; border: none; text-decoration: none; }
     .btn-circle:hover { background: var(--primary); color: #fff; transform: scale(1.1); }
-
-    @media (max-width: 991px) {
-        .stat-grid { grid-template-columns: 1fr; }
-        .dashboard-sidebar { margin-bottom: 30px; }
-    }
+    .filter-tabs { display: flex; gap: 8px; }
+    .filter-tabs .btn { border-radius: var(--radius-full); padding: 6px 16px; font-size: 13px; }
+    .btn-group-custom { display: flex; gap: 8px; }
+    @media (max-width: 768px) { .dash-cols-custom { grid-template-columns: 1fr; } }
 </style>
 @endpush
 
 @section('content')
-<section class="page-hero" style="padding: 60px 0;">
-    <div class="container text-center text-lg-start">
-        <h1 style="font-weight: 900; font-size: 32px; color: var(--primary);">স্বাগতম, {{ auth()->user()->name }}</h1>
-        <div class="crumbs">
-            <a href="{{ route('home') }}">Home</a> <span>/</span> 
-            <span style="color: var(--accent);">Dashboard</span>
+<div class="dash-wrap">
+    <!-- Sidebar -->
+    <aside class="dash-side">
+        <div class="dash-user">
+            <img src="{{ auth()->user()->image ? asset('storage/users/'.auth()->user()->image) : 'https://cdn-icons-png.flaticon.com/512/3177/3177440.png' }}"
+                 class="avatar-sm" alt="">
+            <div>
+                <strong>{{ auth()->user()->name }}</strong>
+                <span>{{ auth()->user()->email }}</span>
+            </div>
         </div>
-    </div>
-</section>
+        <nav class="dash-nav" id="dashNav">
+            <a href="#tab-dashboard" data-tab="tab-dashboard" class="{{ ($activeTab == 'dashboard') ? 'active' : '' }}">
+                <i class="fa-solid fa-house"></i> <span>ড্যাশবোর্ড</span>
+            </a>
+            <a href="#tab-courses" data-tab="tab-courses" class="{{ ($activeTab == 'courses') ? 'active' : '' }}">
+                <i class="fa-solid fa-graduation-cap"></i> <span>আমার কোর্সসমূহ</span>
+            </a>
+            <a href="#tab-orders-inline" data-tab="tab-orders-inline" class="{{ ($activeTab == 'order') ? 'active' : '' }}">
+                <i class="fa-solid fa-cart-shopping"></i> <span>আমার অর্ডারসমূহ</span>
+            </a>
+            <a href="#tab-address" data-tab="tab-address" class="{{ ($activeTab == 'address') ? 'active' : '' }}">
+                <i class="fa-solid fa-location-dot"></i> <span>ঠিকানা</span>
+            </a>
+            <a href="#tab-account" data-tab="tab-account" class="{{ ($activeTab == 'edit') ? 'active' : '' }}">
+                <i class="fa-solid fa-user-gear"></i> <span>প্রোফাইল আপডেট</span>
+            </a>
+            @if($enrollments->count() > 0)
+            <a href="#tab-featured" data-tab="tab-featured" class="{{ ($activeTab == 'feature_products') ? 'active' : '' }}">
+                <i class="fa-solid fa-star"></i> <span>ফিচার্ড প্রোডাক্ট</span>
+            </a>
+            @endif
+            <a href="{{ route('logout') }}" style="color: var(--accent); margin-top: auto;">
+                <i class="fa-solid fa-right-from-bracket"></i> <span>লগআউট</span>
+            </a>
+        </nav>
+    </aside>
 
-<div class="dashboard-page">
-    <div class="container">
-        <div class="row g-4">
-            <!-- Sidebar -->
-            <div class="col-lg-3">
-                <aside class="dashboard-sidebar">
-                    <div class="user-profile-mini">
-                        <img src="{{ auth()->user()->image ? asset('storage/user_images/'.auth()->user()->image) : 'https://cdn-icons-png.flaticon.com/512/3177/3177440.png' }}" class="user-avatar" alt="">
-                        <div class="user-name">{{ auth()->user()->name }}</div>
-                        <div class="user-email">{{ auth()->user()->email }}</div>
-                    </div>
-                    <div class="dash-nav">
-                        <div class="nav flex-column nav-pills">
-                            <a class="dash-nav-link {{ $activeTab == 'dashboard' ? 'active' : '' }}" data-bs-toggle="pill" href="#tab-dashboard"><i class="fa-solid fa-house"></i> ড্যাশবোর্ড</a>
-                            <a class="dash-nav-link" data-bs-toggle="pill" href="#tab-courses"><i class="fa-solid fa-graduation-cap"></i> আমার কোর্সসমূহ</a>
-                            <a class="dash-nav-link {{ $activeTab == 'order' ? 'active' : '' }}" href="{{ route('user.orders', ['type' => 'all']) }}"><i class="fa-solid fa-cart-shopping"></i> আমার অর্ডারসমূহ</a>
-                            <a class="dash-nav-link" data-bs-toggle="pill" href="#tab-address"><i class="fa-solid fa-location-dot"></i> ঠিকানা</a>
-                            <a class="dash-nav-link" data-bs-toggle="pill" href="#tab-account"><i class="fa-solid fa-user-gear"></i> প্রোফাইল আপডেট</a>
-                            <a class="dash-nav-link text-danger" href="{{ route('logout') }}"><i class="fa-solid fa-right-from-bracket"></i> লগআউট</a>
-                        </div>
-                    </div>
-                </aside>
+    <!-- Main Content -->
+    <section class="dash-main">
+        <!-- Tab: Dashboard Home -->
+        <div class="tab-content-item" id="tab-dashboard">
+            <div class="dash-head">
+                <div>
+                    <h1>ড্যাশবোর্ড</h1>
+                    <p>স্বাগতম! আপনার একাউন্টের সারসংক্ষেপ</p>
+                </div>
+                <a href="{{ route('courses') }}" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Browse Courses</a>
             </div>
 
-            <!-- Main Content -->
-            <div class="col-lg-9">
-                <div class="tab-content">
-                    
-                    <!-- Dashboard Home -->
-                    <div class="tab-pane fade {{ $activeTab == 'dashboard' ? 'show active' : '' }}" id="tab-dashboard">
-                        ...
-                    </div>
+            <div class="stat-grid">
+                <div class="stat-card">
+                    <div class="icon"><i class="fa-solid fa-cart-shopping"></i></div>
+                    <div class="num">{{ $todayOrdersCount }}</div>
+                    <div class="label">আজকের অর্ডার</div>
+                </div>
+                <div class="stat-card success">
+                    <div class="icon"><i class="fa-solid fa-graduation-cap"></i></div>
+                    <div class="num">{{ $enrollments->count() }}</div>
+                    <div class="label">এনরোলড কোর্স</div>
+                </div>
+                <div class="stat-card warning">
+                    <div class="icon"><i class="fa-solid fa-ban"></i></div>
+                    <div class="num">{{ $cancelOrdersCount }}</div>
+                    <div class="label">বাতিল অর্ডার</div>
+                </div>
+                <div class="stat-card accent">
+                    <div class="icon"><i class="fa-solid fa-box"></i></div>
+                    <div class="num">{{ $orders->total() }}</div>
+                    <div class="label">সর্বমোট অর্ডার</div>
+                </div>
+            </div>
 
-                    <!-- Courses Tab -->
-                    <div class="tab-pane fade" id="tab-courses">
-                        <div class="dash-card">
-                            <div class="dash-card-header">
-                                <h2><i class="fa-solid fa-graduation-cap"></i> আমার সকল কোর্স</h2>
-                            </div>
-                            <div class="dash-card-body">
-                                <div class="row g-4">
-                                    @forelse($enrollments as $enrollment)
-                                        <div class="col-md-6 col-xl-4">
-                                            <div class="course-card h-100 border rounded overflow-hidden shadow-sm d-flex flex-column" style="border-radius: 20px !important;">
-                                                <div class="position-relative">
-                                                    <img src="{{ route('imagecache', ['template' => 'medium', 'filename' => $enrollment->product->fi()]) }}" class="w-100" style="aspect-ratio: 16/9; object-fit: cover;" alt="">
-                                                    <span class="position-absolute top-0 end-0 m-2 badge bg-success">{{ ucfirst($enrollment->status) }}</span>
-                                                </div>
-                                                <div class="p-4 flex-grow-1 d-flex flex-column">
-                                                    <h5 class="fw-bold text-dark mb-2" style="font-size: 16px; line-height: 1.4;">{{ $enrollment->product->name_en }}</h5>
-                                                    <p class="text-muted small mb-3">Enrolled on: {{ $enrollment->enrolled_at ? $enrollment->enrolled_at->format('d M, Y') : 'Pending' }}</p>
-                                                    <div class="mt-auto">
-                                                        @if($enrollment->status == 'active')
-                                                            <a href="{{ route('courseDetail', $enrollment->product->slug) }}" class="btn btn-primary w-100 btn-sm" style="border-radius: 10px;">কন্টিনিউ লার্নিং</a>
-                                                        @else
-                                                            <button class="btn btn-secondary w-100 btn-sm" disabled>পেন্ডিং</button>
-                                                        @endif
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    @empty
-                                        <div class="col-12 text-center py-5">
-                                            <i class="fa-solid fa-graduation-cap mb-3" style="font-size: 48px; color: #e2e8f0;"></i>
-                                            <h5 class="text-muted">আপনি কোনো কোর্সে এনরোল করেননি</h5>
-                                            <a href="{{ route('courses') }}" class="btn btn-primary mt-3">কোর্সসমূহ দেখুন</a>
-                                        </div>
-                                    @endforelse
-                                </div>
-                            </div>
+            @if($enrollments->count() > 0)
+            <div class="panel mb-4">
+                <div class="panel-head">
+                    <h3><i class="fa-solid fa-graduation-cap"></i> আমার সাম্প্রতিক কোর্স</h3>
+                    <a href="#" onclick="switchTab('tab-courses'); return false;">সব দেখুন</a>
+                </div>
+                @foreach($enrollments->take(3) as $enrollment)
+                <div class="course-row">
+                    <div class="thumb" style="--c1:#6c5ce7;--c2:#a29bfe;">
+                        {{ substr($enrollment->product->name_en ?? 'C', 0, 1) }}
+                    </div>
+                    <div class="body">
+                        <h4>{{ $enrollment->product->name_en ?? 'Course' }}</h4>
+                        <div class="meta">
+                            @if($enrollment->status == 'active')
+                                Enrolled: {{ $enrollment->enrolled_at ? $enrollment->enrolled_at->format('d M, Y') : 'Recently' }}
+                            @else
+                                Status: {{ ucfirst($enrollment->status) }}
+                            @endif
                         </div>
                     </div>
+                    @if($enrollment->status == 'active')
+                        <a href="{{ route('courseDetail', $enrollment->product->slug) }}" class="btn btn-primary btn-sm">Continue</a>
+                    @else
+                        <span class="status-pill status-pending">{{ ucfirst($enrollment->status) }}</span>
+                    @endif
+                </div>
+                @endforeach
+            </div>
+            @endif
 
-                    <!-- Orders Tab -->
-                    <div class="tab-pane fade {{ $activeTab == 'order' ? 'show active' : '' }}" id="tab-orders">
-                        <div class="dash-card">
-                            <div class="dash-card-header">
-                                <h2><i class="fa-solid fa-cart-shopping"></i> আমার সকল অর্ডার</h2>
-                                @if(isset($type))
-                                <div class="btn-group">
-                                    <a href="{{ route('user.orders', ['type' => 'all']) }}" class="btn btn-sm {{ $type=='all'?'btn-primary':'btn-outline-primary' }}">সব</a>
-                                    <a href="{{ route('user.orders', ['type' => 'today']) }}" class="btn btn-sm {{ $type=='today'?'btn-primary':'btn-outline-primary' }}">আজকের</a>
-                                </div>
-                                @endif
-                            </div>
-                            <div class="dash-card-body p-0">
-                                <div class="table-responsive">
-                                    <table class="custom-table">
-                                        <thead>
-                                            <tr>
-                                                <th>অর্ডার আইডি</th>
-                                                <th>তারিখ</th>
-                                                <th>অবস্থা</th>
-                                                <th>মোট টাকা</th>
-                                                <th>অ্যাকশন</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach($orders as $order)
-                                            <tr>
-                                                <td class="order-id">#{{ $order->id }}</td>
-                                                <td>{{ $order->created_at->format('M d, Y') }}</td>
-                                                <td>
-                                                    @php
-                                                        $status = strtolower($order->order_status);
-                                                        $statusClass = str_contains($status, 'pending') ? 'status-pending' : (str_contains($status, 'cancel') ? 'status-rejected' : 'status-approved');
-                                                    @endphp
-                                                    <span class="status-pill {{ $statusClass }}">{{ $order->order_status }}</span>
-                                                </td>
-                                                <td class="fw-bold">৳{{ number_format($order->grand_total) }}</td>
-                                                <td>
-                                                    <a href="{{ route('user.orderPrint', $order->id) }}" target="_blank" class="btn-circle" title="Invoice"><i class="fa-solid fa-file-invoice"></i></a>
-                                                    <a href="{{ route('user.orderChalan', $order->id) }}" target="_blank" class="btn-circle" title="Chalan"><i class="fa-solid fa-receipt"></i></a>
-                                                </td>
-                                            </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                </div>
-                                <div class="p-4">
-                                    {{ $orders->links() }}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Address Tab -->
-                    <div class="tab-pane fade" id="tab-address">
-                        <div class="dash-card">
-                            <div class="dash-card-header">
-                                <h2><i class="fa-solid fa-location-dot"></i> সংরক্ষিত ঠিকানা</h2>
-                            </div>
-                            <div class="dash-card-body">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="p-4 border rounded bg-white shadow-sm" style="border-radius: 20px !important;">
-                                            <h6 class="fw-bold text-primary mb-3">ডেলিভারি ঠিকানা</h6>
-                                            @php $dl = auth()->user()->locations()->first(); @endphp
-                                            @if($dl)
-                                                <p class="mb-1 fw-bold text-dark">{{ $dl->name }}</p>
-                                                <p class="mb-1 text-muted small">{{ $dl->address_title }}</p>
-                                                <p class="mb-0 text-muted small"><i class="fa-solid fa-phone me-1"></i> {{ $dl->mobile }}</p>
-                                            @else
-                                                <p class="text-muted small">কোনো ঠিকানা সংরক্ষিত নেই।</p>
-                                            @endif
-                                            <hr>
-                                            <a href="#tab-account" data-bs-toggle="pill" class="text-accent fw-bold text-decoration-none small">পরিবর্তন করুন</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Account Details Tab -->
-                    <div class="tab-pane fade" id="tab-account">
-                        <div class="dash-card">
-                            <div class="dash-card-header">
-                                <h2><i class="fa-solid fa-user-gear"></i> প্রোফাইল এবং পাসওয়ার্ড আপডেট</h2>
-                            </div>
-                            <div class="dash-card-body">
-                                <form action="{{ route('user.changeMyInformation') }}" method="POST" enctype="multipart/form-data">
-                                    @csrf
-                                    <div class="row g-4">
-                                        <div class="col-md-6">
-                                            <label class="custom-label">আপনার নাম *</label>
-                                            <input type="text" name="name" class="form-control custom-input" value="{{ auth()->user()->name }}" required>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label class="custom-label">ইমেইল ঠিকানা</label>
-                                            <input type="email" name="email" class="form-control custom-input" value="{{ auth()->user()->email }}" disabled>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label class="custom-label">মোবাইল নম্বর *</label>
-                                            <input type="text" name="mobile" class="form-control custom-input" value="{{ auth()->user()->mobile }}" required>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label class="custom-label">পিতার নাম</label>
-                                            <input type="text" name="father_name" class="form-control custom-input" value="{{ auth()->user()->father_name }}">
-                                        </div>
-                                        
-                                        <div class="col-md-6">
-                                            <label class="custom-label">জন্ম তারিখ</label>
-                                            <input type="date" name="dob" class="form-control custom-input" value="{{ auth()->user()->dob }}">
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label class="custom-label">রক্তের গ্রুপ</label>
-                                            <select name="blood_group" class="form-control custom-input">
-                                                <option value="">নির্বাচন করুন</option>
-                                                @foreach(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] as $bg)
-                                                    <option value="{{ $bg }}" {{ auth()->user()->blood_group == $bg ? 'selected' : '' }}>{{ $bg }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-
-                                        <div class="col-md-6">
-                                            <label class="custom-label">বিকাশ নম্বর</label>
-                                            <input type="text" name="bkash_number" class="form-control custom-input" value="{{ auth()->user()->bkash_number }}">
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label class="custom-label">প্রোফাইল ছবি</label>
-                                            <input type="file" name="image" class="form-control custom-input">
-                                        </div>
-
-                                        <div class="col-12">
-                                            <label class="custom-label">বিস্তারিত ঠিকানা</label>
-                                            <textarea name="address" class="form-control custom-input" rows="3">{{ auth()->user()->address }}</textarea>
-                                        </div>
-                                        
-                                        <div class="col-12 py-3"><hr></div>
-
-                                        <div class="col-md-12">
-                                            <h5 class="fw-bold text-primary mb-3">পাসওয়ার্ড পরিবর্তন করুন (ঐচ্ছিক)</h5>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <label class="custom-label">বর্তমান পাসওয়ার্ড</label>
-                                            <input type="password" name="old_password" class="form-control custom-input" placeholder="পাসওয়ার্ড পরিবর্তন করতে চাইলে বর্তমানটি দিন">
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label class="custom-label">নতুন পাসওয়ার্ড</label>
-                                            <input type="password" name="new_password" class="form-control custom-input">
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label class="custom-label">কনফার্ম পাসওয়ার্ড</label>
-                                            <input type="password" name="confirm_password" class="form-control custom-input">
-                                        </div>
-                                        
-                                        <div class="col-12">
-                                            <button type="submit" class="action-btn">সকল তথ্য আপডেট করুন</button>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-
+            <div class="panel">
+                <div class="panel-head">
+                    <h3><i class="fa-solid fa-clock-rotate-left"></i> সর্বশেষ অর্ডার</h3>
+                    <a href="#" onclick="switchTab('tab-orders-inline'); return false;">সব দেখুন</a>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>অর্ডার আইডি</th>
+                                <th>তারিখ</th>
+                                <th>অবস্থা</th>
+                                <th>মোট টাকা</th>
+                                <th>অ্যাকশন</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($orders->take(5) as $order)
+                            <tr>
+                                <td class="order-id">#{{ $order->id }}</td>
+                                <td style="color: var(--text-soft);">{{ $order->created_at->format('M d, Y') }}</td>
+                                <td>
+                                    @php
+                                        $status = strtolower($order->order_status);
+                                        $statusClass = str_contains($status, 'pending') ? 'status-pending' : (str_contains($status, 'cancel') ? 'status-rejected' : 'status-approved');
+                                    @endphp
+                                    <span class="status-pill {{ $statusClass }}">{{ $order->order_status }}</span>
+                                </td>
+                                <td class="fw-bold">৳{{ number_format($order->grand_total) }}</td>
+                                <td>
+                                    <a href="{{ route('user.orderPrint', $order->id) }}" target="_blank" class="btn-circle" title="Invoice"><i class="fa-solid fa-file-invoice"></i></a>
+                                    <a href="{{ route('user.orderChalan', $order->id) }}" target="_blank" class="btn-circle" title="Chalan"><i class="fa-solid fa-receipt"></i></a>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="5" class="empty-state">
+                                    <i class="fa-solid fa-cart-shopping"></i>
+                                    <h5>কোনো অর্ডার নেই</h5>
+                                    <a href="{{ route('shop') }}" class="btn btn-primary">শপিং করুন</a>
+                                </td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
-    </div>
+
+        <!-- Tab: Courses -->
+        <div class="tab-content-item" id="tab-courses" style="display:none;">
+            <div class="dash-head">
+                <div>
+                    <h1>আমার কোর্সসমূহ</h1>
+                    <p>আপনার সকল এনরোল করা কোর্স</p>
+                </div>
+            </div>
+            <div class="panel">
+                @forelse($enrollments as $enrollment)
+                <div class="course-row">
+                    <div class="thumb" style="--c1:#6c5ce7;--c2:#a29bfe;">
+                        {{ substr($enrollment->product->name_en ?? 'C', 0, 1) }}
+                    </div>
+                    <div class="body">
+                        <h4>{{ $enrollment->product->name_en ?? 'Course' }}</h4>
+                        <div class="meta">
+                            @if($enrollment->enrolled_at)
+                                Enrolled: {{ $enrollment->enrolled_at->format('d M, Y') }}
+                            @else
+                                Enrolled: Pending
+                            @endif
+                            &middot; Status: {{ ucfirst($enrollment->status) }}
+                        </div>
+                    </div>
+                    @if($enrollment->status == 'active')
+                        <a href="{{ route('courseDetail', $enrollment->product->slug) }}" class="btn btn-primary btn-sm">Continue Learning</a>
+                    @else
+                        <span class="status-pill status-pending">{{ ucfirst($enrollment->status) }}</span>
+                    @endif
+                </div>
+                @empty
+                <div class="empty-state">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                    <h5>আপনি কোনো কোর্সে এনরোল করেননি</h5>
+                    <a href="{{ route('courses') }}" class="btn btn-primary">কোর্সসমূহ দেখুন</a>
+                </div>
+                @endforelse
+            </div>
+        </div>
+
+        <!-- Tab: Orders Inline -->
+        <div class="tab-content-item" id="tab-orders-inline" style="display:none;">
+            <div class="dash-head">
+                <div>
+                    <h1>সকল অর্ডার</h1>
+                    <p>আপনার অর্ডার তালিকা</p>
+                </div>
+                <div class="filter-tabs">
+                    <a href="{{ route('user.orders', ['type' => 'all']) }}" class="btn {{ (!isset($type) || $type == 'all') ? 'btn-primary' : 'btn-outline' }} btn-sm">সব</a>
+                    <a href="{{ route('user.orders', ['type' => 'today']) }}" class="btn {{ isset($type) && $type == 'today' ? 'btn-primary' : 'btn-outline' }} btn-sm">আজকের</a>
+                    <a href="{{ route('user.orders', ['type' => 'cancelled']) }}" class="btn {{ isset($type) && $type == 'cancelled' ? 'btn-primary' : 'btn-outline' }} btn-sm">বাতিল</a>
+                </div>
+            </div>
+            <div class="panel">
+                <div style="overflow-x: auto;">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>অর্ডার আইডি</th>
+                                <th>তারিখ</th>
+                                <th>অবস্থা</th>
+                                <th>মোট টাকা</th>
+                                <th>অ্যাকশন</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($orders as $order)
+                            <tr>
+                                <td class="order-id">#{{ $order->id }}</td>
+                                <td style="color: var(--text-soft);">{{ $order->created_at->format('M d, Y') }}</td>
+                                <td>
+                                    @php
+                                        $status = strtolower($order->order_status);
+                                        $statusClass = str_contains($status, 'pending') ? 'status-pending' : (str_contains($status, 'cancel') ? 'status-rejected' : 'status-approved');
+                                    @endphp
+                                    <span class="status-pill {{ $statusClass }}">{{ $order->order_status }}</span>
+                                </td>
+                                <td class="fw-bold">৳{{ number_format($order->grand_total) }}</td>
+                                <td>
+                                    <a href="{{ route('user.orderPrint', $order->id) }}" target="_blank" class="btn-circle" title="Invoice"><i class="fa-solid fa-file-invoice"></i></a>
+                                    <a href="{{ route('user.orderChalan', $order->id) }}" target="_blank" class="btn-circle" title="Chalan"><i class="fa-solid fa-receipt"></i></a>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="5" class="empty-state">
+                                    <i class="fa-solid fa-cart-shopping"></i>
+                                    <h5>কোনো অর্ডার নেই</h5>
+                                    <a href="{{ route('shop') }}" class="btn btn-primary">শপিং করুন</a>
+                                </td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+                @if($orders->hasPages())
+                <div style="padding: 20px;">
+                    {{ $orders->links() }}
+                </div>
+                @endif
+            </div>
+        </div>
+
+        <!-- Tab: Address -->
+        <div class="tab-content-item" id="tab-address" style="display:none;">
+            <div class="dash-head">
+                <div>
+                    <h1>সংরক্ষিত ঠিকানা</h1>
+                    <p>আপনার ডেলিভারি ঠিকানা</p>
+                </div>
+            </div>
+            <div class="dash-cols-custom">
+                @php $dl = auth()->user()->locations()->first(); @endphp
+                @if($dl)
+                <div class="panel">
+                    <div class="panel-head">
+                        <h3><i class="fa-solid fa-location-dot"></i> ডেলিভারি ঠিকানা</h3>
+                        <a href="#" onclick="switchTab('tab-account'); return false;">পরিবর্তন করুন</a>
+                    </div>
+                    <div style="padding: 20px;">
+                        <p style="font-weight: 700; color: var(--primary); margin-bottom: 6px;">{{ $dl->name }}</p>
+                        <p style="color: var(--text-soft); font-size: 14px; margin-bottom: 4px;">{{ $dl->address_title }}</p>
+                        <p style="color: var(--text-muted); font-size: 13px;"><i class="fa-solid fa-phone me-1"></i> {{ $dl->mobile }}</p>
+                        <p style="color: var(--text-muted); font-size: 13px;"><i class="fa-solid fa-map-pin me-1"></i> {{ $dl->address }}</p>
+                    </div>
+                </div>
+                @else
+                <div class="panel">
+                    <div class="empty-state">
+                        <i class="fa-solid fa-location-dot"></i>
+                        <h5>কোনো ঠিকানা সংরক্ষিত নেই</h5>
+                        <p style="color: var(--text-muted); font-size: 14px;">প্রোফাইল আপডেট সেকশন থেকে ঠিকানা যোগ করুন</p>
+                    </div>
+                </div>
+                @endif
+            </div>
+        </div>
+
+        <!-- Tab: Account / Profile -->
+        <div class="tab-content-item" id="tab-account" style="display:none;">
+            <div class="dash-head">
+                <div>
+                    <h1>প্রোফাইল এবং পাসওয়ার্ড আপডেট</h1>
+                    <p>আপনার ব্যক্তিগত তথ্য আপডেট করুন</p>
+                </div>
+            </div>
+            <div class="panel">
+                <div style="padding: 20px 20px 0;">
+                    @if (session('success'))
+                        <div class="alert alert-success">
+                            {{ session('success') }}
+                        </div>
+                    @endif
+
+                    @if (session('error'))
+                        <div class="alert alert-danger">
+                            {{ session('error') }}
+                        </div>
+                    @endif
+
+                    @if ($errors->any())
+                        <div class="alert alert-danger">
+                            <ul class="mb-0">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+                </div>
+                <form action="{{ route('user.changeMyInformation') }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <div class="row g-4" style="padding: 20px;">
+                        <div class="col-md-6">
+                            <label class="custom-label">আপনার নাম *</label>
+                            <input type="text" name="name" class="custom-input" value="{{ auth()->user()->name }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="custom-label">ইমেইল ঠিকানা</label>
+                            <input type="email" class="custom-input" value="{{ auth()->user()->email }}" disabled>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="custom-label">মোবাইল নম্বর *</label>
+                            <input type="text" name="mobile" class="custom-input" value="{{ auth()->user()->mobile }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="custom-label">পিতার নাম</label>
+                            <input type="text" name="father_name" class="custom-input" value="{{ auth()->user()->father_name }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="custom-label">জন্ম তারিখ</label>
+                            <input type="date" name="dob" class="custom-input" value="{{ auth()->user()->dob }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="custom-label">রক্তের গ্রুপ</label>
+                            <select name="blood_group" class="custom-input">
+                                <option value="">নির্বাচন করুন</option>
+                                @foreach(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] as $bg)
+                                    <option value="{{ $bg }}" {{ auth()->user()->blood_group == $bg ? 'selected' : '' }}>{{ $bg }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="custom-label">বিকাশ নম্বর</label>
+                            <input type="text" name="bkash_number" class="custom-input" value="{{ auth()->user()->bkash_number }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="custom-label">প্রোফাইল ছবি</label>
+                            <input type="file" name="image" class="custom-input">
+                        </div>
+                        <div class="col-12">
+                            <label class="custom-label">বিস্তারিত ঠিকানা</label>
+                            <textarea name="address" class="custom-input" rows="3">{{ auth()->user()->address }}</textarea>
+                        </div>
+
+                        <div class="col-12"><hr style="border-color: var(--border);"></div>
+
+                        <div class="col-12">
+                            <h5 style="font-weight: 700; color: var(--primary);">পাসওয়ার্ড পরিবর্তন করুন (ঐচ্ছিক)</h5>
+                        </div>
+                        <div class="col-12">
+                            <label class="custom-label">বর্তমান পাসওয়ার্ড</label>
+                            <input type="password" name="old_password" class="custom-input" placeholder="পাসওয়ার্ড পরিবর্তন করতে চাইলে বর্তমানটি দিন">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="custom-label">নতুন পাসওয়ার্ড</label>
+                            <input type="password" name="new_password" class="custom-input">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="custom-label">কনফার্ম পাসওয়ার্ড</label>
+                            <input type="password" name="confirm_password" class="custom-input">
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" class="action-btn">সকল তথ্য আপডেট করুন</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Tab: Featured Products -->
+        <div class="tab-content-item" id="tab-featured" style="display:none;">
+            <div class="dash-head">
+                <div>
+                    <h1>ফিচার্ড প্রোডাক্ট</h1>
+                    <p>আমাদের বিশেষ প্রোডাক্টসমূহ</p>
+                </div>
+            </div>
+            <div class="row g-4">
+                @forelse($featured_products as $product)
+                <div class="col-md-6 col-xl-4">
+                    <div class="course-card h-100" style="border-radius: var(--radius-lg) !important;">
+                        <div class="course-thumb" style="--c1:#6c5ce7;--c2:#a29bfe;">
+                            @if($product->active)
+                                <span class="course-tag">AVAILABLE</span>
+                            @endif
+                            {{ substr($product->name_en ?? 'P', 0, 1) }}
+                        </div>
+                        <div class="course-body">
+                            <h3>{{ $product->name_en }}</h3>
+                            <div class="course-meta">
+                                @if($product->price)
+                                    <span><i class="fa-solid fa-tag"></i> ৳{{ number_format($product->price) }}</span>
+                                @endif
+                                @if($product->stock)
+                                    <span><i class="fa-solid fa-box"></i> Stock: {{ $product->stock }}</span>
+                                @endif
+                            </div>
+                            <div class="course-foot">
+                                @if($product->price)
+                                    <span class="price">৳{{ number_format($product->price) }}</span>
+                                @endif
+                                <a href="{{ route('productDetails', $product->slug) }}" class="btn btn-accent btn-sm">View</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @empty
+                <div class="col-12">
+                    <div class="empty-state">
+                        <i class="fa-solid fa-star"></i>
+                        <h5>কোনো ফিচার্ড প্রোডাক্ট নেই</h5>
+                    </div>
+                </div>
+                @endforelse
+            </div>
+            @if($featured_products->hasPages())
+            <div style="padding: 20px;">
+                {{ $featured_products->links() }}
+            </div>
+            @endif
+        </div>
+
+    </section>
 </div>
+
+<script>
+    // Tab switching
+    function switchTab(tabId) {
+        // Hide all tabs
+        document.querySelectorAll('.tab-content-item').forEach(function(el) {
+            el.style.display = 'none';
+        });
+        // Show target tab
+        var target = document.getElementById(tabId);
+        if (target) {
+            target.style.display = 'block';
+        }
+        // Update nav active states
+        document.querySelectorAll('#dashNav a[data-tab]').forEach(function(link) {
+            link.classList.remove('active');
+            if (link.getAttribute('data-tab') === tabId) {
+                link.classList.add('active');
+            }
+        });
+        // Update URL hash
+        window.location.hash = '#' + tabId;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Click handlers for nav links with data-tab
+        document.querySelectorAll('#dashNav a[data-tab]').forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                var tabId = this.getAttribute('data-tab');
+                switchTab(tabId);
+            });
+        });
+
+        // Determine which tab to show on page load
+        // Priority: URL hash > activeTab from server > default (dashboard)
+        var hash = window.location.hash.replace('#', '');
+        if (hash && document.getElementById(hash)) {
+            switchTab(hash);
+        } else if ('{{ $activeTab }}' === 'order') {
+            switchTab('tab-orders-inline');
+        } else if ('{{ $activeTab }}' === 'edit') {
+            switchTab('tab-account');
+        } else if ('{{ $activeTab }}' === 'address') {
+            switchTab('tab-address');
+        } else if ('{{ $activeTab }}' === 'feature_products') {
+            switchTab('tab-featured');
+        } else if ('{{ $activeTab }}' === 'courses') {
+            switchTab('tab-courses');
+        } else {
+            switchTab('tab-dashboard');
+        }
+    });
+</script>
 @endsection
 
 @push('js')
 <script>
-    $(document).ready(function() {
-        var hash = window.location.hash;
-        if (hash) {
-            $('.dash-nav-link[href="' + hash + '"]').tab('show');
-            $('.dash-nav-link').removeClass('active');
-            $('.dash-nav-link[href="' + hash + '"]').addClass('active');
-        }
-        
-        $('.dash-nav-link[data-bs-toggle="pill"]').on('click', function() {
-            window.location.hash = $(this).attr('href');
-            $('.dash-nav-link').removeClass('active');
-            $(this).addClass('active');
-        });
-    });
+    // Keep any existing page-specific JS here
 </script>
 @endpush

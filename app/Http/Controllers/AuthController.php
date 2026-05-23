@@ -57,10 +57,16 @@ class AuthController extends Controller
 
         // Attempt login
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
+            $user = Auth::user();
+
+            // Check if user is approved
+            if (!$user->is_approve && !$user->hasRole('admin')) {
+                Auth::logout();
+                return back()->with('error', 'Your account is pending approval from the administrator. Please wait for approval.');
+            }
+
             // Merge session cart to user cart
             $this->cartSessionToUser();
-
-            $user = Auth::user();
 
             // Redirect based on role
             if ($user->hasRole('admin')) {
@@ -85,7 +91,7 @@ class AuthController extends Controller
             return redirect()->route('user.dashboard');;
         }
         else{
-            return view('auth.login');
+            return view('auth.registration');
         }
 
     }
@@ -304,28 +310,24 @@ class AuthController extends Controller
         $request->validate([
             'name'               => 'required|string|max:255',
             'email'              => 'required|email|unique:users,email',
-            'password'           =>  'required|string|min:8|confirmed',
-            'password'           => 'required|string|min:8',
-            'role'               => 'required|in:rider,seller,buyer',
-            // 'password'           => 'required|string|min:8',
+            'password'           => 'required|string|min:8|confirmed',
+            'role'               => 'nullable|in:rider,seller,buyer',
         ]);
 
         $user = User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'password' => Hash::make($request->password),
-            'role'     => $request->role,
+            'name'       => $request->name,
+            'email'      => $request->email,
+            'password'   => Hash::make($request->password),
+            'role'       => $request->role ?? 'buyer',
+            'is_approve' => 0,
         ]);
-
-        // Auto login
-        Auth::login($user);
 
         // Merge session cart
         $this->cartSessionToUser();
 
         // Redirect
-        return redirect()->route('user.dashboard')
-                        ->with('success', 'Registration successful! Welcome, ' . $user->name);
+        return redirect()->route('login')
+                        ->with('success', 'Registration successful! Your account is pending approval from the administrator.');
     }
 
 
@@ -490,10 +492,8 @@ class AuthController extends Controller
     {
         $user = Auth::user();
 
-
         $validator = Validator::make($request->all(), [
             'name'   => 'required|string|max:255',
-            'email'  => 'required|email|unique:users,email,' . $user->id,
             'mobile' => 'required|unique:users,mobile,' . $user->id,
             'image'  => 'nullable|image|max:2048',
             'address'      => 'nullable|string|max:500',
@@ -505,40 +505,47 @@ class AuthController extends Controller
         ]);
 
         if ($validator->fails()) {
-            toast('Something went wrong!', 'error');
-            return back()->withErrors($validator)->withInput();
+            return back()->withErrors($validator)->withInput()->with('error', 'Validation failed. Please check the form.');
         }
 
         // Update basic info
         $user->name   = $request->name;
-        $user->email  = $request->email;
         $user->mobile = $request->mobile;
         $user->father_name   = $request->father_name;
-
         $user->bkash_number   = $request->bkash_number;
         $user->address  = $request->address;
         $user->reg_date = $request->reg_date;
-
         $user->dob  = $request->dob;
         $user->blood_group = $request->blood_group;
 
-       
+        // Handle Image Upload
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $imageName = time() . '.' . $file->getClientOriginalExtension();
+            
+            // storeAs is cleaner and handles the move correctly
+            $file->storeAs('users', $imageName, 'public');
+            
+            // Delete old image if exists
+            if ($user->image && Storage::disk('public')->exists('users/' . $user->image)) {
+                Storage::disk('public')->delete('users/' . $user->image);
+            }
+            
+            $user->image = $imageName;
+        }
 
         // Password update only if filled
         if ($request->filled('old_password') || $request->filled('new_password') || $request->filled('confirm_password')) {
             if (!Hash::check($request->old_password, $user->password)) {
-                alert()->error('Current password is incorrect!');
-                return back()->withInput();
+                return back()->with('error', 'Current password is incorrect!')->withInput();
             }
 
             if ($request->new_password !== $request->confirm_password) {
-                alert()->error('New password and confirmation do not match!');
-                return back()->withInput();
+                return back()->with('error', 'New password and confirmation do not match!')->withInput();
             }
 
             if (Hash::check($request->new_password, $user->password)) {
-                alert()->error('New password cannot be the same as the old password!');
-                return back()->withInput();
+                return back()->with('error', 'New password cannot be the same as the old password!')->withInput();
             }
 
             // Set new password
@@ -547,8 +554,7 @@ class AuthController extends Controller
 
         $user->save();
 
-        alert()->success('Profile updated successfully!');
-        return redirect()->back();
+        return redirect()->back()->with('success', 'Profile updated successfully!');
     }
 
 

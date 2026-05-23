@@ -98,6 +98,8 @@ Route::get('/test-email', function () {
 
 
 Route::middleware(['web', 'auth'])->group(function() {
+    Route::get('/course-play/{slug}', [FrontendController::class, 'coursePlay'])->name('course.play');
+    Route::post('/lesson/toggle-completion', [FrontendController::class, 'toggleLessonCompletion'])->name('lesson.toggleCompletion');
     Route::post('/pay', [SslCommerzPaymentController::class, 'index']);
     Route::post('/pay-via-ajax', [SslCommerzPaymentController::class, 'payViaAjax']);
 
@@ -645,6 +647,11 @@ Route::middleware(['userRole:admin','auth'])->prefix('admin')->group(function(){
     Route::post('/product/{product}/lessons/store', [\App\Http\Controllers\Admin\CourseLessonController::class, 'store'])->name('admin.lessons.store');
     Route::post('/lessons/{lesson}/update', [\App\Http\Controllers\Admin\CourseLessonController::class, 'update'])->name('admin.lessons.update');
     Route::get('/lessons/{lesson}/delete', [\App\Http\Controllers\Admin\CourseLessonController::class, 'destroy'])->name('admin.lessons.destroy');
+
+    // Course Sections Management
+    Route::post('/product/{product}/sections/store', [\App\Http\Controllers\Admin\CourseSectionController::class, 'store'])->name('admin.sections.store');
+    Route::post('/sections/{section}/update', [\App\Http\Controllers\Admin\CourseSectionController::class, 'update'])->name('admin.sections.update');
+    Route::get('/sections/{section}/delete', [\App\Http\Controllers\Admin\CourseSectionController::class, 'destroy'])->name('admin.sections.destroy');
 
 });
 

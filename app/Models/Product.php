@@ -60,6 +60,11 @@ class Product extends Model
         return $this->hasMany(CourseLesson::class);
     }
 
+    public function sections()
+    {
+        return $this->hasMany(CourseSection::class)->orderBy('priority');
+    }
+
     public function isCourse()
     {
         return $this->type === 'course';

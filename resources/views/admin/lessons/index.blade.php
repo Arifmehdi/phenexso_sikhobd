@@ -13,10 +13,55 @@
                     </h3>
                     <div class="card-tools">
                         <a href="{{ route('admin.productsAll') }}" class="btn btn-outline-primary btn-xs mr-2"><i class="fa fa-arrow-left"></i> Back</a>
+                        <button type="button" class="btn btn-info btn-xs mr-1" data-toggle="modal" data-target="#addSectionModal">
+                            <i class="fas fa-folder-plus"></i> Add Section
+                        </button>
                         <button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#addLessonModal">
                             <i class="fas fa-plus"></i> Add New Class
                         </button>
                     </div>
+                </div>
+            </div>
+
+            <!-- Sections Management -->
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-light py-2">
+                    <h5 class="card-title text-sm mb-0">Course Chapters / Sections</h5>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-sm table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th width="50">Pos</th>
+                                <th>Section Title</th>
+                                <th>Classes</th>
+                                <th class="text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($product->sections as $section)
+                            <tr>
+                                <td>{{ $section->priority }}</td>
+                                <td>
+                                    <strong>{{ $section->title_en }}</strong> / {{ $section->title_bn }}
+                                </td>
+                                <td><span class="badge badge-info">{{ $section->lessons->count() }}</span></td>
+                                <td class="text-right">
+                                    <button class="btn btn-xs btn-outline-info edit-section" data-section="{{ json_encode($section) }}" data-toggle="modal" data-target="#editSectionModal">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <a href="{{ route('admin.sections.destroy', $section->id) }}" class="btn btn-xs btn-outline-danger" onclick="return confirm('Are you sure? All classes in this section will be unassigned.')">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="4" class="text-center py-2 text-muted">No sections created yet.</td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
@@ -76,8 +121,8 @@
 
 <!-- Add Lesson Modal -->
 <div class="modal fade" id="addLessonModal" tabindex="-1" role="dialog" aria-labelledby="addLessonModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <form action="{{ route('admin.lessons.store', $product->id) }}" method="POST">
+    <div class="modal-dialog modal-lg" role="document">
+        <form action="{{ route('admin.lessons.store', $product->id) }}" method="POST" enctype="multipart/form-data">
             @csrf
             <div class="modal-content">
                 <div class="modal-header">
@@ -87,31 +132,31 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <div class="form-group">
-                        <label>Title (English)</label>
-                        <input type="text" name="title_en" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Title (Bengali)</label>
-                        <input type="text" name="title_bn" class="form-control">
-                    </div>
-                    <div class="form-group">
-                        <label>Video Provider</label>
-                        <select name="video_provider" class="form-control">
-                            <option value="youtube">YouTube</option>
-                            <option value="vimeo">Vimeo</option>
-                            <option value="custom">Custom/Other</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Video URL</label>
-                        <input type="url" name="video_url" class="form-control" placeholder="https://www.youtube.com/watch?v=...">
-                    </div>
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>Duration</label>
-                                <input type="text" name="duration" class="form-control" placeholder="15:30">
+                                <label>Title (English)</label>
+                                <input type="text" name="title_en" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Title (Bengali)</label>
+                                <input type="text" name="title_bn" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Course Section (Chapter)</label>
+                                <select name="course_section_id" class="form-control">
+                                    <option value="">No Section</option>
+                                    @foreach($product->sections as $section)
+                                        <option value="{{ $section->id }}">{{ $section->title_en }}</option>
+                                    @endforeach
+                                </select>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -121,6 +166,64 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="form-group">
+                        <label>Lesson Tutorial / Description</label>
+                        <textarea name="description" class="form-control" rows="4" placeholder="Write lesson instructions or tutorial content here..."></textarea>
+                    </div>
+
+                    <hr>
+                    <h6 class="text-bold text-primary">Media & Resources</h6>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Video Provider</label>
+                                <select name="video_provider" class="form-control">
+                                    <option value="youtube">YouTube</option>
+                                    <option value="vimeo">Vimeo</option>
+                                    <option value="custom">Custom/Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Video URL (YouTube/Vimeo)</label>
+                                <input type="url" name="video_url" class="form-control" placeholder="https://www.youtube.com/watch?v=...">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Upload local Video (MP4)</label>
+                                <input type="file" name="video_file" class="form-control-file" accept="video/mp4">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Duration</label>
+                                <input type="text" name="duration" class="form-control" placeholder="15:30">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Upload Audio (MP3)</label>
+                                <input type="file" name="audio_file" class="form-control-file" accept="audio/*">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Upload PDF Material</label>
+                                <input type="file" name="pdf_file" class="form-control-file" accept="application/pdf">
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="form-check mb-2">
                         <input type="checkbox" name="is_free" class="form-check-input" id="is_free">
                         <label class="form-check-label" for="is_free">Free Preview?</label>
@@ -139,10 +242,81 @@
     </div>
 </div>
 
-<!-- Edit Lesson Modal -->
-<div class="modal fade" id="editLessonModal" tabindex="-1" role="dialog" aria-labelledby="editLessonModalLabel" aria-hidden="true">
+<!-- Add Section Modal -->
+<div class="modal fade" id="addSectionModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog" role="document">
-        <form id="editLessonForm" action="" method="POST">
+        <form action="{{ route('admin.sections.store', $product->id) }}" method="POST">
+            @csrf
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Section (Chapter)</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Section Title (English)</label>
+                        <input type="text" name="title_en" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Section Title (Bengali)</label>
+                        <input type="text" name="title_bn" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Priority (Position)</label>
+                        <input type="number" name="priority" class="form-control" value="{{ $product->sections->count() + 1 }}">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save Section</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Edit Section Modal -->
+<div class="modal fade" id="editSectionModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <form id="editSectionForm" action="" method="POST">
+            @csrf
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Section</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Section Title (English)</label>
+                        <input type="text" name="title_en" id="edit_section_title_en" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Section Title (Bengali)</label>
+                        <input type="text" name="title_bn" id="edit_section_title_bn" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Priority (Position)</label>
+                        <input type="number" name="priority" id="edit_section_priority" class="form-control">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Update Section</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Add Lesson Modal -->
+
+<div class="modal fade" id="editLessonModal" tabindex="-1" role="dialog" aria-labelledby="editLessonModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <form id="editLessonForm" action="" method="POST" enctype="multipart/form-data">
             @csrf
             <div class="modal-content">
                 <div class="modal-header">
@@ -152,31 +326,31 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <div class="form-group">
-                        <label>Title (English)</label>
-                        <input type="text" name="title_en" id="edit_title_en" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Title (Bengali)</label>
-                        <input type="text" name="title_bn" id="edit_title_bn" class="form-control">
-                    </div>
-                    <div class="form-group">
-                        <label>Video Provider</label>
-                        <select name="video_provider" id="edit_video_provider" class="form-control">
-                            <option value="youtube">YouTube</option>
-                            <option value="vimeo">Vimeo</option>
-                            <option value="custom">Custom/Other</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Video URL</label>
-                        <input type="url" name="video_url" id="edit_video_url" class="form-control">
-                    </div>
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>Duration</label>
-                                <input type="text" name="duration" id="edit_duration" class="form-control">
+                                <label>Title (English)</label>
+                                <input type="text" name="title_en" id="edit_title_en" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Title (Bengali)</label>
+                                <input type="text" name="title_bn" id="edit_title_bn" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Course Section (Chapter)</label>
+                                <select name="course_section_id" id="edit_course_section_id" class="form-control">
+                                    <option value="">No Section</option>
+                                    @foreach($product->sections as $section)
+                                        <option value="{{ $section->id }}">{{ $section->title_en }}</option>
+                                    @endforeach
+                                </select>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -186,6 +360,67 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="form-group">
+                        <label>Lesson Tutorial / Description</label>
+                        <textarea name="description" id="edit_description" class="form-control" rows="4"></textarea>
+                    </div>
+
+                    <hr>
+                    <h6 class="text-bold text-primary">Media & Resources</h6>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Video Provider</label>
+                                <select name="video_provider" id="edit_video_provider" class="form-control">
+                                    <option value="youtube">YouTube</option>
+                                    <option value="vimeo">Vimeo</option>
+                                    <option value="custom">Custom/Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Video URL (YouTube/Vimeo)</label>
+                                <input type="url" name="video_url" id="edit_video_url" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Change local Video (MP4)</label>
+                                <input type="file" name="video_file" class="form-control-file" accept="video/mp4">
+                                <small id="current_video_file" class="text-muted"></small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Duration</label>
+                                <input type="text" name="duration" id="edit_duration" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Change Audio (MP3)</label>
+                                <input type="file" name="audio_file" class="form-control-file" accept="audio/*">
+                                <small id="current_audio_file" class="text-muted"></small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Change PDF Material</label>
+                                <input type="file" name="pdf_file" class="form-control-file" accept="application/pdf">
+                                <small id="current_pdf_file" class="text-muted"></small>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="form-check mb-2">
                         <input type="checkbox" name="is_free" class="form-check-input" id="edit_is_free">
                         <label class="form-check-label" for="edit_is_free">Free Preview?</label>
@@ -214,12 +449,29 @@
         $('#editLessonForm').attr('action', url);
         $('#edit_title_en').val(lesson.title_en);
         $('#edit_title_bn').val(lesson.title_bn);
+        $('#edit_course_section_id').val(lesson.course_section_id);
+        $('#edit_description').val(lesson.description);
         $('#edit_video_provider').val(lesson.video_provider);
         $('#edit_video_url').val(lesson.video_url);
         $('#edit_duration').val(lesson.duration);
         $('#edit_priority').val(lesson.priority);
         $('#edit_is_free').prop('checked', !!lesson.is_free);
         $('#edit_active').prop('checked', !!lesson.active);
+
+        // Show current filenames if exist
+        $('#current_video_file').text(lesson.video_file ? 'Current: ' + lesson.video_file.split('/').pop() : '');
+        $('#current_audio_file').text(lesson.audio_url ? 'Current: ' + lesson.audio_url.split('/').pop() : '');
+        $('#current_pdf_file').text(lesson.pdf_url ? 'Current: ' + lesson.pdf_url.split('/').pop() : '');
+    });
+
+    $('.edit-section').click(function() {
+        const section = $(this).data('section');
+        const url = "{{ url('admin/sections') }}/" + section.id + "/update";
+        
+        $('#editSectionForm').attr('action', url);
+        $('#edit_section_title_en').val(section.title_en);
+        $('#edit_section_title_bn').val(section.title_bn);
+        $('#edit_section_priority').val(section.priority);
     });
 </script>
 @endpush

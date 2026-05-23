@@ -1,270 +1,217 @@
-@extends('frontend.layouts.ecommercemaster')
+@extends('website.layouts.sikhobd')
+
+@section('title', 'আইডি কার্ড — ' . ($ws->name ?? env('APP_NAME')))
+
+@push('css')
+<style>
+    .dash-main { min-height: calc(100vh - 76px); }
+    .avatar-sm { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; }
+    .stat-grid-compact { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 28px; }
+    .stat-card-compact { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px 20px; display: flex; align-items: center; gap: 16px; transition: all .2s; }
+    .stat-card-compact:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.06); }
+    .stat-card-compact .icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+    .stat-card-compact .num { font-size: 20px; font-weight: 800; color: var(--text); line-height: 1.2; }
+    .stat-card-compact .label { font-size: 12px; color: var(--text-soft); }
+    .icon-primary { background: #ede9fe; color: #7c3aed; }
+    .icon-success { background: #dcfce7; color: #16a34a; }
+    .icon-danger { background: #fee2e2; color: #dc2626; }
+
+    /* ID Card styles */
+    .idcard-wrapper { display: flex; justify-content: center; padding: 20px 0; }
+    .idcard-preview { width: 360px; height: 560px; border-radius: 14px; position: relative; overflow: hidden; font-family: 'Segoe UI', Arial, sans-serif; background: linear-gradient(to bottom, #BBDFBB 0%, #BBDFBB 32%, #DFF2DF 50%, #ffffff 100%); box-shadow: 0 8px 32px rgba(0,0,0,0.1); transition: transform .2s; }
+    .idcard-preview:hover { transform: scale(1.01); }
+    .idcard-preview .print-btn { position: absolute; top: 12px; right: 12px; z-index: 10; width: 36px; height: 36px; border-radius: 50%; border: none; background: rgba(89, 186, 71, 0.9); color: #fff; font-size: 14px; cursor: pointer; transition: all .2s; display: flex; align-items: center; justify-content: center; text-decoration: none; }
+    .idcard-preview .print-btn:hover { background: #59BA47; transform: scale(1.1); }
+    .idcard-body { padding: 24px 20px 20px; text-align: center; }
+    .idcard-avatar { width: 130px; height: 130px; border-radius: 10px; object-fit: cover; border: 3px solid #59BA47; margin-bottom: 12px; display: block; margin-left: auto; margin-right: auto; cursor: pointer; transition: opacity .2s; }
+    .idcard-avatar:hover { opacity: 0.85; }
+    .idcard-name { font-weight: 700; font-size: 17px; margin: 0 0 2px; }
+    .idcard-blood { font-size: 14px; color: #444; margin: 2px 0; }
+    .idcard-mobile { font-size: 14px; color: #444; margin: 2px 0 10px; }
+    .idcard-title { font-size: 26px; font-weight: 800; color: #788377; margin: 8px 0 4px; letter-spacing: 0.5px; }
+    .idcard-logo { width: 45%; margin: 4px auto; display: block; }
+    .idcard-footer { background: #59BA47; color: #053800; padding: 10px 14px; font-size: 12px; text-align: center; line-height: 1.4; position: absolute; bottom: 0; width: 100%; }
+    .idcard-footer a { color: #053800; text-decoration: none; font-weight: 600; }
+    .idcard-signature-area { display: flex; justify-content: space-between; align-items: flex-end; padding: 0 20px; position: absolute; bottom: 70px; width: 100%; font-size: 13px; }
+    .idcard-signature-area img { width: 100px; height: auto; display: block; margin-bottom: 2px; }
+    .idcard-signature-area .sig-label { font-size: 11px; color: #555; }
+    .idcard-reg-date { font-size: 15px; font-weight: 600; }
+    .idcard-reg-label { font-size: 11px; color: #555; }
+
+    .profile-upload { margin-top: 12px; }
+    .profile-upload input[type="file"] { display: none; }
+
+    @media (max-width: 576px) {
+        .stat-grid-compact { grid-template-columns: 1fr; }
+        .idcard-preview { width: 320px; height: auto; min-height: 520px; }
+    }
+</style>
+@endpush
 
 @section('content')
-
-
-
-<section class="my-0 section">
-  <div class="container">
-
-     <!-- Success/Error Messages -->
-      @if(session('success'))
-          <div class="alert alert-success">{{ session('success') }}</div>
-      @endif
-      @if(session('error'))
-          <div class="alert alert-danger">{{ session('error') }}</div>
-      @endif
-    <div class="row">
-
-      {{-- Sidebar --}}
-      <aside class="col-lg-3 mb-4">
-        <div class="card text-center">
-          <div class="card-body">
-            <img id="profilePreview"
-                 src="{{ route('imagecache', ['template' => 'pfimd', 'filename' => $user->fi()]) }}"
-                 alt="Profile"
-                 class="rounded-circle border border-success mb-2"
-                 style="width:80px; height:80px; object-fit:cover; cursor:pointer;">
-            <input type="file" id="profileImageInput" accept="image/*" class="d-none">
-
-            <h5 class="card-title">{{ $user->name }}</h5>
-            <p class="text-muted">{{ $user->email }}</p>
-          </div>
-
-          <ul class="list-group list-group-flush text-start">
-            <li class="list-group-item">
-              <a href="{{route('user.dashboard')}}" 
-                 class="tab-link {{ $activeTab=='dashboard'?'text-success fw-bold':'' }}">
-                 Dashboard
-              </a>
-            </li>
-            <li class="list-group-item">
-              <a href="{{route('user.orders', ['type' => 'all'])}}" 
-                 class="tab-link {{ $activeTab=='order'?'text-success fw-bold':'' }}">
-                 Orders
-              </a>
-            </li>
-            <li class="list-group-item">
-              <a href="{{ route('user.editMyInformation')}}" 
-                 class="tab-link {{ $activeTab=='edit'?'text-success fw-bold':'' }}">
-                 Personal Info
-              </a>
-            </li>
-            <li class="list-group-item">
-                  <a href="{{ route('health.registration') }}" 
-                      class="tab-link">
-                        Health Card Form
-                  </a>
-              </li>
-
-              @if (isset($user) && $user->idcard)
-
-                <li class="list-group-item">
-                    <a href="{{ asset('storage/'.$user->idcard->file_name) }}" target="_blank"
-                        class="tab-link">
-                          Health Card
-                    </a>
-                </li>
-
-              @endif
-
-            <li class="list-group-item">
-              <a href="{{ route('logout') }}" class="text-danger">Logout</a>
-            </li>
-          </ul>
+<div class="dash-wrap">
+    <!-- Sidebar -->
+    <aside class="dash-side">
+        <div class="dash-user">
+            <img src="{{ auth()->user()->image ? asset('storage/user_images/'.auth()->user()->image) : 'https://cdn-icons-png.flaticon.com/512/3177/3177440.png' }}"
+                 class="avatar-sm" alt="">
+            <div>
+                <strong>{{ auth()->user()->name }}</strong>
+                <span>{{ auth()->user()->email }}</span>
+            </div>
         </div>
-      </aside>
-
-      {{-- Main Content --}}
-      <div class="col-lg-9">
-        <div class="tab-content">
-
-          {{-- Dashboard Tab --}}
-          <div class="tab-pane fade {{ $activeTab=='dashboard'?'show active':'' }}" id="dashboard">
-            <div class="row g-3">
-              {{-- Total Orders --}}
-              <div class="col-md-4">
-                <a href="{{ route('user.orders', ['type' => 'all']) }}" class="text-decoration-none">
-                  <div class="card border-success shadow-sm">
-                    <div class="card-body d-flex align-items-center gap-3">
-                      <div class="bg-success text-white d-flex justify-content-center align-items-center rounded-circle" 
-                           style="width:50px; height:50px; font-size:20px;">
-                        <i class="fa-solid fa-cart-plus"></i>
-                      </div>
-                      <div>
-                        <h4 class="text-success mb-0">{{ $user->orders()->count() }}</h4>
-                        <small>Total Orders</small>
-                      </div>
-                    </div>
-                  </div>
-                </a>
-              </div>
-
-              {{-- Today Orders --}}
-              <div class="col-md-4">
-                <a href="{{ route('user.orders', ['type' => 'today']) }}" class="text-decoration-none">
-                  <div class="card border-primary shadow-sm">
-                    <div class="card-body d-flex align-items-center gap-3">
-                      <div class="bg-primary text-white d-flex justify-content-center align-items-center rounded-circle" 
-                           style="width:50px; height:50px; font-size:20px;">
-                        <i class="fa-solid fa-cart-plus"></i>
-                      </div>
-                      <div>
-                        <h4 class="text-primary mb-0">{{ $todayOrdersCount }}</h4>
-                        <small>Today Orders</small>
-                      </div>
-                    </div>
-                  </div>
-                </a>
-              </div>
-
-              {{-- Cancelled Orders --}}
-              <div class="col-md-4">
-                <a href="{{ route('user.orders', ['type' => 'cancelled']) }}" class="text-decoration-none">
-                  <div class="card border-danger shadow-sm">
-                    <div class="card-body d-flex align-items-center gap-3">
-                      <div class="bg-danger text-white d-flex justify-content-center align-items-center rounded-circle" 
-                           style="width:50px; height:50px; font-size:20px;">
-                        <i class="fa-solid fa-cart-plus"></i>
-                      </div>
-                      <div>
-                        <h4 class="text-danger mb-0">{{ $cancelOrdersCount }}</h4>
-                        <small>Cancelled Orders</small>
-                      </div>
-                    </div>
-                  </div>
-                </a>
-              </div>
-            </div>
-          </div>
-
-          {{-- Orders Tab --}}
-          <div class="tab-pane fade {{ $activeTab=='order'?'show active':'' }}" id="order">
-            <div class="card">
-              <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">My Orders</h5>
-                @if(isset($type))
-                  <div class="btn-group btn-group-sm">
-                    <a href="{{ route('user.orders', ['type' => 'all']) }}" 
-                       class="btn {{ $type=='all'?'btn-light border':'btn-outline-light' }}">All</a>
-                    <a href="{{ route('user.orders', ['type' => 'today']) }}" 
-                       class="btn {{ $type=='today'?'btn-light border':'btn-outline-light' }}">Today</a>
-                    <a href="{{ route('user.orders', ['type' => 'cancelled']) }}" 
-                       class="btn {{ $type=='cancelled'?'btn-light border':'btn-outline-light' }}">Cancelled</a>
-                  </div>
-                @endif
-              </div>
-              <div class="card-body p-3">
-                @if($orders->count())
-                  <div class="table-responsive">
-                    <table class="table table-bordered table-hover mb-0">
-                      <thead class="table-light">
-                        <tr>
-                          <th>ORDER</th>
-                          <th>DATE</th>
-                          <th>STATUS</th>
-                          <th>TOTAL</th>
-                          <th>ACTION</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        @foreach ($orders as $order)
-                          <tr>
-                            <td>{{ $order->id }}</td>
-                            <td>{{ $order->created_at->format('Y-m-d') }}</td>
-                            <td class="text-capitalize">{{ $order->order_status }}</td>
-                            <td>{{ number_format($order->grand_total, 2) }} tk</td>
-                            <td>
-                               <a class="btn btn-primary btn-xs" target="_blank" href="{{ route('user.orderPrint', $order->id) }}"><i class="fas fa-print w3-small"></i> Invoice</a>
-                                <a class="btn btn-primary btn-xs" target="_blank" href="{{ route('user.orderChalan', $order->id) }}"><i class="fas fa-print w3-small"></i> Chalan</a>
-                                  
-                            </td>
-                          </tr>
-                        @endforeach
-                      </tbody>
-                    </table>
-                  </div>
-                  <div class="mt-3">
-                    {{ $orders->links() }}
-                  </div>
-                @else
-                  <p class="text-center text-muted">No orders found.</p>
-                @endif
-              </div>
-            </div>
-          </div>
-
-          {{-- Id Card Info  --}}
-
-        <div class="card print-card" style="width: 350px; height: 550px; margin: auto; border: 1px solid #ccc; border-radius: 10px;
-            font-family: Arial, sans-serif; position: relative; overflow: visible;
-            background: linear-gradient(to bottom, #BBDFBB 0%, #BBDFBB 30%, #DFF2DF 50%, #ffffff 100%);">
-
-            <!-- Top Right Button -->
-            <a href="{{ route('user.idcard.pdf') }}" target="_blank" 
-                style="position: absolute; top: 10px; right: 10px; padding: 5px 10px; font-size: 14px; border: none; border-radius: 5px; background-color: #59BA47; color: #fff; cursor: pointer; z-index: 10; text-decoration: none;">
-                Print
+        <nav class="dash-nav">
+            <a href="{{ route('user.dashboard') }}">
+                <i class="fa-solid fa-house"></i> <span>ড্যাশবোর্ড</span>
             </a>
+            <a href="{{ route('user.orders', ['type' => 'all']) }}">
+                <i class="fa-solid fa-cart-shopping"></i> <span>আমার অর্ডারসমূহ</span>
+            </a>
+            <a href="{{ route('user.editMyInformation') }}">
+                <i class="fa-solid fa-user-gear"></i> <span>প্রোফাইল আপডেট</span>
+            </a>
+            <a href="{{ route('user.idcard') }}" class="active">
+                <i class="fa-solid fa-id-card"></i> <span>আইডি কার্ড</span>
+            </a>
+            @if(isset($user) && $user->idcard)
+                <a href="{{ asset('storage/'.$user->idcard->file_name) }}" target="_blank">
+                    <i class="fa-solid fa-file-medical"></i> <span>হেলথ কার্ড</span>
+                </a>
+            @endif
+            <a href="{{ route('health.registration') }}">
+                <i class="fa-solid fa-clipboard-list"></i> <span>হেলথ কার্ড ফর্ম</span>
+            </a>
+            <a href="{{ route('logout') }}" style="color: var(--accent); margin-top: auto;">
+                <i class="fa-solid fa-right-from-bracket"></i> <span>লগআউট</span>
+            </a>
+        </nav>
+    </aside>
 
-            <!-- Card content here -->
-            <div class="card-body text-center" style="padding: 20px;">
-                <!-- Profile Image -->
-              <img 
-                  src="{{ route('imagecache', ['template' => 'pfimd', 'filename' => $user->fi()]) ?? 'https://img.freepik.com/free-vector/smiling-young-man-illustration_1308-174669.jpg' }} " 
-                  alt="Profile Photo" 
-                  style="width: 140px; height: 140px; object-fit: cover; border-radius: 8px; border: 2px solid #59BA47; margin-bottom: 10px;">
-
-                <div style="font-weight: bold; font-size: 16px; margin: 0;">{{ Auth::user()->name ?? 'Guest User' }}</div>
-                <div style="font-size: 14px; margin: 0;">Blood Group: {{ Auth::user()->blood_group ?? 'A+' }}</div>
-                <div style="font-size: 14px; margin: 0 0 10px 0;">Mobile: {{ Auth::user()->mobile ?? '+880123456789' }}</div>
-                <div style="font-size: 25px; font-weight: bold; color: #BEC6BD; margin: 0; padding: 0;">Health Card</div>
-                <div style="margin: 0; padding: 0; font-size: 14px;">
-                    <img src="https://93.phenexsoft.com/uslive/original/logo-alt1756994190.png" alt="site logo" style="width: 40%; margin: 0; padding: 0;">
-                </div>
+    <!-- Main Content -->
+    <section class="dash-main">
+        <div class="dash-head">
+            <div>
+                <h1>আইডি কার্ড</h1>
+                <p>আপনার হেলথ আইডি কার্ড</p>
             </div>
-
-            <!-- Signature and Date -->
-            <div style="display: flex; justify-content: space-between; align-items: flex-end; padding: 0 20px; position: absolute; bottom: 60px; width: 100%; font-size: 14px; margin-bottom: 6px">
-                <div style="text-align: left;">
-                    <img src="{{ asset('img/sign.png') }}" alt="signature image" style="width: 120px; height: auto; display: block; margin-bottom: 2px;">
-                    <div style="font-size: 12px;">Signature</div>
-                </div>
-                <div style="text-align: center; font-size: 14px;">
-                    <span style="font-size:16px">{{ Auth::user()->registration_date ?? date('d/m/Y') }}</span><br>
-                    Date of Registration
-                </div>
-            </div>
-
-            <!-- Footer -->
-            <div style="background-color: #59BA47; color: #053800; padding: 10px; font-size: 12px; position: absolute; bottom: 0; width: 100%; text-align: center; line-height: 1.4;">
-                <div>Address: H-302 High School Road Muradpur High School Road East Jurain, Dhaka - 1204, Phone - 01973-005566</div>
-                <div>{{ 'www.93shasthoseba.com' }}</div>
+            <div class="btn-group-custom">
+                <a href="{{ route('user.idcard.pdf') }}" target="_blank" class="btn btn-primary">
+                    <i class="fa-solid fa-download"></i> PDF ডাউনলোড
+                </a>
             </div>
         </div>
 
+        <!-- Stats Row -->
+        <div class="stat-grid-compact">
+            <a href="{{ route('user.orders', ['type' => 'all']) }}" class="stat-card-compact text-decoration-none">
+                <div class="icon icon-primary"><i class="fa-solid fa-cart-plus"></i></div>
+                <div>
+                    <div class="num">{{ $user->orders()->count() }}</div>
+                    <div class="label">সর্বমোট অর্ডার</div>
+                </div>
+            </a>
+            <a href="{{ route('user.orders', ['type' => 'today']) }}" class="stat-card-compact text-decoration-none">
+                <div class="icon icon-success"><i class="fa-solid fa-calendar-day"></i></div>
+                <div>
+                    <div class="num">{{ $todayOrdersCount }}</div>
+                    <div class="label">আজকের অর্ডার</div>
+                </div>
+            </a>
+            <a href="{{ route('user.orders', ['type' => 'cancelled']) }}" class="stat-card-compact text-decoration-none">
+                <div class="icon icon-danger"><i class="fa-solid fa-ban"></i></div>
+                <div>
+                    <div class="num">{{ $cancelOrdersCount }}</div>
+                    <div class="label">বাতিল অর্ডার</div>
+                </div>
+            </a>
+        </div>
 
+        <!-- ID Card -->
+        <div class="panel">
+            <div class="panel-head">
+                <h3><i class="fa-solid fa-id-card"></i> হেলথ আইডি কার্ড</h3>
+                <div class="profile-upload">
+                    <label for="profileImageInput" class="btn btn-accent btn-sm" style="cursor:pointer;">
+                        <i class="fa-solid fa-camera"></i> ছবি পরিবর্তন
+                    </label>
+                    <input type="file" id="profileImageInput" accept="image/*">
+                </div>
+            </div>
+            <div class="idcard-wrapper">
+                <div class="idcard-preview">
+                    <a href="{{ route('user.idcard.pdf') }}" target="_blank" class="print-btn" title="Print / Download PDF">
+                        <i class="fa-solid fa-download"></i>
+                    </a>
 
-      </div>
-    </div>
-  </div>
-</section>
-@endsection
+                    <div class="idcard-body">
+                        <img id="cardProfilePreview"
+                             src="{{ route('imagecache', ['template' => 'pfimd', 'filename' => $user->fi()]) }}"
+                             alt="Profile Photo"
+                             class="idcard-avatar"
+                             onclick="document.getElementById('profileImageInput').click()">
 
-@push('js')
+                        <div class="idcard-name">{{ Auth::user()->name ?? 'Guest User' }}</div>
+                        <div class="idcard-blood">Blood Group: {{ Auth::user()->blood_group ?? 'A+' }}</div>
+                        <div class="idcard-mobile">Mobile: {{ Auth::user()->mobile ?? '+880123456789' }}</div>
+                        <div class="idcard-title">Health Card</div>
+                        <img src="https://93.phenexsoft.com/uslive/original/logo-alt1756994190.png" alt="site logo" class="idcard-logo">
+                    </div>
+
+                    <!-- Signature & Date -->
+                    <div class="idcard-signature-area">
+                        <div style="text-align:left;">
+                            <img src="{{ asset('img/sign.png') }}" alt="signature">
+                            <div class="sig-label">Signature</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div class="idcard-reg-date">{{ Auth::user()->registration_date ?? date('d/m/Y') }}</div>
+                            <div class="idcard-reg-label">Date of Registration</div>
+                        </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="idcard-footer">
+                        <div>H-302 High School Road Muradpur High School Road East Jurain, Dhaka - 1204</div>
+                        <div>Phone: 01973-005566 &middot; {{ 'www.93shasthoseba.com' }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
 <script>
-  // Profile Image Upload
-  document.getElementById('profilePreview').addEventListener('click',()=>document.getElementById('profileImageInput').click());
-  document.getElementById('profileImageInput').addEventListener('change', function(){
-    const file = this.files[0];
-    if(!file) return;
-    const formData = new FormData();
-    formData.append('image',file);
-    formData.append('_token','{{ csrf_token() }}');
-    const reader = new FileReader();
-    reader.onload = e=>document.getElementById('profilePreview').src=e.target.result;
-    reader.readAsDataURL(file);
-    fetch("{{ route('user.uploadProfileImage') }}",{method:'POST',body:formData})
-      .then(res=>res.json()).then(data=>{if(!data.success) alert('Upload failed')}).catch(()=>alert('Upload failed'));
-  });
+    // Profile Image Upload
+    document.addEventListener('DOMContentLoaded', function() {
+        var input = document.getElementById('profileImageInput');
+        if (input) {
+            input.addEventListener('change', function() {
+                var file = this.files[0];
+                if (!file) return;
+
+                var formData = new FormData();
+                formData.append('image', file);
+                formData.append('_token', '{{ csrf_token() }}');
+
+                // Preview immediately
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('cardProfilePreview').src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+
+                // Upload
+                fetch("{{ route('user.uploadProfileImage') }}", {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(function(res) { return res.json(); })
+                .then(function(data) {
+                    if (!data.success) alert('Upload failed');
+                })
+                .catch(function() { alert('Upload failed'); });
+            });
+        }
+    });
 </script>
-@endpush
+@endsection

@@ -22,10 +22,14 @@ class CourseLessonController extends Controller
         $request->validate([
             'title_en' => 'required|string|max:255',
             'video_url' => 'nullable|url',
+            'pdf_file' => 'nullable|file|mimes:pdf|max:10240',
+            'audio_file' => 'nullable|file|mimes:mp3,wav,ogg|max:20480',
+            'video_file' => 'nullable|file|mimes:mp4,webm|max:51200',
         ]);
 
-        CourseLesson::create([
+        $data = [
             'product_id' => $product->id,
+            'course_section_id' => $request->course_section_id,
             'title_en' => $request->title_en,
             'title_bn' => $request->title_bn,
             'description' => $request->description,
@@ -36,7 +40,19 @@ class CourseLessonController extends Controller
             'is_free' => $request->has('is_free'),
             'active' => $request->has('active'),
             'addedby_id' => Auth::id(),
-        ]);
+        ];
+
+        if ($request->hasFile('pdf_file')) {
+            $data['pdf_url'] = $request->file('pdf_file')->store('course_materials/pdf', 'public');
+        }
+        if ($request->hasFile('audio_file')) {
+            $data['audio_url'] = $request->file('audio_file')->store('course_materials/audio', 'public');
+        }
+        if ($request->hasFile('video_file')) {
+            $data['video_file'] = $request->file('video_file')->store('course_materials/video', 'public');
+        }
+
+        CourseLesson::create($data);
 
         return back()->with('success', 'Lesson added successfully.');
     }
@@ -46,9 +62,13 @@ class CourseLessonController extends Controller
         $request->validate([
             'title_en' => 'required|string|max:255',
             'video_url' => 'nullable|url',
+            'pdf_file' => 'nullable|file|mimes:pdf|max:10240',
+            'audio_file' => 'nullable|file|mimes:mp3,wav,ogg|max:20480',
+            'video_file' => 'nullable|file|mimes:mp4,webm|max:51200',
         ]);
 
-        $lesson->update([
+        $data = [
+            'course_section_id' => $request->course_section_id,
             'title_en' => $request->title_en,
             'title_bn' => $request->title_bn,
             'description' => $request->description,
@@ -58,7 +78,22 @@ class CourseLessonController extends Controller
             'priority' => $request->priority,
             'is_free' => $request->has('is_free'),
             'active' => $request->has('active'),
-        ]);
+        ];
+
+        if ($request->hasFile('pdf_file')) {
+            if ($lesson->pdf_url) \Storage::disk('public')->delete($lesson->pdf_url);
+            $data['pdf_url'] = $request->file('pdf_file')->store('course_materials/pdf', 'public');
+        }
+        if ($request->hasFile('audio_file')) {
+            if ($lesson->audio_url) \Storage::disk('public')->delete($lesson->audio_url);
+            $data['audio_url'] = $request->file('audio_file')->store('course_materials/audio', 'public');
+        }
+        if ($request->hasFile('video_file')) {
+            if ($lesson->video_file) \Storage::disk('public')->delete($lesson->video_file);
+            $data['video_file'] = $request->file('video_file')->store('course_materials/video', 'public');
+        }
+
+        $lesson->update($data);
 
         return back()->with('success', 'Lesson updated successfully.');
     }

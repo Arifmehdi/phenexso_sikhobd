@@ -113,10 +113,10 @@
                         <button type="submit" class="btn btn-primary btn-block mb-3" style="border-radius:0.25rem;">Sign
                             In</button>
 
-                        {{--<div class="text-center">
+                        <div class="text-center mt-3">
                             <span>Don't have an account? </span>
-                            <a href="{{ route('register') }}">Sign Up</a>
-                        </div>--}}
+                            <a href="{{ route('registration') }}">Sign Up</a>
+                        </div>
                     </form>
                 </div>
             </div>

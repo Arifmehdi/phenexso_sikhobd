@@ -163,7 +163,7 @@
                                 </div>
 
                                 {{-- Rider Assignment --}}
-                                <div class="form-group">
+                                {{--<div class="form-group">
                                     <label for="rider_id">Assign Rider (Driver)</label>
                                     <select name="rider_id" id="rider_id" class="form-control select2">
                                         <option value="">Select Rider</option>
@@ -176,7 +176,7 @@
                                     @error('rider_id')
                                         <span class="text-danger">{{ $message }}</span>
                                     @enderror
-                                </div>
+                                </div>--}}
 
                                 {{-- Instructor Assignment --}}
                                 <div class="form-group instructor-select" style="display: {{ old('type') == 'course' ? 'block' : 'none' }};">
