@@ -50,6 +50,30 @@
                     </div>
                 </div>
 
+                {{-- Type filter tabs --}}
+                <div class="card-header bg-light border-bottom-0 py-2">
+                    <ul class="nav nav-pills w3-small">
+                        <li class="nav-item">
+                            <a class="nav-link py-1 px-3 {{ !$activeType ? 'active' : '' }}" 
+                               href="{{ route('admin.productsAll') }}">
+                                All <span class="badge badge-light ml-1">{{ $totalCount }}</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link py-1 px-3 {{ $activeType === 'product' ? 'active' : '' }}" 
+                               href="{{ route('admin.productsAll', ['type' => 'product']) }}">
+                                <i class="fas fa-box text-info"></i> Products <span class="badge badge-light ml-1">{{ $productCount }}</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link py-1 px-3 {{ $activeType === 'course' ? 'active' : '' }}" 
+                               href="{{ route('admin.productsAll', ['type' => 'course']) }}">
+                                <i class="fas fa-graduation-cap text-success"></i> Courses <span class="badge badge-light ml-1">{{ $courseCount }}</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
                 {{-- Card body: Products list and pagination --}}
                 <div class="card-body bg-light px-0 pb-0 pt-2">
                     <div class="col-sm-12">
@@ -136,9 +160,13 @@
             var that = $(this);
             var url = that.attr('data-url');
             var q = that.val();
+            // Get current filter type from URL query string
+            var urlParams = new URLSearchParams(window.location.search);
+            var filterType = urlParams.get('type') || '';
+
             $.ajax({
                 url: url,
-                data : {q: q},
+                data : {q: q, filter_type: filterType},
                 method: "get",
                 success: function(res) {
                     if(res.success) {

@@ -653,6 +653,16 @@ Route::middleware(['userRole:admin','auth'])->prefix('admin')->group(function(){
     Route::post('/sections/{section}/update', [\App\Http\Controllers\Admin\CourseSectionController::class, 'update'])->name('admin.sections.update');
     Route::get('/sections/{section}/delete', [\App\Http\Controllers\Admin\CourseSectionController::class, 'destroy'])->name('admin.sections.destroy');
 
+    // Instructor Management
+    Route::get('instructors', [\App\Http\Controllers\Admin\InstructorController::class, 'index'])->name('admin.instructors.index');
+    Route::get('instructors/create', [\App\Http\Controllers\Admin\InstructorController::class, 'create'])->name('admin.instructors.create');
+    Route::post('instructors', [\App\Http\Controllers\Admin\InstructorController::class, 'store'])->name('admin.instructors.store');
+    Route::get('instructors/{id}/edit', [\App\Http\Controllers\Admin\InstructorController::class, 'edit'])->name('admin.instructors.edit');
+    Route::post('instructors/{id}', [\App\Http\Controllers\Admin\InstructorController::class, 'update'])->name('admin.instructors.update');
+    Route::delete('instructors/{id}', [\App\Http\Controllers\Admin\InstructorController::class, 'destroy'])->name('admin.instructors.destroy');
+    Route::put('instructors/{user}/toggle-approval', [\App\Http\Controllers\Admin\InstructorController::class, 'toggleApproval'])->name('admin.instructors.toggle-approval');
+    Route::get('instructors/search', [\App\Http\Controllers\Admin\InstructorController::class, 'search'])->name('admin.instructors.search');
+
 });
 
 Route::middleware(['auth', 'retailer'])->prefix('retailer')->group(function () {

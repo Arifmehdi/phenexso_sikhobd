@@ -32,19 +32,31 @@ class ProductController extends Controller
      *
      * @return \Illuminate\View\View
      */
-    public function productCategoriesAll()
+    public function productCategoriesAll(Request $request)
     {
         // Set active menu and submenu
         menuSubmenu('product', 'productCategoriesAll');
 
-        // Fetch latest categories with children (subcategories) and count products
-        $data['categories'] = ProductCategory::whereNull('parent_id')
+        // Optional type filter: product, course, or all (default)
+        $type = $request->type;
+
+        $query = ProductCategory::whereNull('parent_id')
             ->with(['children' => function($query) {
                 $query->withCount('products');
             }])
-            ->withCount('products')
-            ->latest()
-            ->paginate(30);
+            ->withCount('products');
+
+        if ($type && in_array($type, ['product', 'course'])) {
+            $query->where('type', $type);
+        }
+
+        $data['categories'] = $query->latest()->paginate(30)->appends(['type' => $type]);
+        $data['activeType'] = $type;
+
+        // Counts for filter tabs (parent categories only, consistent with the listing)
+        $data['totalCount'] = ProductCategory::whereNull('parent_id')->count();
+        $data['productCount'] = ProductCategory::whereNull('parent_id')->where('type', 'product')->count();
+        $data['courseCount'] = ProductCategory::whereNull('parent_id')->where('type', 'course')->count();
 
         return view('admin.productCategories.productCategoriesAll', $data);
     }
@@ -243,13 +255,27 @@ class ProductController extends Controller
      *
      * @return \Illuminate\View\View
      */
-    public function productsAll()
+    public function productsAll(Request $request)
     {
         // Set active menu and submenu for UI highlighting
         menuSubmenu('product', 'productsAll');
 
-        // Fetch latest products with pagination (30 per page)
-        $data['products'] = Product::latest()->paginate(30);
+        // Optional type filter: product, course, or all (default)
+        $type = $request->type;
+
+        $query = Product::latest();
+
+        if ($type && in_array($type, ['product', 'course'])) {
+            $query->where('type', $type);
+        }
+
+        $data['products'] = $query->paginate(30)->appends(['type' => $type]);
+        $data['activeType'] = $type; // Pass active filter to view
+
+        // Counts for filter tabs
+        $data['totalCount'] = Product::count();
+        $data['productCount'] = Product::where('type', 'product')->count();
+        $data['courseCount'] = Product::where('type', 'course')->count();
 
         // Return the products list view with data
         return view('admin.products.productsAll', $data);
@@ -691,6 +717,7 @@ class ProductController extends Controller
     {
         $type = $request->type;
         $q = $request->q;
+        $filterType = $request->filter_type; // product, course, or null for all
 
         if ($type == 'product') {
             // Search products by name, sku, prices or ID
@@ -701,8 +728,14 @@ class ProductController extends Controller
                     ->orWhere('selling_price', 'like', "%{$q}%")
                     ->orWhere('final_price', 'like', "%{$q}%")
                     ->orWhere('id', 'like', "%{$q}%");
-            })->orderBy('name_en')
-            ->paginate(100);
+            });
+
+            // Apply type filter if provided
+            if ($filterType && in_array($filterType, ['product', 'course'])) {
+                $products->where('type', $filterType);
+            }
+
+            $products = $products->orderBy('name_en')->paginate(100);
 
             $products->appends($request->all());
 
@@ -718,8 +751,14 @@ class ProductController extends Controller
                 $qq->orWhere('name_en', 'like', "%{$q}%")
                 ->orWhere('name_bn', 'like', "%{$q}%")
                 ->orWhere('id', 'like', "%{$q}%");
-            })->orderBy('name_en')
-            ->paginate(100);
+            });
+
+            // Apply type filter if provided
+            if ($filterType && in_array($filterType, ['product', 'course'])) {
+                $categories->where('type', $filterType);
+            }
+
+            $categories = $categories->orderBy('name_en')->paginate(100);
 
             $categories->appends($request->all());
 

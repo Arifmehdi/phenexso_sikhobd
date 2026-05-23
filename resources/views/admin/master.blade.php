@@ -523,6 +523,31 @@
                         </ul>
                     </li>
 
+                    {{-- Instructors --}}
+                    <li class="nav-item {{ session('lsbm') == 'instructors'? ' menu-open ' : ''}}">
+                        <a href="#" class="nav-link {{ session('lsbm') == 'instructors'? ' active ' : ''}}">
+                            <i class="nav-icon fas fa-chalkboard-teacher"></i>
+                            <p>
+                                Instructors
+                                <i class="fas fa-angle-left right"></i>
+                            </p>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a href="{{ route('admin.instructors.index') }}" class="nav-link {{ session('lsbsm') == 'allInstructors' ? ' active ' : '' }}">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>All Instructors</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('admin.instructors.create') }}" class="nav-link {{ session('lsbsm') == 'createInstructor' ? ' active ' : '' }}">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Create Instructor</p>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
                     {{-- Products --}}
                     <li class="nav-item {{ session('lsbm') == 'product'? ' menu-open ' : ''}}">
                         <a href="#" class="nav-link {{ session('lsbm') == 'product'? ' active ' : ''}}">

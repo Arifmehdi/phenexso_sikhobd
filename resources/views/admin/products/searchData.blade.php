@@ -4,6 +4,8 @@
             <th scope="col" width="30">SL</th>
             <th scope="col" width="60">Action</th>
             <th scope="col">Product Name</th>
+            <th scope="col" width="80">Type</th>
+            <th scope="col">Instructor</th>
             <th scope="col">Product Stock</th>
             <th scope="col">Purchase Price</th>
             <th scope="col">Selling Price</th>
@@ -43,6 +45,22 @@
                
 
                 <td>{{ Str::limit($product->name_en, 30) }}</td>
+                <td>
+                    @if($product->type === 'course')
+                        <span class="badge badge-success">Course</span>
+                    @else
+                        <span class="badge badge-info">Product</span>
+                    @endif
+                </td>
+                <td>
+                    @if($product->type === 'course' && $product->instructor)
+                        <span class="badge badge-secondary">{{ $product->instructor->name }}</span>
+                    @elseif($product->type === 'course')
+                        <span class="text-muted">Not assigned</span>
+                    @else
+                        <span class="text-muted">—</span>
+                    @endif
+                </td>
                 <td>{{ $product->stock ? $product->stock : 'N/A' }}</td>
                 <td>{{ $product->purchase_price }}</td>
                 <td>{{ $product->selling_price }}</td>
@@ -100,7 +118,7 @@
          
         @empty
             <tr>
-                <td colspan="8" class="text-danger h5 text-center">No Product Found</td>
+                <td colspan="11" class="text-danger h5 text-center">No Product Found</td>
             </tr>
         @endforelse
     </tbody>

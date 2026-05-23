@@ -51,6 +51,30 @@
                    
                 </div>
 
+                {{-- Type filter tabs --}}
+                <div class="card-header bg-light border-bottom-0 py-2">
+                    <ul class="nav nav-pills w3-small">
+                        <li class="nav-item">
+                            <a class="nav-link py-1 px-3 {{ !$activeType ? 'active' : '' }}" 
+                               href="{{ route('admin.productCategoriesAll') }}">
+                                All <span class="badge badge-light ml-1">{{ $totalCount }}</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link py-1 px-3 {{ $activeType === 'product' ? 'active' : '' }}" 
+                               href="{{ route('admin.productCategoriesAll', ['type' => 'product']) }}">
+                                <i class="fas fa-box text-info"></i> Product <span class="badge badge-light ml-1">{{ $productCount }}</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link py-1 px-3 {{ $activeType === 'course' ? 'active' : '' }}" 
+                               href="{{ route('admin.productCategoriesAll', ['type' => 'course']) }}">
+                                <i class="fas fa-graduation-cap text-success"></i> Course <span class="badge badge-light ml-1">{{ $courseCount }}</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
                 <!-- Categories Table -->
                 <div class="card-body bg-light px-0 pb-0 pt-2">
                     <div class="col-sm-12">
@@ -95,7 +119,11 @@
             const url = $input.data('url');
             const query = $input.val();
 
-            $.get(url, { q: query }, function(res) {
+            // Get current filter type from URL query string
+            const urlParams = new URLSearchParams(window.location.search);
+            const filterType = urlParams.get('type') || '';
+
+            $.get(url, { q: query, filter_type: filterType }, function(res) {
                 if (res.success) {
                     $(".data-container").html(res.page);
                 }
