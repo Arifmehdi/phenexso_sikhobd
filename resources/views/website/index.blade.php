@@ -92,7 +92,7 @@
       </div>
       <div class="categories-grid">
         @foreach($categories->take(4) as $index => $category)
-        <a href="{{ route('productCategory', $category->slug) }}" class="category-card" style="--cat-color: {{ $index % 2 == 0 ? 'linear-gradient(135deg, rgba(108,92,231,.12), transparent)' : 'linear-gradient(135deg, rgba(255,40,79,.12), transparent)' }};">
+        <a href="{{ route('courses', ['category' => $category->slug]) }}" class="category-card" style="--cat-color: {{ $index % 2 == 0 ? 'linear-gradient(135deg, rgba(108,92,231,.12), transparent)' : 'linear-gradient(135deg, rgba(255,40,79,.12), transparent)' }};">
           <div class="cat-icon">
               @if($index == 0) <i class="fa-solid fa-graduation-cap"></i>
               @elseif($index == 1) <i class="fa-solid fa-bolt"></i>
@@ -285,7 +285,7 @@
   </section>
   @endif
 
-  <section class="section" style="padding-top:0;">
+  {{--<section class="section" style="padding-top:0;">
     <div class="container">
       <div class="cta-strip">
         <div>
@@ -295,7 +295,7 @@
         <a href="#" class="btn btn-accent"><i class="fa-solid fa-download"></i> <span data-i18n="cta.btn">এখনই ডাউনলোড</span></a>
       </div>
     </div>
-  </section>
+  </section>--}}
 @endsection
 
 @push('css')

@@ -70,8 +70,8 @@
       <a href="{{ route('login') }}" class="btn btn-outline btn-sm desktop-only" data-i18n="nav.login">লগইন</a>
       @endauth
 
-      <a href="#" class="btn btn-primary desktop-only"><i class="fa-solid fa-download"></i> <span data-i18n="nav.download">ডাউনলোড অ্যাপ</span></a>
-      <button class="menu-toggle" id="menuToggle" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
+      {{-- <a href="#" class="btn btn-primary desktop-only"><i class="fa-solid fa-download"></i> <span data-i18n="nav.download">ডাউনলোড অ্যাপ</span></a>
+      <button class="menu-toggle" id="menuToggle" aria-label="Menu"><i class="fa-solid fa-bars"></i></button> --}}
     </div>
   </div>
 </header>
