@@ -326,7 +326,11 @@ function applyLang(lang) {
 
 document.addEventListener('click', (e) => {
   const btn = e.target.closest('.lang-switch button');
-  if (btn) applyLang(btn.dataset.lang);
+  if (btn) {
+    const lang = btn.dataset.lang;
+    localStorage.setItem('lang', lang);
+    window.location.href = `/language/change?lang=${lang}`;
+  }
 });
 
 const savedLang = (() => { try { return localStorage.getItem('lang'); } catch (_) { return null; } })();

@@ -21,14 +21,14 @@
             <h3 style="color:var(--primary); margin-bottom:16px; font-size:16px;" data-i18n="filter">ফিল্টার</h3>
             
             <div class="filter-group">
-              <h4 data-i18n="category">ক্যাটাগরি</h4>
+              <h4 data-i18n="category">{{ __('category') }}</h4>
               @foreach($categories as $cat)
                 <div class="category-filter-item" style="margin-bottom: 8px;">
                     <label style="font-weight: 600; display: flex; align-items: center; gap: 8px; cursor: pointer;">
                         <input type="checkbox" name="category[]" value="{{ $cat->slug }}" 
                             {{ in_array($cat->slug, (array)request('category')) ? 'checked' : '' }}
                             onchange="document.getElementById('filter-form').submit()"> 
-                        <span>{{ $cat->name_en }}</span>
+                        <span>{{ lp($cat, 'name') }}</span>
                     </label>
                     
                     @if($cat->children->count() > 0)
@@ -38,7 +38,7 @@
                                     <input type="checkbox" name="category[]" value="{{ $subcat->slug }}" 
                                         {{ in_array($subcat->slug, (array)request('category')) ? 'checked' : '' }}
                                         onchange="document.getElementById('filter-form').submit()"> 
-                                    <span>{{ $subcat->name_en }}</span>
+                                    <span>{{ lp($subcat, 'name') }}</span>
                                 </label>
                             @endforeach
                         </div>
@@ -95,7 +95,12 @@
                         <span class="price">৳ {{ number_format($course->selling_price) }}</span>
                       @endif
                     </div>
-                    <a href="{{ route('productDetails', $course->slug) }}" class="btn btn-accent btn-sm" data-i18n="enroll">এনরোল</a>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-outline btn-sm add-to-wishlist-ajax" data-id="{{ $course->id }}" title="Add to Wishlist">
+                            <i class="fa-regular fa-heart"></i>
+                        </button>
+                        <a href="{{ route('courseDetail', $course->slug) }}" class="btn btn-accent btn-sm" data-i18n="enroll">এনরোল</a>
+                    </div>
                   </div>
                 </div>
               </article>
@@ -111,3 +116,31 @@
     </div>
   </section>
 @endsection
+
+@push('js')
+<script>
+    $(document).on('click', '.add-to-wishlist-ajax', function() {
+        const productId = $(this).data('id');
+        const btn = $(this);
+        
+        btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i>');
+
+        $.ajax({
+            url: "{{ route('wishlist.add') }}",
+            type: "POST",
+            data: {
+                product_id: productId,
+                _token: "{{ csrf_token() }}"
+            },
+            success: function(response) {
+                btn.prop('disabled', false).html('<i class="fa-solid fa-heart"></i>');
+                showCartNotification(response.message, 'success');
+            },
+            error: function() {
+                btn.prop('disabled', false).html('<i class="fa-regular fa-heart"></i>');
+                showCartNotification('Failed to add to wishlist.', 'error');
+            }
+        });
+    });
+</script>
+@endpush

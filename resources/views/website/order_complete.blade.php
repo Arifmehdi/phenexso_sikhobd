@@ -12,7 +12,14 @@
             <h1 style="font-size: 32px; color: var(--text-main); margin-bottom: 16px;">ধন্যবাদ! আপনার অর্ডারটি সফলভাবে সম্পন্ন হয়েছে।</h1>
             <p style="color: #666; font-size: 18px; margin-bottom: 40px;">অল্প কিছুক্ষণের মধ্যে আমাদের একজন প্রতিনিধি আপনার সাথে যোগাযোগ করবেন।</p>
             
-            <div style="display: flex; gap: 16px; justify-content: center;">
+            @php
+                $hasCourses = $order && $order->orderItems->contains(fn($item) => $item->product && $item->product->type === 'course');
+            @endphp
+
+            <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+                @if($hasCourses)
+                    <a href="{{ route('user.dashboard') }}#tab-courses" class="btn btn-accent" style="padding: 12px 30px;">কোর্স শুরু করুন</a>
+                @endif
                 <a href="{{ route('shop') }}" class="btn btn-primary" style="padding: 12px 30px;">Continue Shopping</a>
                 <a href="{{ route('user.dashboard') }}" class="btn btn-outline" style="padding: 12px 30px;">Go to Dashboard</a>
             </div>

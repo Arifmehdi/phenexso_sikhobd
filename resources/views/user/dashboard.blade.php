@@ -84,6 +84,7 @@
                     <div class="dash-nav">
                         <div class="nav flex-column nav-pills">
                             <a class="dash-nav-link {{ $activeTab == 'dashboard' ? 'active' : '' }}" data-bs-toggle="pill" href="#tab-dashboard"><i class="fa-solid fa-house"></i> ড্যাশবোর্ড</a>
+                            <a class="dash-nav-link" data-bs-toggle="pill" href="#tab-courses"><i class="fa-solid fa-graduation-cap"></i> আমার কোর্সসমূহ</a>
                             <a class="dash-nav-link {{ $activeTab == 'order' ? 'active' : '' }}" href="{{ route('user.orders', ['type' => 'all']) }}"><i class="fa-solid fa-cart-shopping"></i> আমার অর্ডারসমূহ</a>
                             <a class="dash-nav-link" data-bs-toggle="pill" href="#tab-address"><i class="fa-solid fa-location-dot"></i> ঠিকানা</a>
                             <a class="dash-nav-link" data-bs-toggle="pill" href="#tab-account"><i class="fa-solid fa-user-gear"></i> প্রোফাইল আপডেট</a>
@@ -99,65 +100,44 @@
                     
                     <!-- Dashboard Home -->
                     <div class="tab-pane fade {{ $activeTab == 'dashboard' ? 'show active' : '' }}" id="tab-dashboard">
-                        <div class="stat-grid">
-                            <div class="stat-item">
-                                <div class="stat-icon blue"><i class="fa-solid fa-bag-shopping"></i></div>
-                                <span class="stat-val">{{ $orders->total() }}</span>
-                                <span class="stat-label">মোট অর্ডার</span>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-icon orange"><i class="fa-solid fa-clock-rotate-left"></i></div>
-                                <span class="stat-val">{{ $todayOrdersCount }}</span>
-                                <span class="stat-label">আজকের অর্ডার</span>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-icon purple"><i class="fa-solid fa-calendar-check"></i></div>
-                                <span class="stat-val">{{ now()->format('d M') }}</span>
-                                <span class="stat-label">{{ now()->format('Y') }}</span>
-                            </div>
-                        </div>
+                        ...
+                    </div>
 
+                    <!-- Courses Tab -->
+                    <div class="tab-pane fade" id="tab-courses">
                         <div class="dash-card">
                             <div class="dash-card-header">
-                                <h2><i class="fa-solid fa-clock-rotate-left"></i> সাম্প্রতিক অর্ডারসমূহ</h2>
-                                <a href="{{ route('user.orders', ['type' => 'all']) }}" class="btn btn-link text-primary fw-bold text-decoration-none small">সব দেখুন</a>
+                                <h2><i class="fa-solid fa-graduation-cap"></i> আমার সকল কোর্স</h2>
                             </div>
-                            <div class="dash-card-body p-0">
-                                <div class="table-responsive">
-                                    <table class="custom-table">
-                                        <thead>
-                                            <tr>
-                                                <th>অর্ডার আইডি</th>
-                                                <th>তারিখ</th>
-                                                <th>অবস্থা</th>
-                                                <th>মোট টাকা</th>
-                                                <th>অ্যাকশন</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @forelse($orders->take(5) as $order)
-                                            <tr>
-                                                <td class="order-id">#{{ $order->id }}</td>
-                                                <td>{{ $order->created_at->format('M d, Y') }}</td>
-                                                <td>
-                                                    @php
-                                                        $status = strtolower($order->order_status);
-                                                        $statusClass = str_contains($status, 'pending') ? 'status-pending' : (str_contains($status, 'cancel') ? 'status-rejected' : 'status-approved');
-                                                    @endphp
-                                                    <span class="status-pill {{ $statusClass }}">{{ $order->order_status }}</span>
-                                                </td>
-                                                <td class="fw-bold">৳{{ number_format($order->grand_total) }}</td>
-                                                <td>
-                                                    <a href="{{ route('user.orderPrint', $order->id) }}" target="_blank" class="btn-circle" title="Invoice"><i class="fa-solid fa-file-invoice"></i></a>
-                                                </td>
-                                            </tr>
-                                            @empty
-                                            <tr>
-                                                <td colspan="5" class="text-center py-5 text-muted">কোনো অর্ডার পাওয়া যায়নি</td>
-                                            </tr>
-                                            @endforelse
-                                        </tbody>
-                                    </table>
+                            <div class="dash-card-body">
+                                <div class="row g-4">
+                                    @forelse($enrollments as $enrollment)
+                                        <div class="col-md-6 col-xl-4">
+                                            <div class="course-card h-100 border rounded overflow-hidden shadow-sm d-flex flex-column" style="border-radius: 20px !important;">
+                                                <div class="position-relative">
+                                                    <img src="{{ route('imagecache', ['template' => 'medium', 'filename' => $enrollment->product->fi()]) }}" class="w-100" style="aspect-ratio: 16/9; object-fit: cover;" alt="">
+                                                    <span class="position-absolute top-0 end-0 m-2 badge bg-success">{{ ucfirst($enrollment->status) }}</span>
+                                                </div>
+                                                <div class="p-4 flex-grow-1 d-flex flex-column">
+                                                    <h5 class="fw-bold text-dark mb-2" style="font-size: 16px; line-height: 1.4;">{{ $enrollment->product->name_en }}</h5>
+                                                    <p class="text-muted small mb-3">Enrolled on: {{ $enrollment->enrolled_at ? $enrollment->enrolled_at->format('d M, Y') : 'Pending' }}</p>
+                                                    <div class="mt-auto">
+                                                        @if($enrollment->status == 'active')
+                                                            <a href="{{ route('courseDetail', $enrollment->product->slug) }}" class="btn btn-primary w-100 btn-sm" style="border-radius: 10px;">কন্টিনিউ লার্নিং</a>
+                                                        @else
+                                                            <button class="btn btn-secondary w-100 btn-sm" disabled>পেন্ডিং</button>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @empty
+                                        <div class="col-12 text-center py-5">
+                                            <i class="fa-solid fa-graduation-cap mb-3" style="font-size: 48px; color: #e2e8f0;"></i>
+                                            <h5 class="text-muted">আপনি কোনো কোর্সে এনরোল করেননি</h5>
+                                            <a href="{{ route('courses') }}" class="btn btn-primary mt-3">কোর্সসমূহ দেখুন</a>
+                                        </div>
+                                    @endforelse
                                 </div>
                             </div>
                         </div>

@@ -151,4 +151,28 @@ function calculateDiscountPercentage($originalPrice, $discountAmount) {
     return round(($discountAmount / $originalPrice) * 100);
 }
 
+/**
+ * Localized Property Helper
+ * Returns the localized field (e.g., name_en or name_bn) based on current locale.
+ */
+function lp($model, $field)
+{
+    $locale = app()->getLocale();
+    $localizedField = $field . '_' . $locale;
+
+    if (isset($model->$localizedField) && !empty($model->$localizedField)) {
+        return $model->$localizedField;
+    }
+
+    // Fallback logic
+    $fallbackLocale = ($locale === 'en') ? 'bn' : 'en';
+    $fallbackField = $field . '_' . $fallbackLocale;
+
+    if (isset($model->$fallbackField) && !empty($model->$fallbackField)) {
+        return $model->$fallbackField;
+    }
+
+    return $model->$field ?? '';
+}
+
 

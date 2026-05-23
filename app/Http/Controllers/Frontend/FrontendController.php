@@ -1455,7 +1455,11 @@ public function quickAdd(Request $request)
 
     public function orderComplete()
     {
-        return view('website.order_complete');
+        $order = null;
+        if (Auth::check()) {
+            $order = \App\Models\Order::where('user_id', Auth::id())->with('orderItems.product')->latest()->first();
+        }
+        return view('website.order_complete', compact('order'));
     }
 
     private function getUserLocation($user)

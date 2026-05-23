@@ -1,7 +1,7 @@
 <header class="site-header">
   <div class="container header-inner">
     <a href="{{ route('home') }}" class="logo">
-      <img src="{{ route('imagecache', ['template' => 'original', 'filename' => $ws->logo_alt()]) }}" alt="{{ $ws->name }}" style="max-height: 40px;">
+      <img src="{{ route('imagecache', ['template' => 'original', 'filename' => $ws->logo_alt()]) }}" alt="{{ $ws->name }}" style="max-height: 70px;">
     </a>
 
     <nav class="nav-desktop">

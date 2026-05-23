@@ -991,6 +991,22 @@ class ProductController extends Controller
         $order->editedby_id    = Auth::id(); // Fix: assignment operator should be '='
         $order->save();
 
+        // Automatic Enrollment for Course Products if order is paid
+        if ($order->payment_status === 'paid') {
+            foreach ($order->orderItems as $item) {
+                if ($item->product && $item->product->type === 'course') {
+                    \App\Models\Enrollment::updateOrCreate(
+                        ['user_id' => $order->user_id, 'product_id' => $item->product_id],
+                        [
+                            'order_id' => $order->id,
+                            'enrolled_at' => now(),
+                            'status' => 'active'
+                        ]
+                    );
+                }
+            }
+        }
+
         // Display success notification
         toast('Order payment successfully added.', 'success');
 

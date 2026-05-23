@@ -1,6 +1,6 @@
 @extends('website.layouts.sikhobd')
 
-@section('title', ($product->name_en ?? 'Course Details') . ' — ' . ($ws->name ?? env('APP_NAME')))
+@section('title', (lp($product, 'name') ?? 'Course Details') . ' — ' . ($ws->name ?? env('APP_NAME')))
 
 @section('content')
   <section class="section">
@@ -9,10 +9,10 @@
         <div>
           <div class="crumbs" style="margin-bottom: 16px;">
             <a href="{{ route('home') }}">Home</a> <span>/</span>
-            <a href="{{ route('courses') }}" data-i18n="nav.courses">কোর্সসমূহ</a> <span>/</span>
-            <span>{{ $product->name_en }}</span>
+            <a href="{{ route('courses') }}" data-i18n="nav.courses">{{ __('nav.courses') }}</a> <span>/</span>
+            <span>{{ lp($product, 'name') }}</span>
           </div>
-          <h1 style="color: var(--primary); font-size: 32px; margin-bottom: 12px;">{{ $product->name_en }}</h1>
+          <h1 style="color: var(--primary); font-size: 32px; margin-bottom: 12px;">{{ lp($product, 'name') }}</h1>
           <div class="course-meta" style="margin-bottom: 24px;">
             <span><i class="fa-solid fa-star"></i> {{ number_format($product->averageRating(), 1) }} ({{ $product->reviews->count() }} reviews)</span>
             <span><i class="fa-solid fa-users"></i> {{ $product->enrollments->count() }} students</span>
@@ -25,20 +25,20 @@
           </div>
 
           <div class="cd-tabs">
-            <button class="active" data-tab="overview">Overview</button>
-            <button data-tab="curriculum">Curriculum</button>
-            <button data-tab="instructor">Instructor</button>
-            <button data-tab="reviews">Reviews</button>
+            <button class="active" data-tab="overview">{{ __('overview') }}</button>
+            <button data-tab="curriculum">{{ __('curriculum') }}</button>
+            <button data-tab="instructor">{{ __('instructor') }}</button>
+            <button data-tab="reviews">{{ __('reviews') }}</button>
           </div>
 
           <div data-tab-content="overview" style="display:block;">
             <h3 style="color:var(--primary); margin-bottom:12px;">About this course</h3>
             <div style="color:var(--text-soft); margin-bottom:16px;">
-                {!! $product->description_en !!}
+                {!! lp($product, 'description') !!}
             </div>
-            @if($product->excerpt_en)
+            @if(lp($product, 'excerpt'))
                 <h3 style="color:var(--primary); margin:20px 0 12px;">Course Highlights</h3>
-                <p style="color:var(--text-soft);">{{ $product->excerpt_en }}</p>
+                <p style="color:var(--text-soft);">{{ lp($product, 'excerpt') }}</p>
             @endif
           </div>
 
@@ -51,7 +51,7 @@
                 <div class="lesson">
                     <div class="num">{{ $index + 1 }}</div>
                     <div>
-                        <h4>{{ $lesson->title_en }}</h4>
+                        <h4>{{ lp($lesson, 'title') }}</h4>
                         <div class="dur">{{ $lesson->is_free ? 'Free Preview' : 'Premium Content' }}</div>
                     </div>
                     <span class="dur">{{ $lesson->duration }}</span>
@@ -112,12 +112,23 @@
             </div>
           @endif
 
-          <a href="{{ route('enroll', $product->slug) }}" class="btn btn-accent" style="width:100%; justify-content:center; margin-top:20px;" data-i18n="enroll">এনরোল</a>
+          @php
+            $isEnrolled = false;
+            if(auth()->check()){
+                $isEnrolled = \App\Models\Enrollment::where('user_id', auth()->id())->where('product_id', $product->id)->where('status', 'active')->exists();
+            }
+          @endphp
+
+          @if($isEnrolled)
+            <a href="{{ route('user.dashboard') }}#tab-courses" class="btn btn-primary" style="width:100%; justify-content:center; margin-top:20px;">কন্টিনিউ লার্নিং</a>
+          @else
+            <a href="{{ route('enroll', $product->slug) }}" class="btn btn-accent" style="width:100%; justify-content:center; margin-top:20px;" data-i18n="enroll">এনরোল</a>
+          @endif
           
-          <form action="{{ route('wishlist.add') }}" method="POST">
+          <form id="add-to-wishlist-form">
             @csrf
             <input type="hidden" name="product_id" value="{{ $product->id }}">
-            <button type="submit" class="btn btn-outline" style="width:100%; justify-content:center; margin-top:8px;">Add to Wishlist</button>
+            <button type="button" class="btn btn-outline add-to-wishlist-btn" style="width:100%; justify-content:center; margin-top:8px;">Add to Wishlist</button>
           </form>
 
           <ul>
@@ -147,6 +158,33 @@
             document.querySelectorAll('[data-tab-content]').forEach(content => {
                 content.style.display = content.getAttribute('data-tab-content') === tab ? 'block' : 'none';
             });
+        });
+    });
+
+    $(document).on('click', '.add-to-wishlist-btn', function() {
+        const productId = $('#add-to-wishlist-form input[name="product_id"]').val();
+        const btn = $(this);
+        
+        btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Processing...');
+
+        $.ajax({
+            url: "{{ route('wishlist.add') }}",
+            type: "POST",
+            data: {
+                product_id: productId,
+                _token: "{{ csrf_token() }}"
+            },
+            success: function(response) {
+                btn.prop('disabled', false).html('<i class="fa-solid fa-heart"></i> Added!');
+                showCartNotification(response.message, 'success');
+                setTimeout(() => {
+                    btn.html('Add to Wishlist');
+                }, 2000);
+            },
+            error: function() {
+                btn.prop('disabled', false).html('Add to Wishlist');
+                showCartNotification('Failed to add to wishlist.', 'error');
+            }
         });
     });
 </script>

@@ -354,10 +354,11 @@ class AuthController extends Controller
         $featured_products = \App\Models\Product::where('feature', 1)->where('active',1)->latest()->paginate(12);
         $stockRequests = \App\Models\ProductStockRequest::where('user_id', Auth::id())->latest()->paginate(20); // Initialize
         $products = \App\Models\Product::all(); // Add this line
+        $enrollments = \App\Models\Enrollment::where('user_id', $user->id)->with('product')->latest()->get();
 
         $activeTab = 'dashboard'; 
 
-        return view('user.dashboard', compact('user', 'todayOrdersCount', 'cancelOrdersCount', 'orders', 'activeTab','featured_products', 'stockRequests', 'products'));
+        return view('user.dashboard', compact('user', 'todayOrdersCount', 'cancelOrdersCount', 'orders', 'activeTab','featured_products', 'stockRequests', 'products', 'enrollments'));
     }
 
     public function orders(Request $request)
@@ -381,10 +382,11 @@ class AuthController extends Controller
         $featured_products = \App\Models\Product::where('feature', 1)->where('active',1)->latest()->paginate(12); // Ensure it's always passed
         $stockRequests = \App\Models\ProductStockRequest::where('user_id', Auth::id())->latest()->paginate(20); // Ensure it's always passed
         $products = \App\Models\Product::all(); // Add this line
+        $enrollments = \App\Models\Enrollment::where('user_id', $user->id)->with('product')->latest()->get();
 
         $activeTab = 'order'; 
 
-        return view('user.dashboard', compact('user', 'todayOrdersCount', 'cancelOrdersCount', 'orders', 'activeTab', 'type','featured_products', 'stockRequests', 'products'));
+        return view('user.dashboard', compact('user', 'todayOrdersCount', 'cancelOrdersCount', 'orders', 'activeTab', 'type','featured_products', 'stockRequests', 'products', 'enrollments'));
 
     }
     
@@ -397,10 +399,11 @@ class AuthController extends Controller
         $featured_products = \App\Models\Product::where('feature', 1)->where('active',1)->latest()->paginate(12);
         $stockRequests = \App\Models\ProductStockRequest::where('user_id', Auth::id())->latest()->paginate(20); // Initialize
         $products = \App\Models\Product::all(); // Add this line
+        $enrollments = \App\Models\Enrollment::where('user_id', $user->id)->with('product')->latest()->get();
 
         $activeTab = 'edit'; 
 
-        return view('user.dashboard', compact('user', 'todayOrdersCount', 'cancelOrdersCount', 'orders', 'activeTab', 'featured_products', 'stockRequests', 'products'));
+        return view('user.dashboard', compact('user', 'todayOrdersCount', 'cancelOrdersCount', 'orders', 'activeTab', 'featured_products', 'stockRequests', 'products', 'enrollments'));
     }
 
     public function idcard()
@@ -409,10 +412,11 @@ class AuthController extends Controller
         $todayOrdersCount = $user->orders()->whereDate('created_at', now()->toDateString())->count();
         $cancelOrdersCount = $user->orders()->where('order_status', 'cancelled')->count();
         $orders = $user->orders()->latest()->paginate(30);
+        $enrollments = \App\Models\Enrollment::where('user_id', $user->id)->with('product')->latest()->get();
 
         $activeTab = 'edit'; 
 
-        return view('user.idcard', compact('user', 'todayOrdersCount', 'cancelOrdersCount', 'orders', 'activeTab'));
+        return view('user.idcard', compact('user', 'todayOrdersCount', 'cancelOrdersCount', 'orders', 'activeTab', 'enrollments'));
     }
 
     public function featureProducts()
@@ -424,10 +428,11 @@ class AuthController extends Controller
         $featured_products = Product::where('feature', 1)->where('active',1)->latest()->paginate(12);
         $stockRequests = \App\Models\ProductStockRequest::where('user_id', Auth::id())->latest()->paginate(20); // Initialize
         $products = \App\Models\Product::all(); // Add this line
+        $enrollments = \App\Models\Enrollment::where('user_id', $user->id)->with('product')->latest()->get();
 
         $activeTab = 'feature_products'; 
 
-        return view('user.dashboard', compact('user', 'todayOrdersCount', 'cancelOrdersCount', 'orders', 'activeTab', 'featured_products', 'stockRequests', 'products'));
+        return view('user.dashboard', compact('user', 'todayOrdersCount', 'cancelOrdersCount', 'orders', 'activeTab', 'featured_products', 'stockRequests', 'products', 'enrollments'));
     }
 
     public function stockRequests()
@@ -438,14 +443,15 @@ class AuthController extends Controller
         $cancelOrdersCount = $user->orders()->where('order_status', 'cancelled')->count();
         $featured_products = collect(); // Initialize as empty collection
         $products = \App\Models\Product::all(); // Add this line
+        $enrollments = \App\Models\Enrollment::where('user_id', $user->id)->with('product')->latest()->get();
 
         $stockRequests = \App\Models\ProductStockRequest::with('product')->where('user_id', Auth::id())->latest()->paginate(20);
 
         $activeTab = 'stock_requests'; 
 
-        return view('user.dashboard', compact('user', 'todayOrdersCount', 'cancelOrdersCount', 'orders', 'activeTab', 'stockRequests', 'featured_products', 'products'));
+        return view('user.dashboard', compact('user', 'todayOrdersCount', 'cancelOrdersCount', 'orders', 'activeTab', 'stockRequests', 'featured_products', 'products', 'enrollments'));
     }
-
+    
     // public function createStockRequestForm()
     // {
     //     $user = Auth::user();
@@ -472,10 +478,11 @@ class AuthController extends Controller
         $stockRequests = \App\Models\ProductStockRequest::with('product')->where('user_id', Auth::id())->latest()->paginate(20); // Initialize as empty collection
 
         $products = \App\Models\Product::all(); // Products needed for the form
+        $enrollments = \App\Models\Enrollment::where('user_id', $user->id)->with('product')->latest()->get();
 
         $activeTab = 'create_stock_request'; 
 
-        return view('user.dashboard', compact('user', 'todayOrdersCount', 'cancelOrdersCount', 'orders', 'activeTab', 'featured_products', 'stockRequests', 'products'));
+        return view('user.dashboard', compact('user', 'todayOrdersCount', 'cancelOrdersCount', 'orders', 'activeTab', 'featured_products', 'stockRequests', 'products', 'enrollments'));
     }
 
 

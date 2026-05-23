@@ -3,7 +3,7 @@
     <div class="footer-grid">
       <div>
         <a href="{{ route('home') }}" class="logo">
-          <img src="{{ route('imagecache', ['template' => 'original', 'filename' => $ws->logo()]) }}" alt="{{ $ws->name }}" style="max-height: 50px;">
+          <img src="{{ route('imagecache', ['template' => 'original', 'filename' => $ws->logo()]) }}" alt="{{ $ws->name }}" style="max-height: 70px;">
         </a>
         <p class="footer-about" data-i18n="footer.about">বাংলাদেশের সবচেয়ে বড় অনলাইন শিক্ষাপ্ল্যাটফর্ম।</p>
         <div class="social">

@@ -111,24 +111,26 @@
   <section class="section" style="padding-top:0;">
     <div class="container">
       <div class="section-head">
-        <h2><span data-i18n="sec.popular">জনপ্রিয়</span> <em data-i18n="sec.popular2">কোর্সসমূহ</em></h2>
+        <a href="{{ route('courses') }}" style="text-decoration: none;">
+            <h2><span data-i18n="sec.popular">জনপ্রিয়</span> <em data-i18n="sec.popular2">কোর্সসমূহ</em></h2>
+        </a>
         <p data-i18n="sec.popular.sub">হাজারো শিক্ষার্থীর পছন্দের কোর্স</p>
       </div>
       <div class="courses-grid">
         @foreach($feature_products->take(6) as $product)
         <article class="course-card">
-          <div class="course-thumb" style="--c1:#6c5ce7; --c2:#a29bfe;">
+          <a href="{{ route('courseDetail', $product->slug) }}" class="course-thumb" style="--c1:#6c5ce7; --c2:#a29bfe; display: block; overflow: hidden;">
             @if($product->feature)
             <span class="course-tag">FEATURED</span>
             @endif
             @if($product->featured_image)
-            <img src="{{ route('imagecache', ['template' => 'medium', 'filename' => $product->featured_image]) }}" alt="{{ $product->name_en }}" style="width:100%; height:100%; object-fit:cover;">
+            <img src="{{ route('imagecache', ['template' => 'medium', 'filename' => $product->featured_image]) }}" alt="{{ $product->name_en }}" style="width:100%; height:100%; object-fit:cover; transition: transform 0.5s;">
             @else
-            {{ $product->name_en }}
+            <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:var(--bg-soft); color:var(--primary); font-weight:700;">{{ $product->name_en }}</div>
             @endif
-          </div>
+          </a>
           <div class="course-body">
-            <h3>{{ $product->name_en }}</h3>
+            <h3><a href="{{ route('courseDetail', $product->slug) }}" style="color: inherit; text-decoration: none;">{{ $product->name_en }}</a></h3>
             <div class="course-meta">
               <span><i class="fa-solid fa-star"></i> 4.9</span>
               <span><i class="fa-solid fa-users"></i> {{ $product->click_count ?? '0' }}</span>
@@ -141,7 +143,12 @@
                   <span class="old-price">৳ {{ number_format($product->price, 0) }}</span>
                   @endif
               </div>
-              <a href="{{ route('productDetails', $product->slug) }}" class="btn btn-accent" data-i18n="enroll">এনরোল</a>
+              <div style="display: flex; gap: 8px;">
+                <button class="btn btn-outline btn-sm add-to-wishlist-ajax" data-id="{{ $product->id }}" title="Add to Wishlist">
+                    <i class="fa-regular fa-heart"></i>
+                </button>
+                <a href="{{ route('courseDetail', $product->slug) }}" class="btn btn-accent" data-i18n="enroll">এনরোল</a>
+              </div>
             </div>
           </div>
         </article>
@@ -566,6 +573,30 @@ $(document).ready(function() {
 
         });
 
+    });
+
+    $(document).on('click', '.add-to-wishlist-ajax', function() {
+        const productId = $(this).data('id');
+        const btn = $(this);
+        
+        btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i>');
+
+        $.ajax({
+            url: "{{ route('wishlist.add') }}",
+            type: "POST",
+            data: {
+                product_id: productId,
+                _token: "{{ csrf_token() }}"
+            },
+            success: function(response) {
+                btn.prop('disabled', false).html('<i class="fa-solid fa-heart"></i>');
+                showCartNotification(response.message, 'success');
+            },
+            error: function() {
+                btn.prop('disabled', false).html('<i class="fa-regular fa-heart"></i>');
+                showCartNotification('Failed to add to wishlist.', 'error');
+            }
+        });
     });
 
 
