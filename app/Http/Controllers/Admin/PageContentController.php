@@ -26,30 +26,28 @@ class PageContentController extends Controller
     {
         $request->validate([
             'page_slug' => 'required|unique:page_contents',
-            'title' => 'nullable|string|max:255',
-            'subtitle' => 'nullable|string',
-            'description' => 'nullable|string',
-            'content' => 'nullable|string',
+            'title_en' => 'nullable|string|max:255',
+            'title_bn' => 'nullable|string|max:255',
+            'subtitle_en' => 'nullable|string',
+            'subtitle_bn' => 'nullable|string',
+            'description_en' => 'nullable|string',
+            'description_bn' => 'nullable|string',
+            'content_en' => 'nullable|string',
+            'content_bn' => 'nullable|string',
         ]);
-
-        $highlights = $request->highlights;
-        if (is_string($highlights)) {
-            $highlights = json_decode($highlights, true);
-        }
-
-        $meta = $request->meta;
-        if (is_string($meta)) {
-            $meta = json_decode($meta, true);
-        }
 
         PageContent::create([
             'page_slug' => $request->page_slug,
-            'title' => $request->title,
-            'subtitle' => $request->subtitle,
-            'description' => $request->description,
-            'content' => $request->content,
-            'highlights' => $highlights,
-            'meta' => $meta,
+            'title_en' => $request->title_en,
+            'title_bn' => $request->title_bn,
+            'subtitle_en' => $request->subtitle_en,
+            'subtitle_bn' => $request->subtitle_bn,
+            'description_en' => $request->description_en,
+            'description_bn' => $request->description_bn,
+            'content_en' => $request->content_en,
+            'content_bn' => $request->content_bn,
+            'highlights' => $request->highlights,
+            'meta' => $request->meta,
             'addedby_id' => Auth::id(),
         ]);
 
@@ -76,30 +74,28 @@ class PageContentController extends Controller
 
         $request->validate([
             'page_slug' => 'required|unique:page_contents,page_slug,' . $id,
-            'title' => 'nullable|string|max:255',
-            'subtitle' => 'nullable|string',
-            'description' => 'nullable|string',
-            'content' => 'nullable|string',
+            'title_en' => 'nullable|string|max:255',
+            'title_bn' => 'nullable|string|max:255',
+            'subtitle_en' => 'nullable|string',
+            'subtitle_bn' => 'nullable|string',
+            'description_en' => 'nullable|string',
+            'description_bn' => 'nullable|string',
+            'content_en' => 'nullable|string',
+            'content_bn' => 'nullable|string',
         ]);
-
-        $highlights = $request->highlights;
-        if (is_string($highlights)) {
-            $highlights = json_decode($highlights, true);
-        }
-
-        $meta = $request->meta;
-        if (is_string($meta)) {
-            $meta = json_decode($meta, true);
-        }
 
         $pageContent->update([
             'page_slug' => $request->page_slug,
-            'title' => $request->title,
-            'subtitle' => $request->subtitle,
-            'description' => $request->description,
-            'content' => $request->content,
-            'highlights' => $highlights,
-            'meta' => $meta,
+            'title_en' => $request->title_en,
+            'title_bn' => $request->title_bn,
+            'subtitle_en' => $request->subtitle_en,
+            'subtitle_bn' => $request->subtitle_bn,
+            'description_en' => $request->description_en,
+            'description_bn' => $request->description_bn,
+            'content_en' => $request->content_en,
+            'content_bn' => $request->content_bn,
+            'highlights' => $request->highlights,
+            'meta' => $request->meta,
             'editedby_id' => Auth::id(),
         ]);
 
@@ -112,5 +108,13 @@ class PageContentController extends Controller
         $pageContent->delete();
 
         return redirect()->route('admin.page_contents.index')->with('success', 'Page content deleted successfully.');
+    }
+
+    public function toggleActive(PageContent $pageContent)
+    {
+        $pageContent->active = !$pageContent->active;
+        $pageContent->save();
+
+        return back()->with('success', 'Status updated successfully.');
     }
 }

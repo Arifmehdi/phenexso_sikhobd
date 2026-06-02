@@ -13,97 +13,92 @@ class PageContentSeeder extends Seeder
         $admin = User::first();
         $adminId = $admin ? $admin->id : null;
 
-        // Home Page Content
+        // Home Page Content for SikhoBD
         PageContent::updateOrCreate(
             ['page_slug' => 'home'],
             [
-                'title' => 'MN Coffee <br class="d-none d-xxl-block"> Local Beans, Global Taste.',
-                'subtitle' => 'about us',
-                'description' => 'MN Coffee is a Bangladesh-based specialty coffee venture connecting hill farmers with urban cafés through a direct farm-to-market supply chain. We focus on improving quality, traceability, and farmer income by developing local Arabica production and better post-harvest practices.',
-                'highlights' => [
-                    'B2B supply of roasted coffee beans (Arabica & Robusta)',
-                    'Direct sourcing from Bandarban hill farmers',
-                    'Custom roast profiles for cafés',
-                    'Quality-controlled and traceable coffee supply'
-                ],
+                'title_en' => 'Learn <em>anything</em>,<br>anytime, anywhere',
+                'title_bn' => 'শিখুন <em>যেকোনো কিছু</em>,<br>যেকোনো সময়, যেকোনো জায়গায়',
+                'subtitle_en' => "Bangladesh's #1 Online School",
+                'subtitle_bn' => 'বাংলাদেশের #১ অনলাইন স্কুল',
+                'description_en' => '1000+ courses for Class 6-12, admission prep & skill development — all in one place.',
+                'description_bn' => 'ক্লাস ৬ থেকে ১২, ভর্তি প্রস্তুতি, স্কিল ডেভেলপমেন্ট সহ ১০০০+ কোর্স একসাথে।',
                 'meta' => [
-                    'process_title' => 'Our Specialty Process',
-                    'process_subtitle' => 'From direct farm sourcing to custom roasting, discover how we bring the best coffee to your cup.',
-                    'offer_title' => 'Try Our Special Offers',
-                    'offer_subtitle' => 'Check out our featured products and special deals.',
-                    'testimonial_title' => 'What Our Customer Says',
-                    'testimonial_subtitle' => 'Hear from our satisfied customers about their experience with us.',
-                    'blog_title' => 'Blog & Articles',
-                    'blog_subtitle' => 'Stay updated with our latest news and recipes.',
-                    'counter_bg' => 'mncofee/assets/img/aida-images/reservation-bg.png',
-                    'counters' => [
-                        ['count' => '5670', 'label' => 'Happy Customers', 'icon' => 'fa-light fa-face-smile'],
-                        ['count' => '29', 'label' => 'Passionate Chefs', 'icon' => 'fa-light fa-hat-chef'],
-                        ['count' => '260', 'label' => 'Favorite Dishes', 'icon' => 'fa-light fa-mug-hot'],
-                        ['count' => '778', 'label' => 'Customer Rating', 'icon' => 'fa-light fa-star']
-                    ]
-                ],
-                'active' => true,
-                'addedby_id' => $adminId,
-            ]
-        );
-
-        // About Us Page Content
-        PageContent::updateOrCreate(
-            ['page_slug' => 'about'],
-            [
-                'title' => 'Specialty Coffee Venture <br> in Bangladesh',
-                'subtitle' => 'Our Story',
-                'description' => 'MN Coffee is a Bangladesh-based specialty coffee venture connecting hill farmers with urban cafés through a direct farm-to-market supply chain. We focus on improving quality, traceability, and farmer income by developing local Arabica production and better post-harvest practices.',
-                'highlights' => [
-                    ['title' => 'Our Mission', 'text' => 'To build a sustainable, high-quality local coffee industry that benefits farmers and meets premium market demand.'],
-                    ['title' => 'Our Vision', 'text' => 'To position Bangladesh as an emerging origin for specialty coffee.']
-                ],
-                'meta' => [
-                    'focus_title' => 'Key Objectives',
-                    'focus_subtitle' => 'Our Focus',
-                    'objectives' => [
-                        ['icon' => 'fa-light fa-users-viewfinder', 'title' => 'Farmer Income', 'text' => 'Connecting hill farmers directly to markets to ensure fair and improved income.'],
-                        ['icon' => 'fa-light fa-microscope', 'title' => 'Traceability', 'text' => 'Maintaining full traceability from the specific hill farm to your urban café cup.'],
-                        ['icon' => 'fa-light fa-chart-line-up', 'title' => 'Arabica Growth', 'text' => 'Developing and expanding local Arabica production in the Chittagong Hill Tracts.']
-                    ]
-                ],
-                'active' => true,
-                'addedby_id' => $adminId,
-            ]
-        );
-
-        // Our Process Page Content
-        PageContent::updateOrCreate(
-            ['page_slug' => 'process'],
-            [
-                'title' => 'Our Direct Farm-to-Market Supply Chain',
-                'subtitle' => 'Our Process',
-                'description' => 'We focus on improving quality, traceability, and farmer income through a meticulous post-harvest process.',
-                'highlights' => [
-                    ['title' => 'Direct Sourcing'],
-                    ['title' => 'Post-Harvest'],
-                    ['title' => 'Urban Supply']
-                ],
-                'meta' => [
-                    'steps' => [
-                        [
-                            'title' => 'Direct Farm Sourcing',
-                            'text' => 'We work directly with Bandarban hill farmers, cutting out middlemen to ensure higher income for the producers. This direct connection allows us to maintain full traceability of every bean.',
-                            'image' => 'mncofee/assets/img/aida-images/about-picture1.png'
-                        ],
-                        [
-                            'title' => 'Post-Harvest Excellence',
-                            'text' => 'Our team implements better post-harvest practices on the ground. From precise fermentation to controlled drying, we ensure the local Arabica and Robusta beans reach their full specialty potential.',
-                            'image' => 'mncofee/assets/img/aida-images/service-image1.png'
-                        ],
-                        [
-                            'title' => 'Custom Roasting & Supply',
-                            'text' => 'We develop custom roast profiles specifically for urban cafés. Our quality-controlled B2B supply chain delivers the global taste of local beans directly to your business.',
-                            'image' => 'mncofee/assets/img/aida-images/about-picture3.png'
+                    'hero_stats' => [
+                        ['count' => '2.4M+', 'label_en' => 'Students', 'label_bn' => 'শিক্ষার্থী'],
+                        ['count' => '1000+', 'label_en' => 'Courses', 'label_bn' => 'কোর্স'],
+                        ['count' => '500+', 'label_en' => 'Teachers', 'label_bn' => 'শিক্ষক']
+                    ],
+                    'how_it_works' => [
+                        'title_en' => 'Start Learning in 3 Easy Steps',
+                        'title_bn' => 'সহজ তিন ধাপে শেখা শুরু করুন',
+                        'steps' => [
+                            [
+                                'num' => '01',
+                                'title_en' => 'Choose a Course',
+                                'title_bn' => 'কোর্স পছন্দ করুন',
+                                'desc_en' => 'Pick your favorite course from our vast categories.',
+                                'desc_bn' => 'আমাদের বিশাল ক্যাটাগরি থেকে আপনার পছন্দের কোর্সটি বেছে নিন।'
+                            ],
+                            [
+                                'num' => '02',
+                                'title_en' => 'Enroll',
+                                'title_bn' => 'এনরোল করুন',
+                                'desc_en' => 'Get access by enrolling with easy payment methods.',
+                                'desc_bn' => 'সহজ পেমেন্ট পদ্ধতিতে কোর্সে ভর্তি হন এবং এক্সেস পান।'
+                            ],
+                            [
+                                'num' => '03',
+                                'title_en' => 'Start Learning',
+                                'title_bn' => 'শেখা শুরু করুন',
+                                'desc_en' => 'Improve your skills with video lessons, quizzes and notes.',
+                                'desc_bn' => 'ভিডিও লেসন, কুইজ এবং নোটের মাধ্যমে আপনার দক্ষতা বৃদ্ধি করুন।'
+                            ]
+                        ]
+                    ],
+                    'features' => [
+                        'title_en' => 'Why SikhoBD?',
+                        'title_bn' => 'কেন SikhoBD?',
+                        'items' => [
+                            [
+                                'icon' => 'fa-solid fa-video',
+                                'title_en' => 'Live Classes',
+                                'title_bn' => 'লাইভ ক্লাস',
+                                'desc_en' => 'Real-time live classes with the best teachers in the country.',
+                                'desc_bn' => 'দেশের সেরা শিক্ষকদের সাথে রিয়েল-টাইম লাইভ ক্লাস।'
+                            ],
+                            [
+                                'icon' => 'fa-solid fa-book-open',
+                                'title_en' => '1000+ Resources',
+                                'title_bn' => '১০০০+ রিসোর্স',
+                                'desc_en' => 'Videos, notes, quizzes — all in one place.',
+                                'desc_bn' => 'ভিডিও, নোট, কুইজ — সব এক জায়গায়।'
+                            ],
+                            [
+                                'icon' => 'fa-solid fa-mobile-screen',
+                                'title_en' => 'Any Device',
+                                'title_bn' => 'যেকোনো ডিভাইস',
+                                'desc_en' => 'Learn from mobile, tablet or computer — anywhere.',
+                                'desc_bn' => 'মোবাইল, ট্যাবলেট বা কম্পিউটার থেকে শিখুন — যেকোনো জায়গায়।'
+                            ]
                         ]
                     ]
                 ],
+                'active' => true,
+                'addedby_id' => $adminId,
+            ]
+        );
+
+        // About Page Content
+        PageContent::updateOrCreate(
+            ['page_slug' => 'about'],
+            [
+                'title_en' => 'Education for Everyone',
+                'title_bn' => 'সবার জন্য শিক্ষা',
+                'subtitle_en' => 'Our Story',
+                'subtitle_bn' => 'আমাদের গল্প',
+                'description_en' => 'SikhoBD is an online learning platform dedicated to providing quality education to students across Bangladesh.',
+                'description_bn' => 'SikhoBD একটি অনলাইন লার্নিং প্ল্যাটফর্ম যা সারা বাংলাদেশের শিক্ষার্থীদের মানসম্মত শিক্ষা প্রদানে নিবেদিত।',
                 'active' => true,
                 'addedby_id' => $adminId,
             ]

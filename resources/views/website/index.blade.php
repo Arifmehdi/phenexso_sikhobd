@@ -16,26 +16,32 @@
     <div class="container">
       <div class="hero-grid">
         <div>
-          <span class="eyebrow" data-i18n="hero.eyebrow">বাংলাদেশের #১ অনলাইন স্কুল</span>
-          <h1><span data-i18n="hero.title1">শিখুন</span> <em data-i18n="hero.title2">যেকোনো কিছু</em>,<br><span data-i18n="hero.title3">যেকোনো সময়, যেকোনো জায়গায়</span></h1>
-          <p data-i18n="hero.desc">ক্লাস ৬ থেকে ১২, ভর্তি প্রস্তুতি, স্কিল ডেভেলপমেন্ট সহ ১০০০+ কোর্স একসাথে।</p>
+          <span class="eyebrow">{{ app()->getLocale() == 'bn' ? ($content->subtitle_bn ?? 'বাংলাদেশের #১ অনলাইন স্কুল') : ($content->subtitle_en ?? "Bangladesh's #1 Online School") }}</span>
+          <h1>{!! app()->getLocale() == 'bn' ? ($content->title_bn ?? 'শিখুন <em>যেকোনো কিছু</em>,<br>যেকোনো সময়, যেকোনো জায়গায়') : ($content->title_en ?? 'Learn <em>anything</em>,<br>anytime, anywhere') !!}</h1>
+          <p>{{ app()->getLocale() == 'bn' ? ($content->description_bn ?? 'ক্লাস ৬ থেকে ১২, ভর্তি প্রস্তুতি, স্কিল ডেভেলপমেন্ট সহ ১০০০+ কোর্স একসাথে।') : ($content->description_en ?? '1000+ courses for Class 6-12, admission prep & skill development — all in one place.') }}</p>
           
           <div class="hero-search">
             <form action="{{ route('shop') }}" method="GET">
               <i class="fa-solid fa-magnifying-glass"></i>
-              <input type="text" name="search" placeholder="কী শিখতে চান? সার্চ করুন..." required>
-              <button type="submit" class="btn btn-accent">খুঁজুন</button>
+              <input type="text" name="search" placeholder="{{ app()->getLocale() == 'bn' ? 'কী শিখতে চান? সার্চ করুন...' : 'What do you want to learn? Search...' }}" required>
+              <button type="submit" class="btn btn-accent">{{ app()->getLocale() == 'bn' ? 'খুঁজুন' : 'Search' }}</button>
             </form>
           </div>
 
           <div class="hero-cta">
-            <a href="{{ route('courses') }}" class="btn btn-primary"><span data-i18n="hero.explore">এক্সপ্লোর কোর্স</span> <i class="fa-solid fa-arrow-right"></i></a>
-            <a href="#" class="btn btn-outline"><i class="fa-solid fa-play"></i> <span data-i18n="hero.freeclass">ফ্রি ক্লাস দেখুন</span></a>
+            <a href="{{ route('courses') }}" class="btn btn-primary"><span>{{ app()->getLocale() == 'bn' ? 'এক্সপ্লোর কোর্স' : 'Explore Courses' }}</span> <i class="fa-solid fa-arrow-right"></i></a>
+            <a href="#" class="btn btn-outline"><i class="fa-solid fa-play"></i> <span>{{ app()->getLocale() == 'bn' ? 'ফ্রি ক্লাস দেখুন' : 'Watch Free Class' }}</span></a>
           </div>
           <div class="hero-stats">
-            <div class="stat"><strong>2.4M+</strong><span data-i18n="hero.students">শিক্ষার্থী</span></div>
-            <div class="stat"><strong>1000+</strong><span data-i18n="hero.courses">কোর্স</span></div>
-            <div class="stat"><strong>500+</strong><span data-i18n="hero.teachers">শিক্ষক</span></div>
+            @if(isset($content->meta['hero_stats']))
+                @foreach($content->meta['hero_stats'] as $stat)
+                    <div class="stat"><strong>{{ $stat['count'] }}</strong><span>{{ app()->getLocale() == 'bn' ? $stat['label_bn'] : $stat['label_en'] }}</span></div>
+                @endforeach
+            @else
+                <div class="stat"><strong>2.4M+</strong><span data-i18n="hero.students">শিক্ষার্থী</span></div>
+                <div class="stat"><strong>1000+</strong><span data-i18n="hero.courses">কোর্স</span></div>
+                <div class="stat"><strong>500+</strong><span data-i18n="hero.teachers">শিক্ষক</span></div>
+            @endif
           </div>
         </div>
         <div style="position: relative;">
@@ -62,24 +68,38 @@
   <section class="section how-it-works">
     <div class="container">
       <div class="section-head">
-        <h2><span data-i18n="how.title">সহজ তিন ধাপে</span> <em data-i18n="how.title2">শেখা শুরু করুন</em></h2>
+        @if(isset($content->meta['how_it_works']))
+            <h2><span>{{ app()->getLocale() == 'bn' ? $content->meta['how_it_works']['title_bn'] : $content->meta['how_it_works']['title_en'] }}</span></h2>
+        @else
+            <h2><span data-i18n="how.title">সহজ তিন ধাপে</span> <em data-i18n="how.title2">শেখা শুরু করুন</em></h2>
+        @endif
       </div>
       <div class="steps-grid">
-        <div class="step">
-          <div class="step-num">01</div>
-          <h3>কোর্স পছন্দ করুন</h3>
-          <p>আমাদের বিশাল ক্যাটাগরি থেকে আপনার পছন্দের কোর্সটি বেছে নিন।</p>
-        </div>
-        <div class="step">
-          <div class="step-num">02</div>
-          <h3>এনরোল করুন</h3>
-          <p>সহজ পেমেন্ট পদ্ধতিতে কোর্সে ভর্তি হন এবং এক্সেস পান।</p>
-        </div>
-        <div class="step">
-          <div class="step-num">03</div>
-          <h3>শেখা শুরু করুন</h3>
-          <p>ভিডিও লেসন, কুইজ এবং নোটের মাধ্যমে আপনার দক্ষতা বৃদ্ধি করুন।</p>
-        </div>
+        @if(isset($content->meta['how_it_works']['steps']))
+            @foreach($content->meta['how_it_works']['steps'] as $step)
+                <div class="step">
+                  <div class="step-num">{{ $step['num'] }}</div>
+                  <h3>{{ app()->getLocale() == 'bn' ? $step['title_bn'] : $step['title_en'] }}</h3>
+                  <p>{{ app()->getLocale() == 'bn' ? $step['desc_bn'] : $step['desc_en'] }}</p>
+                </div>
+            @endforeach
+        @else
+            <div class="step">
+              <div class="step-num">01</div>
+              <h3>কোর্স পছন্দ করুন</h3>
+              <p>আমাদের বিশাল ক্যাটাগরি থেকে আপনার পছন্দের কোর্সটি বেছে নিন।</p>
+            </div>
+            <div class="step">
+              <div class="step-num">02</div>
+              <h3>এনরোল করুন</h3>
+              <p>সহজ পেমেন্ট পদ্ধতিতে কোর্সে ভর্তি হন এবং এক্সেস পান।</p>
+            </div>
+            <div class="step">
+              <div class="step-num">03</div>
+              <h3>শেখা শুরু করুন</h3>
+              <p>ভিডিও লেসন, কুইজ এবং নোটের মাধ্যমে আপনার দক্ষতা বৃদ্ধি করুন।</p>
+            </div>
+        @endif
       </div>
     </div>
   </section>
@@ -87,8 +107,8 @@
   <section class="section" style="padding-top:0;">
     <div class="container">
       <div class="section-head">
-        <h2><span data-i18n="sec.cat">ক্যাটাগরি অনুযায়ী</span> <em data-i18n="sec.cat2">কোর্স</em></h2>
-        <p data-i18n="sec.cat.sub">আপনার আগ্রহ অনুযায়ী যেকোনো ক্যাটাগরি বেছে নিন</p>
+        <h2><span data-i18n="sec.cat">{{ app()->getLocale() == 'bn' ? 'ক্যাটাগরি অনুযায়ী' : 'Browse by' }}</span> <em data-i18n="sec.cat2">{{ app()->getLocale() == 'bn' ? 'কোর্স' : 'category' }}</em></h2>
+        <p data-i18n="sec.cat.sub">{{ app()->getLocale() == 'bn' ? 'আপনার আগ্রহ অনুযায়ী যেকোনো ক্যাটাগরি বেছে নিন' : 'Pick a category that matches your interest' }}</p>
       </div>
       <div class="categories-grid">
         @foreach($categories->take(4) as $index => $category)
@@ -100,8 +120,8 @@
               @else <i class="fa-solid fa-user-graduate"></i>
               @endif
           </div>
-          <h3>{{ $category->name_en }}</h3>
-          <p>{{ $category->products_count ?? $category->products->count() }} Courses</p>
+          <h3>{{ app()->getLocale() == 'bn' ? $category->name_bn : $category->name_en }}</h3>
+          <p>{{ $category->products_count ?? $category->products->count() }} {{ app()->getLocale() == 'bn' ? 'টি কোর্স' : 'Courses' }}</p>
         </a>
         @endforeach
       </div>
@@ -112,9 +132,9 @@
     <div class="container">
       <div class="section-head">
         <a href="{{ route('courses') }}" style="text-decoration: none;">
-            <h2><span data-i18n="sec.popular">জনপ্রিয়</span> <em data-i18n="sec.popular2">কোর্সসমূহ</em></h2>
+            <h2><span data-i18n="sec.popular">{{ app()->getLocale() == 'bn' ? 'জনপ্রিয়' : 'Popular' }}</span> <em data-i18n="sec.popular2">{{ app()->getLocale() == 'bn' ? 'কোর্সসমূহ' : 'courses' }}</em></h2>
         </a>
-        <p data-i18n="sec.popular.sub">হাজারো শিক্ষার্থীর পছন্দের কোর্স</p>
+        <p data-i18n="sec.popular.sub">{{ app()->getLocale() == 'bn' ? 'হাজারো শিক্ষার্থীর পছন্দের কোর্স' : 'Loved by thousands of students' }}</p>
       </div>
       <div class="courses-grid">
         @foreach($feature_products->take(6) as $product)
@@ -124,13 +144,13 @@
             <span class="course-tag">FEATURED</span>
             @endif
             @if($product->featured_image)
-            <img src="{{ route('imagecache', ['template' => 'medium', 'filename' => $product->featured_image]) }}" alt="{{ $product->name_en }}" style="width:100%; height:100%; object-fit:cover; transition: transform 0.5s;">
+            <img src="{{ route('imagecache', ['template' => 'medium', 'filename' => $product->featured_image]) }}" alt="{{ app()->getLocale() == 'bn' ? $product->name_bn : $product->name_en }}" style="width:100%; height:100%; object-fit:cover; transition: transform 0.5s;">
             @else
-            <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:var(--bg-soft); color:var(--primary); font-weight:700;">{{ $product->name_en }}</div>
+            <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:var(--bg-soft); color:var(--primary); font-weight:700;">{{ app()->getLocale() == 'bn' ? $product->name_bn : $product->name_en }}</div>
             @endif
           </a>
           <div class="course-body">
-            <h3><a href="{{ route('courseDetail', $product->slug) }}" style="color: inherit; text-decoration: none;">{{ $product->name_en }}</a></h3>
+            <h3><a href="{{ route('courseDetail', $product->slug) }}" style="color: inherit; text-decoration: none;">{{ app()->getLocale() == 'bn' ? $product->name_bn : $product->name_en }}</a></h3>
             <div class="course-meta">
               <span><i class="fa-solid fa-star"></i> 4.9</span>
               <span><i class="fa-solid fa-users"></i> {{ $product->click_count ?? '0' }}</span>
@@ -147,7 +167,7 @@
                 <button class="btn btn-outline btn-sm add-to-wishlist-ajax" data-id="{{ $product->id }}" title="Add to Wishlist">
                     <i class="fa-regular fa-heart"></i>
                 </button>
-                <a href="{{ route('courseDetail', $product->slug) }}" class="btn btn-accent" data-i18n="enroll">এনরোল</a>
+                <a href="{{ route('courseDetail', $product->slug) }}" class="btn btn-accent">{{ app()->getLocale() == 'bn' ? 'এনরোল' : 'Enroll' }}</a>
               </div>
             </div>
           </div>
@@ -155,7 +175,7 @@
         @endforeach
       </div>
       <div style="text-align:center; margin-top:40px;">
-        <a href="{{ route('courses') }}" class="btn btn-outline">সব কোর্স দেখুন</a>
+        <a href="{{ route('courses') }}" class="btn btn-outline">{{ app()->getLocale() == 'bn' ? 'সব কোর্স দেখুন' : 'View All Courses' }}</a>
       </div>
     </div>
   </section>
@@ -163,24 +183,38 @@
   <section class="section features">
     <div class="container">
       <div class="section-head">
-        <h2><span data-i18n="sec.why">কেন</span> <em data-i18n="sec.why2">{{ $ws->name ?? 'SikhoBD' }}?</em></h2>
+        @if(isset($content->meta['features']))
+            <h2><span>{{ app()->getLocale() == 'bn' ? $content->meta['features']['title_bn'] : $content->meta['features']['title_en'] }}</span></h2>
+        @else
+            <h2><span data-i18n="sec.why">কেন</span> <em data-i18n="sec.why2">{{ $ws->name ?? 'SikhoBD' }}?</em></h2>
+        @endif
       </div>
       <div class="features-grid">
-        <div class="feature">
-          <div class="feature-icon"><i class="fa-solid fa-video"></i></div>
-          <h3 data-i18n="nav.live">লাইভ ক্লাস</h3>
-          <p>Real-time live classes with the best teachers in the country.</p>
-        </div>
-        <div class="feature">
-          <div class="feature-icon"><i class="fa-solid fa-book-open"></i></div>
-          <h3>1000+ Resources</h3>
-          <p>Videos, notes, quizzes — all in one place.</p>
-        </div>
-        <div class="feature">
-          <div class="feature-icon"><i class="fa-solid fa-mobile-screen"></i></div>
-          <h3>Any Device</h3>
-          <p>Learn from mobile, tablet or computer — anywhere.</p>
-        </div>
+        @if(isset($content->meta['features']['items']))
+            @foreach($content->meta['features']['items'] as $item)
+                <div class="feature">
+                  <div class="feature-icon"><i class="{{ $item['icon'] }}"></i></div>
+                  <h3>{{ app()->getLocale() == 'bn' ? $item['title_bn'] : $item['title_en'] }}</h3>
+                  <p>{{ app()->getLocale() == 'bn' ? $item['desc_bn'] : $item['desc_en'] }}</p>
+                </div>
+            @endforeach
+        @else
+            <div class="feature">
+              <div class="feature-icon"><i class="fa-solid fa-video"></i></div>
+              <h3 data-i18n="nav.live">লাইভ ক্লাস</h3>
+              <p>Real-time live classes with the best teachers in the country.</p>
+            </div>
+            <div class="feature">
+              <div class="feature-icon"><i class="fa-solid fa-book-open"></i></div>
+              <h3>1000+ Resources</h3>
+              <p>Videos, notes, quizzes — all in one place.</p>
+            </div>
+            <div class="feature">
+              <div class="feature-icon"><i class="fa-solid fa-mobile-screen"></i></div>
+              <h3>Any Device</h3>
+              <p>Learn from mobile, tablet or computer — anywhere.</p>
+            </div>
+        @endif
       </div>
     </div>
   </section>

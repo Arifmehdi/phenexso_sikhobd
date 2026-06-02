@@ -592,6 +592,7 @@ main { padding-top: 76px; }
 
 /* Responsive */
 @media (max-width: 1024px) {
+  .logo img { max-height: 45px !important; }
   .nav-desktop, .header-right .desktop-only { display: none; }
   .menu-toggle { display: flex; }
   .hero-grid, .about-grid, .contact-grid, .cd-grid { grid-template-columns: 1fr; gap: 40px; }

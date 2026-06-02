@@ -122,12 +122,15 @@
 @endpush
 
 @section('content')
+@php
+    $isBn = app()->getLocale() == 'bn';
+@endphp
   <section class="page-hero">
     <div class="container">
-        <h1 data-i18n="shop.title">আওয়ার শপ</h1>
-        <p data-i18n="shop.subtitle">আপনার প্রয়োজনীয় সব শিক্ষামূলক পণ্য এখন এক জায়গায়</p>
+        <h1 data-i18n="shop.title">{{ $isBn ? 'আমাদের  শপ' : 'Our Shop' }}</h1>
+        <p data-i18n="shop.subtitle">{{ $isBn ? 'আপনার প্রয়োজনীয় সব শিক্ষামূলক পণ্য এখন এক জায়গায়' : 'All your educational products in one place' }}</p>
         <div class="crumbs">
-            <a href="{{ route('home') }}">Home</a> <span>/</span> <span data-i18n="nav.shop">শপ</span>
+            <a href="{{ route('home') }}">{{ $isBn ? 'হোম' : 'Home' }}</a> <span>/</span> <span data-i18n="nav.shop">{{ $isBn ? 'শপ' : 'Shop' }}</span>
         </div>
     </div>
   </section>

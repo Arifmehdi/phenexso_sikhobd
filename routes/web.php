@@ -637,6 +637,7 @@ Route::middleware(['userRole:admin','auth'])->prefix('admin')->group(function(){
         'update' => 'admin.page_contents.update',
         'destroy' => 'admin.page_contents.destroy',
     ]);
+    Route::put('page_contents/{page_content}/toggle-active', [PageContentController::class, 'toggleActive'])->name('admin.page_contents.toggle-active');
     // E-learning Management
     Route::get('/enrollments', [\App\Http\Controllers\Admin\EnrollmentController::class, 'index'])->name('admin.enrollments.index');
     Route::post('/enrollments/{enrollment}/status', [\App\Http\Controllers\Admin\EnrollmentController::class, 'updateStatus'])->name('admin.enrollments.updateStatus');
