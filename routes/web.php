@@ -628,16 +628,16 @@ Route::middleware(['userRole:admin','auth'])->prefix('admin')->group(function(){
     // Vehicle Assignment Admin Routes
     Route::resource('vehicle-assignments', \App\Http\Controllers\Admin\VehicleAssignmentController::class)->names('admin.vehicle_assignments');
 
-    Route::resource('page_contents', PageContentController::class)->names([
-        'index' => 'admin.page_contents.index',
-        'create' => 'admin.page_contents.create',
-        'store' => 'admin.page_contents.store',
-        'show' => 'admin.page_contents.show',
-        'edit' => 'admin.page_contents.edit',
-        'update' => 'admin.page_contents.update',
-        'destroy' => 'admin.page_contents.destroy',
-    ]);
-    Route::put('page_contents/{page_content}/toggle-active', [PageContentController::class, 'toggleActive'])->name('admin.page_contents.toggle-active');
+    // Route::resource('page_contents', PageContentController::class)->names([
+    //     'index' => 'admin.page_contents.index',
+    //     'create' => 'admin.page_contents.create',
+    //     'store' => 'admin.page_contents.store',
+    //     'show' => 'admin.page_contents.show',
+    //     'edit' => 'admin.page_contents.edit',
+    //     'update' => 'admin.page_contents.update',
+    //     'destroy' => 'admin.page_contents.destroy',
+    // ]);
+    // Route::put('page_contents/{page_content}/toggle-active', [PageContentController::class, 'toggleActive'])->name('admin.page_contents.toggle-active');
     // E-learning Management
     Route::get('/enrollments', [\App\Http\Controllers\Admin\EnrollmentController::class, 'index'])->name('admin.enrollments.index');
     Route::post('/enrollments/{enrollment}/status', [\App\Http\Controllers\Admin\EnrollmentController::class, 'updateStatus'])->name('admin.enrollments.updateStatus');
@@ -664,6 +664,24 @@ Route::middleware(['userRole:admin','auth'])->prefix('admin')->group(function(){
     Route::put('instructors/{user}/toggle-approval', [\App\Http\Controllers\Admin\InstructorController::class, 'toggleApproval'])->name('admin.instructors.toggle-approval');
     Route::get('instructors/search', [\App\Http\Controllers\Admin\InstructorController::class, 'search'])->name('admin.instructors.search');
 
+    // Exam Management
+    Route::resource('page_contents', \App\Http\Controllers\Admin\QuestionController::class)->names('admin.questions')->parameters(['page_contents' => 'question']);
+    Route::post('page_contents/bulk-upload', [\App\Http\Controllers\Admin\QuestionController::class, 'bulkUpload'])->name('admin.questions.bulk-upload');
+    
+    Route::resource('exams', \App\Http\Controllers\Admin\ExamController::class)->names('admin.exams');
+    Route::get('exams/{exam}/questions', [\App\Http\Controllers\Admin\ExamController::class, 'selectQuestions'])->name('admin.exams.select-questions');
+    Route::post('exams/{exam}/questions', [\App\Http\Controllers\Admin\ExamController::class, 'updateQuestions'])->name('admin.exams.update-questions');
+    Route::post('exams/{exam}/finish', [\App\Http\Controllers\Admin\ExamController::class, 'finishExam'])->name('admin.exams.finish');
+    Route::get('exams/{exam}/results', [\App\Http\Controllers\Admin\ExamController::class, 'results'])->name('admin.exams.results');
+
+});
+
+Route::middleware(['auth', 'web'])->group(function() {
+    // User Exam Routes
+    Route::get('exams', [\App\Http\Controllers\ExamController::class, 'index'])->name('exams.index');
+    Route::get('exams/{exam}/start', [\App\Http\Controllers\ExamController::class, 'start'])->name('exams.start');
+    Route::post('exams/{exam}/submit', [\App\Http\Controllers\ExamController::class, 'submit'])->name('exams.submit');
+    Route::get('exams/{exam}/result', [\App\Http\Controllers\ExamController::class, 'result'])->name('exams.result');
 });
 
 Route::middleware(['auth', 'retailer'])->prefix('retailer')->group(function () {

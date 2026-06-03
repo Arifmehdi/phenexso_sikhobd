@@ -63,6 +63,9 @@
             <a href="#tab-account" data-tab="tab-account" class="{{ ($activeTab == 'edit') ? 'active' : '' }}">
                 <i class="fa-solid fa-user-gear"></i> <span>প্রোফাইল আপডেট</span>
             </a>
+            <a href="#tab-exams" data-tab="tab-exams" class="{{ ($activeTab == 'exams') ? 'active' : '' }}">
+                <i class="fa-solid fa-file-pen"></i> <span>আমার পরীক্ষাসমূহ</span>
+            </a>
             @if($enrollments->count() > 0)
             <a href="#tab-featured" data-tab="tab-featured" class="{{ ($activeTab == 'feature_products') ? 'active' : '' }}">
                 <i class="fa-solid fa-star"></i> <span>ফিচার্ড প্রোডাক্ট</span>
@@ -483,6 +486,83 @@
             @endif
         </div>
 
+        <!-- Tab: Exams -->
+        <div class="tab-content-item" id="tab-exams" style="display:none;">
+            <div class="dash-head">
+                <div>
+                    <h1>আমার পরীক্ষাসমূহ</h1>
+                    <p>আপনার সকল উপলব্ধ এবং সম্পন্ন করা পরীক্ষা</p>
+                </div>
+            </div>
+            
+            <div class="panel mb-4">
+                <div class="panel-head">
+                    <h3><i class="fa-solid fa-file-pen"></i> উপলব্ধ পরীক্ষাসমূহ</h3>
+                </div>
+                @forelse($exams as $exam)
+                <div class="course-row">
+                    <div class="thumb" style="--c1:#6c5ce7;--c2:#a29bfe;">
+                        E
+                    </div>
+                    <div class="body">
+                        <h4>{{ $exam->title }}</h4>
+                        <div class="meta">
+                            <i class="far fa-clock"></i> {{ $exam->duration }} মিনিট &middot; 
+                            <i class="far fa-calendar-alt"></i> শেষ সময়: {{ $exam->end_time->format('M d, h:i A') }}
+                        </div>
+                    </div>
+                    <a href="{{ route('exams.start', $exam->id) }}" class="btn btn-primary btn-sm">অংশগ্রহণ করুন</a>
+                </div>
+                @empty
+                <div class="empty-state">
+                    <h5>বর্তমানে কোনো পরীক্ষা উপলব্ধ নেই</h5>
+                </div>
+                @endforelse
+            </div>
+
+            <div class="panel">
+                <div class="panel-head">
+                    <h3><i class="fa-solid fa-check-double"></i> সম্পন্ন করা পরীক্ষাসমূহ</h3>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>পরীক্ষা</th>
+                                <th>তারিখ</th>
+                                <th>মার্কস</th>
+                                <th>অবস্থা</th>
+                                <th>অ্যাকশন</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($completed_exams as $attempt)
+                            <tr>
+                                <td>{{ $attempt->exam->title }}</td>
+                                <td>{{ $attempt->end_time->format('M d, Y') }}</td>
+                                <td>{{ $attempt->score }} / {{ $attempt->exam->question_count }}</td>
+                                <td>
+                                    @if($attempt->exam->status == 'finished')
+                                        <span class="status-pill status-approved">ফলাফল প্রকাশিত</span>
+                                    @else
+                                        <span class="status-pill status-pending">অপেক্ষমান</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    <a href="{{ route('exams.result', $attempt->exam->id) }}" class="btn btn-primary btn-sm">বিস্তারিত</a>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="5" class="empty-state">আপনি কোনো পরীক্ষায় অংশগ্রহণ করেননি</td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
     </section>
 </div>
 
@@ -534,6 +614,8 @@
             switchTab('tab-featured');
         } else if ('{{ $activeTab }}' === 'courses') {
             switchTab('tab-courses');
+        } else if ('{{ $activeTab }}' === 'exams') {
+            switchTab('tab-exams');
         } else {
             switchTab('tab-dashboard');
         }

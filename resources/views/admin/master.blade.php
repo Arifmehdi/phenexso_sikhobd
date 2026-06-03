@@ -539,10 +539,29 @@
                                     <p>All Instructors</p>
                                 </a>
                             </li>
+                        </ul>
+                    </li>
+
+                    {{-- Exams --}}
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon fas fa-file-alt"></i>
+                            <p>
+                                Exam Management
+                                <i class="fas fa-angle-left right"></i>
+                            </p>
+                        </a>
+                        <ul class="nav nav-treeview">
                             <li class="nav-item">
-                                <a href="{{ route('admin.instructors.create') }}" class="nav-link {{ session('lsbsm') == 'createInstructor' ? ' active ' : '' }}">
+                                <a href="{{ route('admin.questions.index') }}" class="nav-link">
                                     <i class="far fa-circle nav-icon"></i>
-                                    <p>Create Instructor</p>
+                                    <p>Question Bank</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('admin.exams.index') }}" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Exams</p>
                                 </a>
                             </li>
                         </ul>
@@ -629,7 +648,7 @@
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
-                                <a href="{{ route('admin.page_contents.index') }}" class="nav-link {{ session('lsbsm') == 'pageContentsAll' ? ' active ' : '' }}">
+                                <a href="{{ route('admin.questions.index') }}" class="nav-link {{ session('lsbsm') == 'pageContentsAll' ? ' active ' : '' }}">
                                     <i class="far fa-circle nav-icon"></i>
                                     <p>Page Contents</p>
                                 </a>

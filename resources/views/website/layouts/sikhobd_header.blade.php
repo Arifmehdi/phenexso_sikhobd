@@ -45,6 +45,30 @@
             {{ app()->getLocale() == 'bn' ? 'শপ' : 'Shop' }}
         </a>
     </div>
+    <div class="nav-item">
+        <a href="{{ route('exams.index') }}" class="nav-link">
+            <span>{{ app()->getLocale() == 'bn' ? 'পরীক্ষা' : 'Exam' }}</span>
+            @if($headerExams->count() > 0)
+              <svg class="caret" viewBox="0 0 10 10" fill="currentColor"><path d="M1 3l4 4 4-4z"/></svg>
+            @endif
+        </a>
+        @if($headerExams->count() > 0)
+          <ul class="dropdown">
+            @foreach($headerExams as $exam)
+              <li class="dropdown-item">
+                <a href="{{ route('exams.start', $exam->id) }}" class="dropdown-link">
+                  <span>{{ $exam->title }}</span>
+                </a>
+              </li>
+            @endforeach
+            <li class="dropdown-item border-top">
+              <a href="{{ route('exams.index') }}" class="dropdown-link text-primary font-weight-bold">
+                <span>{{ app()->getLocale() == 'bn' ? 'সব পরীক্ষা দেখুন' : 'See All Exams' }}</span>
+              </a>
+            </li>
+          </ul>
+        @endif
+    </div>
     </nav>
 
     <div class="header-right">
@@ -63,6 +87,7 @@
             <li><a href="{{ route('admin.dashboard') }}" class="dropdown-link"><i class="fa-solid fa-gauge-high me-2"></i> Admin Panel</a></li>
           @endif
           <li><a href="{{ route('user.dashboard') }}" class="dropdown-link"><i class="fa-solid fa-user me-2"></i> Dashboard</a></li>
+          <li><a href="{{ route('exams.index') }}" class="dropdown-link"><i class="fa-solid fa-file-pen me-2"></i> My Exams</a></li>
           <li>
             <a href="{{ route('logout') }}" class="dropdown-link text-danger">
               <i class="fa-solid fa-right-from-bracket me-2"></i> Logout
@@ -109,9 +134,17 @@
                 <a href="{{ route('user.dashboard') }}" class="m-link">
                     <i class="fa-solid fa-user me-2"></i> Dashboard
                 </a>
+
+                <a href="{{ route('exams.index') }}" class="m-link">
+                    <i class="fa-solid fa-file-pen me-2"></i> My Exams
+                </a>
             @else
                 <a href="{{ route('user.dashboard') }}" class="m-link">
                     <i class="fa-solid fa-user me-2"></i> Dashboard
+                </a>
+
+                <a href="{{ route('exams.index') }}" class="m-link">
+                    <i class="fa-solid fa-file-pen me-2"></i> My Exams
                 </a>
             @endif
             <a href="{{ route('logout') }}" class="m-link text-danger">
@@ -120,6 +153,23 @@
           </div>
         </li>
       @endauth
+
+      <li class="m-item">
+        @if($headerExams->count() > 0)
+          <button class="m-toggle">
+            <i class="fa-solid fa-file-pen me-2"></i> <span>{{ app()->getLocale() == 'bn' ? 'পরীক্ষা' : 'Exam' }}</span>
+            <svg class="caret" width="12" height="12" viewBox="0 0 10 10" fill="currentColor"><path d="M1 3l4 4 4-4z"/></svg>
+          </button>
+          <div class="m-children">
+            @foreach($headerExams as $exam)
+              <a href="{{ route('exams.start', $exam->id) }}" class="m-link">{{ $exam->title }}</a>
+            @endforeach
+            <a href="{{ route('exams.index') }}" class="m-link font-weight-bold text-primary">{{ app()->getLocale() == 'bn' ? 'সব পরীক্ষা দেখুন' : 'See All Exams' }}</a>
+          </div>
+        @else
+          <a href="{{ route('exams.index') }}" class="m-link"><i class="fa-solid fa-file-pen me-2"></i> {{ app()->getLocale() == 'bn' ? 'পরীক্ষা' : 'Exam' }}</a>
+        @endif
+      </li>
 
       @foreach($hierarchicalCategories as $cat)
         <li class="m-item">

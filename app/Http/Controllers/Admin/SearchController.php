@@ -17,6 +17,7 @@ use App\Models\membership;
 use App\Models\MembershipPackage;
 use App\Models\Menu;
 use App\Models\Page;
+use App\Models\Question;
 use App\Models\User;
 use App\Models\Visit;
 use Illuminate\Http\Request;
@@ -34,7 +35,15 @@ class SearchController extends Controller
             return back();
         }
 
-        if($type == 'user')
+        if($type == 'question')
+        {
+            $questions = Question::where('question_text', 'like', "%". $q."%")
+            ->orWhere('id', 'like', "%". $q ."%")
+            ->latest()
+            ->paginate(100);
+            $html = view('admin.questions.search_data', compact('questions'));
+        }
+        elseif($type == 'user')
         {
             $users = User::where('name', 'like', "%". $q."%")
             ->orWhere('email', 'like', "%". $q ."%")

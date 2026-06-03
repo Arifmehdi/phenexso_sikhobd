@@ -67,6 +67,13 @@ class AppServiceProvider extends ServiceProvider
                 ->orderBy('position')
                 ->get();
             View::share('hierarchicalCategories', $hierarchicalCategories);
+
+            $headerExams = \App\Models\Exam::where('status', 'published')
+                ->where('end_time', '>=', \Carbon\Carbon::now())
+                ->latest()
+                ->take(10)
+                ->get();
+            View::share('headerExams', $headerExams);
         });
 
         // Share product categories only with specific views

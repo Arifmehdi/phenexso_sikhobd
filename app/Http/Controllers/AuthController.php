@@ -358,9 +358,31 @@ class AuthController extends Controller
         $products = \App\Models\Product::all(); // Add this line
         $enrollments = \App\Models\Enrollment::where('user_id', $user->id)->with('product')->latest()->get();
 
+        $now = \Carbon\Carbon::now();
+        $user_id = Auth::id();
+        
+        $examsQuery = \App\Models\Exam::where('status', '!=', 'draft');
+        
+        if (!$user->hasRole('admin') && $user->role !== 'admin') {
+            $examsQuery->where('start_time', '<=', $now)
+                ->where('end_time', '>=', $now)
+                ->where(function($query) use ($user_id) {
+                    $query->whereHas('students', function($q) use ($user_id) {
+                        $q->where('users.id', $user_id);
+                    })->orWhereDoesntHave('students');
+                });
+        }
+        
+        $exams = $examsQuery->latest()->get();
+            
+        $completed_exams = \App\Models\ExamAttempt::where('user_id', $user_id)
+            ->where('status', 'completed')
+            ->with('exam')
+            ->get();
+
         $activeTab = 'dashboard'; 
 
-        return view('user.dashboard', compact('user', 'todayOrdersCount', 'cancelOrdersCount', 'orders', 'activeTab','featured_products', 'stockRequests', 'products', 'enrollments'));
+        return view('user.dashboard', compact('user', 'todayOrdersCount', 'cancelOrdersCount', 'orders', 'activeTab','featured_products', 'stockRequests', 'products', 'enrollments', 'exams', 'completed_exams'));
     }
 
     public function orders(Request $request)
