@@ -224,10 +224,14 @@
     <div class="container">
 
         <div class="section-head">
-            <h2>
-                <span data-i18n="sec.test">শিক্ষার্থীদের</span>
-                <em data-i18n="sec.test2">মতামত</em>
-            </h2>
+            @if(isset($content->meta['testimonials']['title_en']) || isset($content->meta['testimonials']['title_bn']))
+                <h2><span>{{ app()->getLocale() == 'bn' ? ($content->meta['testimonials']['title_bn'] ?? 'শিক্ষার্থীদের মতামত') : ($content->meta['testimonials']['title_en'] ?? "Students' Opinions") }}</span></h2>
+            @else
+                <h2>
+                    <span data-i18n="sec.test">শিক্ষার্থীদের</span>
+                    <em data-i18n="sec.test2">মতামত</em>
+                </h2>
+            @endif
         </div>
 
         <div class="swiper testimonial-slider">
@@ -244,13 +248,14 @@
 
                         <div class="test-text-container">
                             <p class="test-text">
-                                {!! $testimonial->text_en !!}
+                                {!! app()->getLocale() == 'bn' ? ($testimonial->text_bn ?? $testimonial->text_en) : ($testimonial->text_en ?? $testimonial->text_bn) !!}
                             </p>
                         </div>
 
                         <button class="read-more-toggle" style="display:none;">
                             {!! __('আরও পড়ুন') !!}
                         </button>
+
 
                         <div class="test-user">
 
@@ -295,21 +300,26 @@
   <section class="section" style="background: var(--bg-soft);">
     <div class="container">
       <div class="section-head">
-        <h2><span data-i18n="sec.blog">লেটেস্ট</span> <em data-i18n="sec.blog2">নিউজ ও ব্লগ</em></h2>
+        @if(isset($content->meta['news']['title_en']) || isset($content->meta['news']['title_bn']))
+            <h2><span>{{ app()->getLocale() == 'bn' ? ($content->meta['news']['title_bn'] ?? 'লেটেস্ট নিউজ ও ব্লগ') : ($content->meta['news']['title_en'] ?? 'Latest News & Blog') }}</span></h2>
+        @else
+            <h2><span data-i18n="sec.blog">লেটেস্ট</span> <em data-i18n="sec.blog2">নিউজ ও ব্লগ</em></h2>
+        @endif
       </div>
       <div class="blog-grid">
+
         @foreach($newses as $news)
         <article class="blog-card">
           <div class="blog-thumb">
             <img src="{{ route('imagecache', ['template'=>'original','filename' => $news->fi() ?? 'default.png']) }}" alt="{{ $news->title }}">
           </div>
           <div class="blog-body">
-            <span class="blog-cat">{{ $news->category->name_en ?? 'News' }}</span>
+            <span class="blog-cat">{{ $news->category->name ?? (app()->getLocale() == 'bn' ? 'নিউজ' : 'News') }}</span>
             <h3><a href="{{ route('singleNews', $news->id) }}">{{ $news->title }}</a></h3>
             <p>{{ Str::limit(strip_tags($news->content), 100) }}</p>
             <div class="blog-foot">
               <span><i class="fa-solid fa-calendar"></i> {{ $news->created_at->format('M d, Y') }}</span>
-              <a href="{{ route('singleNews', $news->id) }}">আরও পড়ুন</a>
+              <a href="{{ route('singleNews', $news->id) }}">{{ app()->getLocale() == 'bn' ? 'আরও পড়ুন' : 'Read More' }}</a>
             </div>
           </div>
         </article>

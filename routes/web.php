@@ -207,6 +207,11 @@ Route::get('galleries/video',[FrontendController::class,'videoGalleries'])->name
 //Authentication
 Route::get('/login',[AuthController::class,'index'])->name('login');
 Route::post('/login',[AuthController::class,'login'])->name('login');
+
+// Social Login
+Route::get('login/{provider}', [AuthController::class, 'redirectToProvider'])->name('social.login');
+Route::get('login/{provider}/callback', [AuthController::class, 'handleProviderCallback']);
+
 Route::get('/registration',[AuthController::class,'registration'])->name('registration');
 Route::get('/health-card',[AuthController::class,'healthCard'])->name('health.registration');
 Route::post('/register',[AuthController::class,'register'])->name('register');
@@ -628,16 +633,16 @@ Route::middleware(['userRole:admin','auth'])->prefix('admin')->group(function(){
     // Vehicle Assignment Admin Routes
     Route::resource('vehicle-assignments', \App\Http\Controllers\Admin\VehicleAssignmentController::class)->names('admin.vehicle_assignments');
 
-    // Route::resource('page_contents', PageContentController::class)->names([
-    //     'index' => 'admin.page_contents.index',
-    //     'create' => 'admin.page_contents.create',
-    //     'store' => 'admin.page_contents.store',
-    //     'show' => 'admin.page_contents.show',
-    //     'edit' => 'admin.page_contents.edit',
-    //     'update' => 'admin.page_contents.update',
-    //     'destroy' => 'admin.page_contents.destroy',
-    // ]);
-    // Route::put('page_contents/{page_content}/toggle-active', [PageContentController::class, 'toggleActive'])->name('admin.page_contents.toggle-active');
+    Route::resource('page_contents', PageContentController::class)->names([
+        'index' => 'admin.page_contents.index',
+        'create' => 'admin.page_contents.create',
+        'store' => 'admin.page_contents.store',
+        'show' => 'admin.page_contents.show',
+        'edit' => 'admin.page_contents.edit',
+        'update' => 'admin.page_contents.update',
+        'destroy' => 'admin.page_contents.destroy',
+    ]);
+    Route::put('page_contents/{page_content}/toggle-active', [PageContentController::class, 'toggleActive'])->name('admin.page_contents.toggle-active');
     // E-learning Management
     Route::get('/enrollments', [\App\Http\Controllers\Admin\EnrollmentController::class, 'index'])->name('admin.enrollments.index');
     Route::post('/enrollments/{enrollment}/status', [\App\Http\Controllers\Admin\EnrollmentController::class, 'updateStatus'])->name('admin.enrollments.updateStatus');
@@ -665,8 +670,8 @@ Route::middleware(['userRole:admin','auth'])->prefix('admin')->group(function(){
     Route::get('instructors/search', [\App\Http\Controllers\Admin\InstructorController::class, 'search'])->name('admin.instructors.search');
 
     // Exam Management
-    Route::resource('page_contents', \App\Http\Controllers\Admin\QuestionController::class)->names('admin.questions')->parameters(['page_contents' => 'question']);
-    Route::post('page_contents/bulk-upload', [\App\Http\Controllers\Admin\QuestionController::class, 'bulkUpload'])->name('admin.questions.bulk-upload');
+    Route::resource('questions', \App\Http\Controllers\Admin\QuestionController::class)->names('admin.questions')->parameters(['page_contents' => 'question']);
+    Route::post('questions/bulk-upload', [\App\Http\Controllers\Admin\QuestionController::class, 'bulkUpload'])->name('admin.questions.bulk-upload');
     
     Route::resource('exams', \App\Http\Controllers\Admin\ExamController::class)->names('admin.exams');
     Route::get('exams/{exam}/questions', [\App\Http\Controllers\Admin\ExamController::class, 'selectQuestions'])->name('admin.exams.select-questions');

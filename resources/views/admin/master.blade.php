@@ -648,7 +648,7 @@
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
-                                <a href="{{ route('admin.questions.index') }}" class="nav-link {{ session('lsbsm') == 'pageContentsAll' ? ' active ' : '' }}">
+                                <a href="{{ route('admin.page_contents.index') }}" class="nav-link {{ session('lsbsm') == 'pageContentsAll' ? ' active ' : '' }}">
                                     <i class="far fa-circle nav-icon"></i>
                                     <p>Page Contents</p>
                                 </a>

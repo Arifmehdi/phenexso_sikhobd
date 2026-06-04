@@ -13,11 +13,71 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Laravel\Socialite\Facades\Socialite;
 use PDF; 
 
 use Session;
 class AuthController extends Controller
 {
+    /**
+     * Redirect the user to the social provider's authentication page.
+     */
+    public function redirectToProvider($provider)
+    {
+        return Socialite::driver($provider)->redirect();
+    }
+
+    /**
+     * Obtain the user information from the social provider.
+     */
+    public function handleProviderCallback($provider)
+    {
+        try {
+            $socialUser = Socialite::driver($provider)->user();
+        } catch (\Exception $e) {
+            return redirect()->route('login')->with('error', 'Something went wrong while logging in with ' . ucfirst($provider));
+        }
+
+        // Check if user already exists with this provider_id
+        $user = User::where('provider', $provider)
+                    ->where('provider_id', $socialUser->getId())
+                    ->first();
+
+        if (!$user) {
+            // Check if user exists with the same email
+            $user = User::where('email', $socialUser->getEmail())->first();
+
+            if ($user) {
+                // Update existing user with provider details
+                $user->update([
+                    'provider' => $provider,
+                    'provider_id' => $socialUser->getId(),
+                ]);
+            } else {
+                // Create new user
+                $user = User::create([
+                    'name' => $socialUser->getName(),
+                    'email' => $socialUser->getEmail(),
+                    'provider' => $provider,
+                    'provider_id' => $socialUser->getId(),
+                    'password' => Hash::make(rand(100000, 999999)), // Dummy password
+                    'role' => 'buyer',
+                    'is_approve' => 1, // Auto approve social login users? Or keep 0? Usually 1 for social.
+                ]);
+                
+                // Assign role if needed (the roles table seems to be used)
+                $user->roles()->create([
+                    'role_name' => 'buyer'
+                ]);
+            }
+        }
+
+        Auth::login($user, true);
+        $this->cartSessionToUser();
+
+        return redirect()->route('user.dashboard')->with('success', 'Logged in successfully with ' . ucfirst($provider));
+    }
+
     public function index(){
         if(Auth::check()){
             if(Auth::user()->hasRole('admin')){

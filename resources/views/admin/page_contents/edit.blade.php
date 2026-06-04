@@ -185,7 +185,7 @@
                                 </div>
 
                                 <!-- Features Section -->
-                                <div class="mb-3">
+                                <div class="mb-5">
                                     <h4 class="border-bottom pb-2 mb-3">Features (Why SikhoBD?)</h4>
                                     <div class="row mb-3">
                                         <div class="col-md-6">
@@ -226,6 +226,36 @@
                                         @endif
                                     </div>
                                     <button type="button" class="btn btn-sm btn-info" onclick="addFeature()"><i class="fas fa-plus"></i> Add Feature</button>
+                                </div>
+
+                                <!-- Testimonials Section -->
+                                <div class="mb-5">
+                                    <h4 class="border-bottom pb-2 mb-3">Testimonials (Students' Opinions)</h4>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <label>Section Title (EN)</label>
+                                            <input type="text" name="meta[testimonials][title_en]" class="form-control" value="{{ $pageContent->meta['testimonials']['title_en'] ?? '' }}" placeholder="Students' Opinions">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="bn-font">বিভাগের শিরোনাম (BN)</label>
+                                            <input type="text" name="meta[testimonials][title_bn]" class="form-control bn-font" value="{{ $pageContent->meta['testimonials']['title_bn'] ?? '' }}" placeholder="শিক্ষার্থীদের মতামত">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- News & Blog Section -->
+                                <div class="mb-3">
+                                    <h4 class="border-bottom pb-2 mb-3">News & Blog Section</h4>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <label>Section Title (EN)</label>
+                                            <input type="text" name="meta[news][title_en]" class="form-control" value="{{ $pageContent->meta['news']['title_en'] ?? '' }}" placeholder="Latest News & Blog">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="bn-font">বিভাগের শিরোনাম (BN)</label>
+                                            <input type="text" name="meta[news][title_bn]" class="form-control bn-font" value="{{ $pageContent->meta['news']['title_bn'] ?? '' }}" placeholder="লেটেস্ট নিউজ ও ব্লগ">
+                                        </div>
+                                    </div>
                                 </div>
 
                             </div>

@@ -210,7 +210,7 @@ const FOOTER_HTML = `
     <div class="footer-grid">
       <div>
         <a href="index.html" class="logo"><span class="logo-mark">10</span> Minute <span>School</span></a>
-        <p class="footer-about" data-i18n="footer.about">বাংলাদেশের সবচেয়ে বড় অনলাইন শিক্ষাপ্ল্যাটফর্ম।</p>
+        <p class="footer-about" data-i18n="footer.about">QalamHR বাংলাদেশের অন্যতম শীর্ষস্থানীয় ট্রেনিং ইনস্টিটিউট। আমরা দক্ষ ও পেশাদার জনবল তৈরি করি। আমাদের উচ্চমানের কোর্সগুলো আপনার পেশাগত জ্ঞান, দক্ষতা এবং মানসিকতা উন্নত করার জন্য ডিজাইন করা হয়েছে। সব প্রশিক্ষণ প্রোগ্রাম ইন্ডাস্ট্রির অভিজ্ঞ বিশেষজ্ঞদের দ্বারা তৈরি করা হয়।</p>
         <div class="social">
           <a href="#"><i class="fa-brands fa-facebook-f"></i></a>
           <a href="#"><i class="fa-brands fa-youtube"></i></a>

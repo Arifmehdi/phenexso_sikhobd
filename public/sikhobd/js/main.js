@@ -1,5 +1,5 @@
 /* ============================================
-   10 Minute School — JS
+   Kalam HR — JS
    - Mobile drawer with N-level nesting
    - Language toggle (BN / EN) with localStorage
    ============================================ */
@@ -103,7 +103,7 @@ const i18n = {
     'cta.desc': '২ মিলিয়নের বেশি শিক্ষার্থীর সাথে যোগ দিন।',
     'cta.btn': 'এখনই ডাউনলোড',
 
-    'footer.about': 'বাংলাদেশের সবচেয়ে বড় অনলাইন শিক্ষাপ্ল্যাটফর্ম। যেকোনো সময়, যেকোনো জায়গা থেকে শেখার সুযোগ।',
+    'footer.about': 'QalamHR বাংলাদেশের অন্যতম শীর্ষস্থানীয় ট্রেনিং ইনস্টিটিউট। আমরা দক্ষ ও পেশাদার জনবল তৈরি করি। আমাদের উচ্চমানের কোর্সগুলো আপনার পেশাগত জ্ঞান, দক্ষতা এবং মানসিকতা উন্নত করার জন্য ডিজাইন করা হয়েছে। সব প্রশিক্ষণ প্রোগ্রাম ইন্ডাস্ট্রির অভিজ্ঞ বিশেষজ্ঞদের দ্বারা তৈরি করা হয়।',
     'footer.company': 'কোম্পানি',
     'footer.career': 'ক্যারিয়ার',
     'footer.partner': 'পার্টনার',
@@ -111,7 +111,7 @@ const i18n = {
     'footer.help': 'হেল্প সেন্টার',
     'footer.privacy': 'গোপনীয়তা',
     'footer.terms': 'শর্তাবলী',
-    'footer.copy': '© 2025 10 Minute School. সর্বস্বত্ব সংরক্ষিত।',
+    'footer.copy': '© 2025 Kalam HR. সর্বস্বত্ব সংরক্ষিত।',
 
     'page.about.title': 'আমাদের সম্পর্কে',
     'page.about.sub': 'শিক্ষা সবার জন্য — এই বিশ্বাস থেকেই আমাদের যাত্রা শুরু',
@@ -237,7 +237,7 @@ const i18n = {
     'cta.desc': 'Join over 2 million students.',
     'cta.btn': 'Download Now',
 
-    'footer.about': "Bangladesh's largest online learning platform. Learn anytime, anywhere.",
+    'footer.about': "QalamHR is one of the premier training institutes in Bangladesh. We create professionals. Our high-quality courses are designed to increase your professional knowledge, skills, and attitude. All training programs are crafted by industry experts.",
     'footer.company': 'Company',
     'footer.career': 'Careers',
     'footer.partner': 'Partners',
@@ -245,7 +245,7 @@ const i18n = {
     'footer.help': 'Help Center',
     'footer.privacy': 'Privacy',
     'footer.terms': 'Terms',
-    'footer.copy': '© 2025 10 Minute School. All rights reserved.',
+    'footer.copy': '© 2025 Kalam HR. All rights reserved.',
 
     'page.about.title': 'About Us',
     'page.about.sub': 'Education for everyone — that belief started our journey',

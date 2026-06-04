@@ -40,7 +40,9 @@ class User extends Authenticatable implements CanResetPassword
         'role',
         'is_approve',
         'short_bio',
-        'vehicle_id'
+        'vehicle_id',
+        'provider',
+        'provider_id'
     ];
 
     /**

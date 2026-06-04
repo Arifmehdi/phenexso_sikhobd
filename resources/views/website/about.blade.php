@@ -22,7 +22,7 @@
         <div>
           <h2>{{ $content->meta['story_title'] ?? 'Our Story' }}</h2>
           <div class="mb-4">
-              {!! $content->description ?? '<p>10 Minute School started in 2015 with a simple goal — make quality education accessible to everyone in Bangladesh, regardless of where they live or how much they can afford.</p><p>Today we are the largest online learning platform in the country, with over 2.4 million students and 1000+ courses spanning academic subjects, skills, languages and admission preparation.</p>' !!}
+              {!! $content->description ?? '<p>Kalam HR started in 2015 with a simple goal — make quality education accessible to everyone in Bangladesh, regardless of where they live or how much they can afford.</p><p>Today we are the largest online learning platform in the country, with over 2.4 million students and 1000+ courses spanning academic subjects, skills, languages and admission preparation.</p>' !!}
           </div>
           <a href="{{ route('contact') }}" class="btn btn-primary" style="margin-top:16px;">Get in touch</a>
         </div>

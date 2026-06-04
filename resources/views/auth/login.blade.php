@@ -113,6 +113,22 @@
                         <button type="submit" class="btn btn-primary btn-block mb-3" style="border-radius:0.25rem;">Sign
                             In</button>
 
+                        <div class="social-auth-links text-center mb-3">
+                            <p>- OR -</p>
+                            <div class="row">
+                                <div class="col-6">
+                                    <a href="{{ route('social.login', 'google') }}" class="btn btn-block btn-danger" style="border-radius:0.25rem;">
+                                        <i class="fab fa-google mr-1"></i> Google
+                                    </a>
+                                </div>
+                                <div class="col-6">
+                                    <a href="{{ route('social.login', 'facebook') }}" class="btn btn-block btn-primary" style="border-radius:0.25rem;">
+                                        <i class="fab fa-facebook mr-1"></i> Facebook
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="text-center mt-3">
                             <span>Don't have an account? </span>
                             <a href="{{ route('registration') }}">Sign Up</a>

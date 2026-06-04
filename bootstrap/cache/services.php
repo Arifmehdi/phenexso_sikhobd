@@ -29,23 +29,24 @@
     25 => 'Jenssegers\\Agent\\AgentServiceProvider',
     26 => 'Laravel\\Sail\\SailServiceProvider',
     27 => 'Laravel\\Sanctum\\SanctumServiceProvider',
-    28 => 'Laravel\\Tinker\\TinkerServiceProvider',
-    29 => 'Maatwebsite\\Excel\\ExcelServiceProvider',
-    30 => 'Carbon\\Laravel\\ServiceProvider',
-    31 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
-    32 => 'Termwind\\Laravel\\TermwindServiceProvider',
-    33 => 'RealRashid\\SweetAlert\\SweetAlertServiceProvider',
-    34 => 'Sentry\\Laravel\\ServiceProvider',
-    35 => 'Sentry\\Laravel\\Tracing\\ServiceProvider',
-    36 => 'Spatie\\LaravelIgnition\\IgnitionServiceProvider',
-    37 => 'Jenssegers\\Agent\\AgentServiceProvider',
-    38 => 'App\\Providers\\AppServiceProvider',
-    39 => 'App\\Providers\\AuthServiceProvider',
-    40 => 'App\\Providers\\EventServiceProvider',
-    41 => 'App\\Providers\\RouteServiceProvider',
-    42 => 'Maatwebsite\\Excel\\ExcelServiceProvider',
-    43 => 'Barryvdh\\DomPDF\\ServiceProvider',
-    44 => 'RealRashid\\SweetAlert\\SweetAlertServiceProvider',
+    28 => 'Laravel\\Socialite\\SocialiteServiceProvider',
+    29 => 'Laravel\\Tinker\\TinkerServiceProvider',
+    30 => 'Maatwebsite\\Excel\\ExcelServiceProvider',
+    31 => 'Carbon\\Laravel\\ServiceProvider',
+    32 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
+    33 => 'Termwind\\Laravel\\TermwindServiceProvider',
+    34 => 'RealRashid\\SweetAlert\\SweetAlertServiceProvider',
+    35 => 'Sentry\\Laravel\\ServiceProvider',
+    36 => 'Sentry\\Laravel\\Tracing\\ServiceProvider',
+    37 => 'Spatie\\LaravelIgnition\\IgnitionServiceProvider',
+    38 => 'Jenssegers\\Agent\\AgentServiceProvider',
+    39 => 'App\\Providers\\AppServiceProvider',
+    40 => 'App\\Providers\\AuthServiceProvider',
+    41 => 'App\\Providers\\EventServiceProvider',
+    42 => 'App\\Providers\\RouteServiceProvider',
+    43 => 'Maatwebsite\\Excel\\ExcelServiceProvider',
+    44 => 'Barryvdh\\DomPDF\\ServiceProvider',
+    45 => 'RealRashid\\SweetAlert\\SweetAlertServiceProvider',
   ),
   'eager' => 
   array (
@@ -215,6 +216,7 @@
     'validation.presence' => 'Illuminate\\Validation\\ValidationServiceProvider',
     'Laravel\\Sail\\Console\\InstallCommand' => 'Laravel\\Sail\\SailServiceProvider',
     'Laravel\\Sail\\Console\\PublishCommand' => 'Laravel\\Sail\\SailServiceProvider',
+    'Laravel\\Socialite\\Contracts\\Factory' => 'Laravel\\Socialite\\SocialiteServiceProvider',
     'command.tinker' => 'Laravel\\Tinker\\TinkerServiceProvider',
   ),
   'when' => 
@@ -256,6 +258,9 @@
     array (
     ),
     'Laravel\\Sail\\SailServiceProvider' => 
+    array (
+    ),
+    'Laravel\\Socialite\\SocialiteServiceProvider' => 
     array (
     ),
     'Laravel\\Tinker\\TinkerServiceProvider' => 
