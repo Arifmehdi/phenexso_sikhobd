@@ -1,6 +1,11 @@
 @extends('website.layouts.sikhobd')
 
-@section('title', 'কোর্সসমূহ — ' . ($ws->name ?? env('APP_NAME')))
+@section('title', 'কোর্সসমূহ — ' . ($ws->website_title ?? 'Qalam HR'))
+
+@section('meta')
+<meta name="description" content="Explore quality e-learning courses at {{ $ws->website_title ?? 'Qalam HR' }}.">
+<meta name="keywords" content="Courses, {{ $ws->website_title ?? 'Qalam HR' }}, E-learning, Education">
+@endsection
 
 @section('content')
   <section class="page-hero">

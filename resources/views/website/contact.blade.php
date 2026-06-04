@@ -1,10 +1,10 @@
 @extends('website.layouts.sikhobd')
 
-@section('title', 'যোগাযোগ — '.($ws->name ?? env('APP_NAME')))
+@section('title', 'যোগাযোগ — '.($ws->website_title ?? 'Qalam HR'))
 
 @section('meta')
-<meta name="description" content="Get in touch with {{ $ws->name ?? env('APP_NAME') }}. We are here to help you with your inquiries.">
-<meta name="keywords" content="Contact, {{ $ws->name ?? env('APP_NAME') }}, Help, Inquiries">
+<meta name="description" content="Get in touch with {{ $ws->website_title ?? 'Qalam HR' }}. We are here to help you with your inquiries.">
+<meta name="keywords" content="Contact, {{ $ws->website_title ?? 'Qalam HR' }}, Help, Inquiries">
 @endsection
 
 @section('content')

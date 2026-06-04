@@ -1,25 +1,43 @@
 @extends('admin.master')
 @section('title', 'Admin Dashboard | All Instructors')
 @section('body')
+<style>
+    .table-responsive {
+        overflow: visible !important;
+    }
+    .card-body {
+        padding-bottom: 60px !important;
+    }
+    @media (max-width: 767.98px) {
+        .table-responsive {
+            overflow-x: auto !important;
+        }
+    }
+</style>
     <section class="content py-5">
         <div class="container-fluid">
             <div class="row">
                 <div class="col-12">
 
-                    <div class="card">
+                    <div class="card shadow-lg">
                         <div class="card-header">
-                            <h3 class="card-title">All Instructors</h3>
-                            <div class="card-tools">
-                                <div class="input-group input-group-sm">
+                            <h3 class="card-title">
+                                <i class="fas fa-chalkboard-teacher text-primary"></i> All Instructors
+                            </h3>
+                            <div class="card-tools d-flex">
+                                <div class="input-group input-group-sm mr-2" style="width: 250px;">
                                     <input type="search" name="q" class="global-search form-control float-right"
-                                           data-url="{{ route('admin.instructors.search') }}"
-                                           placeholder="Search name, email, phone...">
+                                           data-url="{{ route('admin.global-search-ajax', ['type' => 'instructor']) }}"
+                                           placeholder="Search instructors...">
                                     <div class="input-group-append">
                                         <button type="submit" class="btn btn-default">
                                             <i class="fas fa-search"></i>
                                         </button>
                                     </div>
                                 </div>
+                                <a href="{{ route('admin.instructors.create') }}" class="btn btn-sm btn-success mr-2">
+                                    <i class="fas fa-plus"></i> Add New
+                                </a>
                             </div>
                         </div>
 
@@ -52,12 +70,6 @@
                                 @include('admin.instructors.search_data')
                             </div>
                         </div>
-
-                        <div class="card-footer">
-                            <a href="{{ route('admin.instructors.create') }}" class="btn btn-primary">
-                                <i class="fas fa-plus"></i> Add New Instructor
-                            </a>
-                        </div>
                     </div>
 
                 </div>
@@ -68,23 +80,25 @@
 
 @push('js')
     <script>
-        $(document).ready(function () {
-            $(document).on('keyup', '.global-search', function (e) {
+        $(document).ready(function() {
+            $(document).on('keyup', ".global-search", function(e){
                 e.preventDefault();
-                var that = $(this);
+                var that = $( this );
                 var url = that.attr('data-url');
                 var q = that.val();
                 var status = '{{ request('status') }}';
 
                 $.ajax({
-                    url: url,
-                    data: { q: q, status: status },
-                    method: 'get',
-                    success: function (res) {
-                        if (res.success) {
-                            $('.data-container').empty().append(res.html);
+                     url: url,
+                     data : {q:q, status:status},
+                     method: "get",
+                     success: function(res)
+                     {
+                        if(res.success)
+                        {
+                            $(".data-container").empty().append(res.html);
                         }
-                    }
+                     }
                 });
             });
         });

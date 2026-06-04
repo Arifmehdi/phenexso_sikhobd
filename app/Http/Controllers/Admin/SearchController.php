@@ -9,7 +9,7 @@ use App\Models\BlogCategory;
 use App\Models\BlogPost;
 use App\Models\BlogSubCategory;
 use App\Models\BookAppointment;
-use App\Models\ContactUs;
+use App\Models\Contact;
 use App\Models\Doctor;
 use App\Models\Hospital;
 use App\Models\Member;
@@ -35,13 +35,21 @@ class SearchController extends Controller
             return back();
         }
 
-        if($type == 'question')
+        elseif($type == 'question')
         {
             $questions = Question::where('question_text', 'like', "%". $q."%")
             ->orWhere('id', 'like', "%". $q ."%")
             ->latest()
             ->paginate(100);
             $html = view('admin.questions.search_data', compact('questions'));
+        }
+        elseif($type == 'exam')
+        {
+            $exams = \App\Models\Exam::where('title', 'like', "%". $q."%")
+            ->orWhere('id', 'like', "%". $q ."%")
+            ->latest()
+            ->paginate(100);
+            $html = view('admin.exams.search_data', compact('exams'));
         }
         elseif($type == 'user')
         {
@@ -72,14 +80,14 @@ class SearchController extends Controller
         }
 
 
-        elseif($type == 'department')
-        {
-             $departments = BisesoggoCategory::where('name_en', 'like', "%". $q."%")
-             ->orWhere('id', 'like', "%". $q ."%")
-             ->orderBy('name_en')
-             ->paginate(100);
-             $html = view('admin.departments.search_data', ['departments' => $departments]);
-        }
+     //    elseif($type == 'department')
+     //    {
+     //         $departments = BisesoggoCategory::where('name_en', 'like', "%". $q."%")
+     //         ->orWhere('id', 'like', "%". $q ."%")
+     //         ->orderBy('name_en')
+     //         ->paginate(100);
+     //         $html = view('admin.departments.search_data', ['departments' => $departments]);
+     //    }
 
         elseif($type == 'hospital')
         {
@@ -103,27 +111,27 @@ class SearchController extends Controller
              $html = view('admin.doctor.search_data', ['doctors' => $doctors]);
         }
 
-        elseif($type == 'visit')
-        {
-             $visits = Visit::where('patient_name', 'like', "%". $q."%")
-             ->orWhere('patient_mobile', 'like', "%". $q."%")
-             ->orWhere('patient_details', 'like', "%". $q."%")
-             ->orWhere('id', 'like', "%". $q ."%")
-             ->orderBy('patient_name')
-             ->paginate(100);
-             $html = view('admin.visit.search_data', ['visits' => $visits]);
-        }
+     //    elseif($type == 'visit')
+     //    {
+     //         $visits = Visit::where('patient_name', 'like', "%". $q."%")
+     //         ->orWhere('patient_mobile', 'like', "%". $q."%")
+     //         ->orWhere('patient_details', 'like', "%". $q."%")
+     //         ->orWhere('id', 'like', "%". $q ."%")
+     //         ->orderBy('patient_name')
+     //         ->paginate(100);
+     //         $html = view('admin.visit.search_data', ['visits' => $visits]);
+     //    }
 
 
 
-        elseif($type == 'subCategory')
-        {
-             $blog_sub_categories = BlogSubCategory::where('name', 'like', "%". $q."%")
-             ->orWhere('id', 'like', "%". $q ."%")
-             ->orderBy('name')
-             ->paginate(100);
-             $html = view('admin.blog-sub-category.search_data', ['blog_sub_categories' => $blog_sub_categories]);
-        }
+     //    elseif($type == 'subCategory')
+     //    {
+     //         $blog_sub_categories = BlogSubCategory::where('name', 'like', "%". $q."%")
+     //         ->orWhere('id', 'like', "%". $q ."%")
+     //         ->orderBy('name')
+     //         ->paginate(100);
+     //         $html = view('admin.blog-sub-category.search_data', ['blog_sub_categories' => $blog_sub_categories]);
+     //    }
 
         elseif($type == 'menu')
         {
@@ -168,6 +176,40 @@ class SearchController extends Controller
              $html = view('admin.appointments.search_data', ['appointments' => $appointments]);
         }
 
+        elseif($type == 'contact')
+        {
+             $contacts = Contact::where('name', 'like', "%". $q."%")
+             ->orWhere('email', 'like', "%". $q ."%")
+             ->orWhere('subject', 'like', "%". $q ."%")
+             ->orWhere('phone', 'like', "%". $q ."%")
+             ->orWhere('id', 'like', "%". $q ."%")
+             ->latest()
+             ->paginate(100);
+             $html = view('admin.contacts.search_data', ['contacts' => $contacts]);
+        }
+
+        elseif($type == 'instructor')
+        {
+             $instructors = User::whereIn('role', ['instructor', 'teacher']);
+
+             if ($request->status === 'approved') {
+                 $instructors->where('is_approve', 1);
+             } elseif ($request->status === 'pending') {
+                 $instructors->where('is_approve', 0);
+             }
+
+             if ($q) {
+                 $instructors->where(function ($query) use ($q) {
+                     $query->where('name', 'like', "%". $q ."%")
+                     ->orWhere('email', 'like', "%". $q ."%")
+                     ->orWhere('mobile', 'like', "%". $q ."%")
+                     ->orWhere('id', 'like', "%". $q ."%");
+                 });
+             }
+
+             $instructors = $instructors->latest()->paginate(100);
+             $html = view('admin.instructors.search_data', ['instructors' => $instructors]);
+        }
 
         return response()->json([
             'success' => true,

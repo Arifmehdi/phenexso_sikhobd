@@ -1,11 +1,11 @@
 @extends('website.layouts.sikhobd')
 
-@section('title', 'News & Blog - '. ($ws->name ?? env('APP_NAME')))
+@section('title', 'News & Blog - '. ($ws->website_title ?? 'Qalam HR'))
 
 @section('meta')
-<meta name="description" content="Stay updated with the latest news, articles, and educational tips from SikhoBD.">
-<meta name="keywords" content="elearning blog, education news, learning tips, SikhoBD articles">
-<meta property="og:title" content="News & Blog - SikhoBD">
+<meta name="description" content="{{ $ws->meta_description ?? 'Stay updated with the latest news, articles, and educational tips from Qalam HR.' }}">
+<meta name="keywords" content="elearning blog, education news, learning tips, Qalam HR articles">
+<meta property="og:title" content="News & Blog - {{ $ws->website_title ?? 'Qalam HR' }}">
 <meta property="og:description" content="Latest updates and insights from the world of e-learning.">
 <meta property="og:type" content="website">
 @endsection

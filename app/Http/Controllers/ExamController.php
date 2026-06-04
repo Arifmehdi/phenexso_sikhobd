@@ -15,28 +15,32 @@ class ExamController extends Controller
     {
         $now = Carbon::now();
         $user = Auth::user();
-        $user_id = $user->id;
+        $user_id = Auth::id();
 
         $query = Exam::where('status', '!=', 'draft');
 
         // If not admin, restrict by timing and assignment
-        if (!$user->hasRole('admin') && $user->role !== 'admin') {
+        if (!$user || (!$user->hasRole('admin') && $user->role !== 'admin')) {
             $query->where('start_time', '<=', $now)
-                  ->where('end_time', '>=', $now)
-                  ->where(function($q) use ($user_id) {
-                      $q->whereHas('students', function($sq) use ($user_id) {
-                          $sq->where('users.id', $user_id);
-                      })->orWhereDoesntHave('students');
-                  });
+                  ->where('end_time', '>=', $now);
+            
+            if ($user_id) {
+                $query->where(function($q) use ($user_id) {
+                    $q->whereHas('students', function($sq) use ($user_id) {
+                        $sq->where('users.id', $user_id);
+                    })->orWhereDoesntHave('students');
+                });
+            } else {
+                $query->whereDoesntHave('students');
+            }
         }
 
         $exams = $query->latest()->paginate(10);
 
-        $completed_exams = ExamAttempt::where('user_id', $user_id)
-
+        $completed_exams = $user_id ? ExamAttempt::where('user_id', $user_id)
             ->where('status', 'completed')
             ->with('exam')
-            ->get();
+            ->get() : collect();
 
         return view('frontend.exams.index', compact('exams', 'completed_exams'));
     }

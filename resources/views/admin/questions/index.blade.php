@@ -5,6 +5,21 @@
 @endsection
 
 @section('body')
+<style>
+    /* Prevent table responsive from clipping dropdowns */
+    .table-responsive {
+        overflow: visible !important;
+    }
+    /* Ensure the card has enough space at the bottom for the last row's dropdown */
+    .card-body {
+        padding-bottom: 60px !important;
+    }
+    @media (max-width: 767.98px) {
+        .table-responsive {
+            overflow-x: auto !important;
+        }
+    }
+</style>
 <section class="content py-5">
     <div class="container-fluid">
         <div class="row">

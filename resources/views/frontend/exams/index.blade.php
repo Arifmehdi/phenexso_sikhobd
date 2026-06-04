@@ -17,8 +17,9 @@
 @endpush
 
 @section('content')
-<div class="dash-wrap">
+<div class="dash-wrap {{ !auth()->check() ? 'guest-view' : '' }}">
     <!-- Sidebar -->
+    @auth
     <aside class="dash-side">
         <div class="dash-user">
             <img src="{{ auth()->user()->image ? asset('storage/users/'.auth()->user()->image) : 'https://cdn-icons-png.flaticon.com/512/3177/3177440.png' }}"
@@ -46,19 +47,29 @@
             </a>
         </nav>
     </aside>
+    @else
+    <section class="page-hero" style="background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%); padding: 60px 0; color: #fff; text-align: center; width: 100%;">
+        <div class="container">
+            <h1>{{ app()->getLocale() == 'bn' ? 'সকল পরীক্ষা' : 'All Exams' }}</h1>
+            <p>{{ app()->getLocale() == 'bn' ? 'আপনার মেধা যাচাই করুন আমাদের বিভিন্ন পরীক্ষার মাধ্যমে' : 'Test your knowledge with our various exams' }}</p>
+        </div>
+    </section>
+    @endauth
 
     <!-- Main Content -->
-    <section class="dash-main">
+    <section class="dash-main" style="{{ !auth()->check() ? 'padding-top: 40px; max-width: 1200px; margin: 0 auto;' : '' }}">
+        @auth
         <div class="dash-head">
             <div>
                 <h1>আমার পরীক্ষাসমূহ</h1>
                 <p>আপনার সকল উপলব্ধ এবং সম্পন্ন করা পরীক্ষা</p>
             </div>
         </div>
+        @endauth
         
         <div class="panel mb-4">
             <div class="panel-head">
-                <h3><i class="fa-solid fa-file-pen"></i> উপলব্ধ পরীক্ষাসমূহ</h3>
+                <h3><i class="fa-solid fa-file-pen"></i> {{ app()->getLocale() == 'bn' ? 'উপলব্ধ পরীক্ষাসমূহ' : 'Available Exams' }}</h3>
             </div>
             @forelse($exams as $exam)
             <div class="course-row">
@@ -72,15 +83,16 @@
                         <i class="far fa-calendar-alt"></i> শেষ সময়: {{ $exam->end_time->format('M d, h:i A') }}
                     </div>
                 </div>
-                <a href="{{ route('exams.start', $exam->id) }}" class="btn btn-primary btn-sm">অংশগ্রহণ করুন</a>
+                <a href="{{ route('exams.start', $exam->id) }}" class="btn btn-primary btn-sm">{{ app()->getLocale() == 'bn' ? 'অংশগ্রহণ করুন' : 'Participate' }}</a>
             </div>
             @empty
             <div class="empty-state">
-                <h5>বর্তমানে কোনো পরীক্ষা উপলব্ধ নেই</h5>
+                <h5>{{ app()->getLocale() == 'bn' ? 'বর্তমানে কোনো পরীক্ষা উপলব্ধ নেই' : 'No exams available at the moment' }}</h5>
             </div>
             @endforelse
         </div>
 
+        @auth
         <div class="panel">
             <div class="panel-head">
                 <h3><i class="fa-solid fa-check-double"></i> সম্পন্ন করা পরীক্ষাসমূহ</h3>
@@ -122,6 +134,12 @@
                 </table>
             </div>
         </div>
+        @else
+        <div class="text-center mt-5">
+            <p>{{ app()->getLocale() == 'bn' ? 'আপনার সম্পন্ন করা পরীক্ষা দেখতে লগইন করুন' : 'Login to see your completed exams' }}</p>
+            <a href="{{ route('login') }}" class="btn btn-outline">{{ app()->getLocale() == 'bn' ? 'লগইন করুন' : 'Login' }}</a>
+        </div>
+        @endauth
     </section>
 </div>
 @endsection

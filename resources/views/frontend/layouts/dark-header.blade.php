@@ -112,7 +112,7 @@
                                                 @if ($user->hasRole('admin'))
                                                     <li><a href="{{ route('admin.dashboard') }}">Admin Dashboard</a></li>
                                                 @endif
-                                                <li><a href="{{ route('admin.dashboard') }}">Member Dashboard</a></li>
+                                                <li><a href="{{ route('user.dashboard') }}">Member Dashboard</a></li>
                                                 <li><a href="#">My Account</a></li>
                                                 <li><a href="#">Wishlist</a></li>
                                                 <li><a href="{{ route('logout') }}">Sign out</a></li>

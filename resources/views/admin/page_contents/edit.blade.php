@@ -260,6 +260,93 @@
 
                             </div>
                         </div>
+                        @elseif($pageContent->page_slug == 'about')
+                        <div class="card card-secondary">
+                            <div class="card-header">
+                                <h3 class="card-title">About Page Dynamic Sections</h3>
+                            </div>
+                            <div class="card-body">
+                                
+                                <!-- Our Story & Mission Section -->
+                                <div class="mb-5">
+                                    <h4 class="border-bottom pb-2 mb-3">Story & Mission</h4>
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label>Story Title (EN)</label>
+                                            <input type="text" name="meta[story_title_en]" class="form-control" value="{{ $pageContent->meta['story_title_en'] ?? '' }}">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="bn-font">গল্পের শিরোনাম (BN)</label>
+                                            <input type="text" name="meta[story_title_bn]" class="form-control bn-font" value="{{ $pageContent->meta['story_title_bn'] ?? '' }}">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label>Mission Title (EN)</label>
+                                            <input type="text" name="meta[mission_title_en]" class="form-control" value="{{ $pageContent->meta['mission_title_en'] ?? '' }}">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="bn-font">মিশনের শিরোনাম (BN)</label>
+                                            <input type="text" name="meta[mission_title_bn]" class="form-control bn-font" value="{{ $pageContent->meta['mission_title_bn'] ?? '' }}">
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <label>Mission Description (EN)</label>
+                                            <textarea name="meta[mission_description_en]" class="form-control" rows="2">{{ $pageContent->meta['mission_description_en'] ?? '' }}</textarea>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="bn-font">মিশনের বিবরণ (BN)</label>
+                                            <textarea name="meta[mission_description_bn]" class="form-control bn-font" rows="2">{{ $pageContent->meta['mission_description_bn'] ?? '' }}</textarea>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Our Impact Section -->
+                                <div class="mb-3">
+                                    <h4 class="border-bottom pb-2 mb-3">Our Impact</h4>
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label>Impact Section Title (EN)</label>
+                                            <input type="text" name="meta[impact][title_en]" class="form-control" value="{{ $pageContent->meta['impact']['title_en'] ?? '' }}" placeholder="Our Impact">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="bn-font">বিভাগের শিরোনাম (BN)</label>
+                                            <input type="text" name="meta[impact][title_bn]" class="form-control bn-font" value="{{ $pageContent->meta['impact']['title_bn'] ?? '' }}" placeholder="আমাদের প্রভাব">
+                                        </div>
+                                    </div>
+                                    <div id="impact-container">
+                                        @if(isset($pageContent->meta['impact']['items']))
+                                            @foreach($pageContent->meta['impact']['items'] as $index => $item)
+                                            <div class="dynamic-card" data-index="{{ $index }}">
+                                                <span class="remove-btn" onclick="$(this).parent().remove()"><i class="fas fa-trash"></i></span>
+                                                <div class="row">
+                                                    <div class="col-md-2">
+                                                        <label>FA Icon</label>
+                                                        <input type="text" name="meta[impact][items][{{ $index }}][icon]" class="form-control" value="{{ $item['icon'] }}" placeholder="fa-solid fa-users">
+                                                    </div>
+                                                    <div class="col-md-5">
+                                                        <label>Title (EN)</label>
+                                                        <input type="text" name="meta[impact][items][{{ $index }}][title_en]" class="form-control" value="{{ $item['title_en'] }}">
+                                                        <label class="mt-2">Subtext (EN)</label>
+                                                        <input type="text" name="meta[impact][items][{{ $index }}][desc_en]" class="form-control" value="{{ $item['desc_en'] }}">
+                                                    </div>
+                                                    <div class="col-md-5">
+                                                        <label class="bn-font">শিরোনাম (BN)</label>
+                                                        <input type="text" name="meta[impact][items][{{ $index }}][title_bn]" class="form-control bn-font" value="{{ $item['title_bn'] }}">
+                                                        <label class="mt-2 bn-font">উপ-লেখা (BN)</label>
+                                                        <input type="text" name="meta[impact][items][{{ $index }}][desc_bn]" class="form-control bn-font" value="{{ $item['desc_bn'] }}">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            @endforeach
+                                        @endif
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-info" onclick="addImpact()"><i class="fas fa-plus"></i> Add Impact Item</button>
+                                </div>
+
+                            </div>
+                        </div>
                         @endif
 
                         <div class="card-footer bg-white border-top text-right">
@@ -366,6 +453,35 @@
                             <input type="text" name="meta[features][items][${index}][title_bn]" class="form-control bn-font">
                             <label class="mt-2 bn-font">বিবরণ (BN)</label>
                             <textarea name="meta[features][items][${index}][desc_bn]" class="form-control bn-font" rows="2"></textarea>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.append(html);
+        }
+
+        function addImpact() {
+            let container = $('#impact-container');
+            let index = container.find('.dynamic-card').length;
+            let html = `
+                <div class="dynamic-card">
+                    <span class="remove-btn" onclick="$(this).parent().remove()"><i class="fas fa-trash"></i></span>
+                    <div class="row">
+                        <div class="col-md-2">
+                            <label>FA Icon</label>
+                            <input type="text" name="meta[impact][items][${index}][icon]" class="form-control" placeholder="fa-solid fa-users">
+                        </div>
+                        <div class="col-md-5">
+                            <label>Title (EN)</label>
+                            <input type="text" name="meta[impact][items][${index}][title_en]" class="form-control">
+                            <label class="mt-2">Subtext (EN)</label>
+                            <input type="text" name="meta[impact][items][${index}][desc_en]" class="form-control">
+                        </div>
+                        <div class="col-md-5">
+                            <label class="bn-font">শিরোনাম (BN)</label>
+                            <input type="text" name="meta[impact][items][${index}][title_bn]" class="form-control bn-font">
+                            <label class="mt-2 bn-font">উপ-লেখা (BN)</label>
+                            <input type="text" name="meta[impact][items][${index}][desc_bn]" class="form-control bn-font">
                         </div>
                     </div>
                 </div>

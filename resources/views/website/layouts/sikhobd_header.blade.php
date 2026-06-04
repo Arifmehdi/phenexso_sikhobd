@@ -1,7 +1,7 @@
 <header class="site-header">
   <div class="container header-inner">
     <a href="{{ route('home') }}" class="logo">
-      <img src="{{ route('imagecache', ['template' => 'original', 'filename' => $ws->logo_alt()]) }}" alt="{{ $ws->name }}" style="max-height: 70px;">
+      <img src="{{ route('imagecache', ['template' => 'original', 'filename' => $ws->logo_alt()]) }}" alt="{{ $ws->website_title ?? 'Qalam HR' }}" style="max-height: 70px;">
     </a>
 
     <nav class="nav-desktop">
@@ -72,11 +72,6 @@
     </nav>
 
     <div class="header-right">
-      <div class="lang-switch" role="group" aria-label="Language">
-        <button data-lang="bn">বাং</button>
-        <button data-lang="en">EN</button>
-      </div>
-      
       @auth
       <div class="nav-item user-dropdown desktop-only">
         <a href="javascript:void(0)" class="icon-btn" aria-label="User Account">
@@ -95,9 +90,16 @@
           </li>
         </ul>
       </div>
-      @else
-      <a href="{{ route('login') }}" class="btn btn-outline btn-sm desktop-only" data-i18n="nav.login">লগইন</a>
       @endauth
+
+      <div class="lang-switch" role="group" aria-label="Language">
+        <button data-lang="bn">বাং</button>
+        <button data-lang="en">EN</button>
+      </div>
+      
+      @guest
+      <a href="{{ route('login') }}" class="btn btn-outline btn-sm desktop-only" data-i18n="nav.login">লগইন</a>
+      @endguest
 
       {{--<a href="#" class="btn btn-primary desktop-only"><i class="fa-solid fa-download"></i> <span data-i18n="nav.download">ডাউনলোড অ্যাপ</span></a>--}}
       <button class="menu-toggle" id="menuToggle" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
@@ -109,7 +111,7 @@
 <aside class="drawer" id="drawer">
   <div class="drawer-head">
     <a href="{{ route('home') }}" class="logo">
-      <img src="{{ route('imagecache', ['template' => 'original', 'filename' => $ws->logo_alt()]) }}" alt="{{ $ws->name }}" style="max-height: 40px;">
+      <img src="{{ route('imagecache', ['template' => 'original', 'filename' => $ws->logo_alt()]) }}" alt="{{ $ws->website_title ?? 'Qalam HR' }}" style="max-height: 40px;">
     </a>
     <button class="icon-btn" id="drawerClose"><i class="fa-solid fa-xmark"></i></button>
   </div>

@@ -289,8 +289,8 @@
                                         @if(Auth::check())
                                             @php $user = auth()->user(); @endphp
                                             <li class="dropdown">
-                                                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown"><i class="fa fa-user"></i> {{ $user->name }}</a>
-                                                <ul class="dropdown-menu">
+                                                <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" data-bs-toggle="dropdown"><i class="fa fa-user"></i> <span>{{ $user->name }}</span></a>
+                                                <ul class="dropdown-menu dropdown-menu-end">
                                                     @if ($user->hasRole('admin'))
                                                         <li><a class="dropdown-item" href="{{ route('admin.dashboard') }}">{{ __('Admin Dashboard') }}</a></li>
                                                     @endif

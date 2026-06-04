@@ -1,12 +1,11 @@
 @extends('website.layouts.sikhobd')
 
-@section('title', 'Home - '. ($ws->name ?? env('APP_NAME')))
+@section('title', 'Home - '. ($ws->website_title ?? 'Qalam HR'))
 
 @section('meta')
-<meta name="description" content="{{ $ws->meta_description ?? 'SikhoBD is an online learning platform.' }}">
-<meta name="keywords" content="{{ $ws->meta_keywords ?? 'education, online courses, learning' }}">
-<meta property="og:title" content="Home - {{ $ws->name ?? env('APP_NAME') }}">
-<meta property="og:description" content="{{ $ws->meta_description ?? 'Discover quality courses at SikhoBD.' }}">
+<meta name="keywords" content="{{ $ws->meta_keywords ?? 'education, online courses, learning, training Bangladesh' }}">
+<meta property="og:title" content="Home - {{ $ws->website_title ?? 'Qalam HR' }}">
+<meta property="og:description" content="{{ $ws->meta_description ?? 'QalamHR is one of the premier training institutes in Bangladesh.' }}">
 <meta property="og:image" content="{{ route('imagecache', ['template' => 'original', 'filename' => $ws->logo()]) }}">
 <meta property="og:type" content="website">
 @endsection
@@ -16,7 +15,6 @@
     <div class="container">
       <div class="hero-grid">
         <div>
-          <span class="eyebrow">{{ app()->getLocale() == 'bn' ? ($content->subtitle_bn ?? 'বাংলাদেশের #১ অনলাইন স্কুল') : ($content->subtitle_en ?? "Bangladesh's #1 Online School") }}</span>
           <h1>{!! app()->getLocale() == 'bn' ? ($content->title_bn ?? 'শিখুন <em>যেকোনো কিছু</em>,<br>যেকোনো সময়, যেকোনো জায়গায়') : ($content->title_en ?? 'Learn <em>anything</em>,<br>anytime, anywhere') !!}</h1>
           <p>{{ app()->getLocale() == 'bn' ? ($content->description_bn ?? 'ক্লাস ৬ থেকে ১২, ভর্তি প্রস্তুতি, স্কিল ডেভেলপমেন্ট সহ ১০০০+ কোর্স একসাথে।') : ($content->description_en ?? '1000+ courses for Class 6-12, admission prep & skill development — all in one place.') }}</p>
           
@@ -324,6 +322,9 @@
           </div>
         </article>
         @endforeach
+      </div>
+      <div style="text-align:center; margin-top:20px;">
+        <a href="{{ route('news') }}" class="btn btn-primary">{{ app()->getLocale() == 'bn' ? 'সব নিউজ ও ব্লগ দেখুন' : 'View All News & Blog' }}</a>
       </div>
     </div>
   </section>

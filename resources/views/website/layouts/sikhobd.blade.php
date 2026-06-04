@@ -3,8 +3,9 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@yield('title', $ws->name ?? 'SikhoBD')</title>
+    <title>@yield('title', $ws->website_title ?? 'Qalam HR')</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="description" content="@yield('meta_description', $ws->meta_description ?? 'QalamHR is one of the premier training institutes in Bangladesh. We create professionals.')">
     @yield('meta')
     
     <link rel="shortcut icon" type="image/png" href="{{ route('imagecache', ['template' => 'original', 'filename' => $ws->favicon()]) }}">
@@ -81,7 +82,7 @@
         .user-dropdown .dropdown {
             display: none;
             position: absolute;
-            right: 0;
+            left: 0;
             top: 100%;
             background: #fff;
             min-width: 180px;
@@ -97,7 +98,7 @@
             content: '';
             position: absolute;
             top: 100%;
-            right: 0;
+            left: 0;
             width: 100%;
             height: 10px;
             background: transparent;

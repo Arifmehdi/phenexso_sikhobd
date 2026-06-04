@@ -681,9 +681,10 @@ Route::middleware(['userRole:admin','auth'])->prefix('admin')->group(function(){
 
 });
 
+Route::get('exams', [\App\Http\Controllers\ExamController::class, 'index'])->name('exams.index');
+
 Route::middleware(['auth', 'web'])->group(function() {
     // User Exam Routes
-    Route::get('exams', [\App\Http\Controllers\ExamController::class, 'index'])->name('exams.index');
     Route::get('exams/{exam}/start', [\App\Http\Controllers\ExamController::class, 'start'])->name('exams.start');
     Route::post('exams/{exam}/submit', [\App\Http\Controllers\ExamController::class, 'submit'])->name('exams.submit');
     Route::get('exams/{exam}/result', [\App\Http\Controllers\ExamController::class, 'result'])->name('exams.result');
