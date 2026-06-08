@@ -368,6 +368,46 @@ class FrontendController extends Controller
         return view('website.course_play', compact('product', 'lessons', 'sections', 'completions'));
     }
 
+    public function search(Request $request)
+    {
+        $queryString = trim($request->get('q', ''));
+        $type = $request->get('type', 'all');
+        $suggestions = collect();
+
+        if (empty($queryString)) {
+            $products = Product::whereNull('id')->paginate(12);
+        } else {
+            $products = Product::where('active', true)
+                ->when($type !== 'all', function ($query) use ($type) {
+                    return $query->where('type', $type);
+                })
+                ->where(function ($query) use ($queryString) {
+                    $query->where('name_en', 'like', "%{$queryString}%")
+                        ->orWhere('name_bn', 'like', "%{$queryString}%")
+                        ->orWhere('excerpt_en', 'like', "%{$queryString}%")
+                        ->orWhere('excerpt_bn', 'like', "%{$queryString}%")
+                        ->orWhere('description_en', 'like', "%{$queryString}%")
+                        ->orWhere('description_bn', 'like', "%{$queryString}%");
+                })
+                ->orderByRaw("CASE WHEN name_en LIKE ? THEN 0 ELSE 1 END", ["{$queryString}%"])
+                ->latest()
+                ->paginate(12)
+                ->appends(['q' => $queryString, 'type' => $type]);
+
+            if (!$products->count()) {
+                $suggestions = Product::where('active', true)
+                    ->when($type !== 'all', function ($query) use ($type) {
+                        return $query->where('type', $type);
+                    })
+                    ->latest()
+                    ->limit(6)
+                    ->get();
+            }
+        }
+
+        return view('website.search', compact('products', 'queryString', 'type', 'suggestions'));
+    }
+
     public function toggleLessonCompletion(Request $request)
     {
         if (!Auth::check()) {

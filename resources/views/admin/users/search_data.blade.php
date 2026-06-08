@@ -6,7 +6,7 @@
         <th>Name</th>
         <th>Email</th>
         <th>Phone</th>
-        <th>Role</th>
+        {{--<th>Role</th>--}}
         {{--<th>Temp Password</th>--}}
         <th>Approval</th>
     </tr>
@@ -38,7 +38,7 @@
             <td>{{$user->name}}</td>
             <td>{{$user->email}}</td>
             <td>{{$user->mobile}}</td>
-            <td>{{ Str::ucfirst($user->role == 0 ? 'buyer' : $user->role) }}</td>
+            {{--<td>{{ Str::ucfirst($user->role == 0 ? 'buyer' : $user->role) }}</td> --}}
             {{--<td>{{ $user->password_temp }}</td>--}}
             <td>
                 <form action="{{ route('admin.user.toggle-approval', $user->id) }}" method="POST">

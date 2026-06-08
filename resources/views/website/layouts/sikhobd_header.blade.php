@@ -40,12 +40,8 @@
           @endif
         </div>
       @endforeach
-    <div class="nav-item">
-        <a href="{{ route('shop') }}" class="nav-link">
-            {{ app()->getLocale() == 'bn' ? 'শপ' : 'Shop' }}
-        </a>
-    </div>
-    <div class="nav-item">
+
+        <div class="nav-item">
         <a href="{{ route('exams.index') }}" class="nav-link">
             <span>{{ app()->getLocale() == 'bn' ? 'পরীক্ষা' : 'Exam' }}</span>
             @if($headerExams->count() > 0)
@@ -69,9 +65,17 @@
           </ul>
         @endif
     </div>
+    <div class="nav-item">
+        <a href="{{ route('shop') }}" class="nav-link">
+            {{ app()->getLocale() == 'bn' ? 'শপ' : 'Shop' }}
+        </a>
+    </div>
+
     </nav>
 
     <div class="header-right">
+      <button class="icon-btn search-toggle" id="searchToggle" aria-label="Search"><i class="fa-solid fa-search"></i></button>
+
       @auth
       <div class="nav-item user-dropdown desktop-only">
         <a href="javascript:void(0)" class="icon-btn" aria-label="User Account">
@@ -107,6 +111,20 @@
   </div>
 </header>
 
+<div class="search-overlay" id="searchOverlay" aria-hidden="true">
+  <div class="search-panel" role="dialog" aria-modal="true" aria-labelledby="searchPanelTitle">
+    <button class="search-close" id="searchClose" aria-label="Close search"><i class="fa-solid fa-xmark"></i></button>
+    <div class="search-panel-inner">
+      <h2 id="searchPanelTitle">{{ app()->getLocale() == 'bn' ? 'প্রোডাক্ট বা কোর্স খুঁজুন' : 'Search products or courses' }}</h2>
+      <form action="{{ route('search') }}" method="get" class="search-form">
+        <input type="search" name="q" id="headerSearchInput" value="{{ request('q') }}" placeholder="{{ app()->getLocale() == 'bn' ? 'প্রোডাক্ট বা কোর্সের নাম লিখুন...' : 'Enter product or course name...' }}" autocomplete="off" required>
+        <button type="submit" aria-label="Search"><i class="fa-solid fa-search"></i></button>
+      </form>
+      <p class="search-subtitle">{{ app()->getLocale() == 'bn' ? 'দ্রুত ফলাফল দেখুন এবং আপনার প্রোডাক্ট বা কোর্সটি আবার খুঁজুন।' : 'Quickly find course and product matches with accurate results.' }}</p>
+    </div>
+  </div>
+</div>
+
 <div class="drawer-overlay" id="drawerOverlay"></div>
 <aside class="drawer" id="drawer">
   <div class="drawer-head">
@@ -116,6 +134,11 @@
     <button class="icon-btn" id="drawerClose"><i class="fa-solid fa-xmark"></i></button>
   </div>
   <div class="drawer-body">
+    <div class="drawer-search" style="margin: 0 8px 18px;">
+      <form action="{{ route('search') }}" method="get" class="search-form">
+        <input type="search" name="q" placeholder="{{ app()->getLocale() == 'bn' ? 'খুঁজুন...' : 'Search...' }}" autocomplete="off" style="width:100%; padding: 12px 14px; border-radius: 14px; border:1px solid #ddd;">
+      </form>
+    </div>
     <div class="lang-switch" style="margin: 0 8px 12px;">
       <button data-lang="bn">বাংলা</button>
       <button data-lang="en">English</button>

@@ -150,7 +150,7 @@
                         <a href="#" class="nav-link {{ session('lsbm') == 'users'? ' active ' : ''}}">
                             <i class="nav-icon fas fa-user-friends"></i>
                             <p>
-                                Users
+                                Students
                                 <i class="fas fa-angle-left right"></i>
                             </p>
                         </a>
@@ -158,13 +158,13 @@
                             <li class="nav-item">
                                 <a href="{{route('admin.user')}}" class="nav-link {{ session('lsbsm') == 'allUsers'? ' active ' : ''}}">
                                     <i class="far fa-circle nav-icon"></i>
-                                    <p>All User</p>
+                                    <p>All Students</p>
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a href="{{route('admin.create-user')}}" class="nav-link {{ session('lsbsm') == 'createUser'? ' active ' : ''}}">
                                     <i class="far fa-circle nav-icon"></i>
-                                    <p>Create User</p>
+                                    <p>Create Student</p>
                                 </a>
                             </li>
                         </ul>

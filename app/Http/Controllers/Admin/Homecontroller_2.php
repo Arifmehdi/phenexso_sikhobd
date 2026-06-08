@@ -27,7 +27,7 @@ class HomeController extends Controller
         // E-Learning Stats
         $totalCourses = Product::where('type', 'course')->count();
         $totalInstructors = User::where('role', 'instructor')->orWhereHas('roles', function($q){
-            $q->where('name', 'instructor');
+            $q->where('role_name', 'instructor');
         })->count();
         $totalEnrollments = \App\Models\Enrollment::count();
         $pendingEnrollments = \App\Models\Enrollment::where('status', 'pending')->count();
@@ -38,6 +38,15 @@ class HomeController extends Controller
         $pendingOrders = Order::where('order_status', 'pending')->count();
         $totalRevenue = Order::where('payment_status', 'paid')->sum('grand_total');
         
+        // Trends for Chart
+        $enrollmentData = [];
+        $enrollmentLabels = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = now()->subDays($i);
+            $enrollmentLabels[] = $date->format('D');
+            $enrollmentData[] = \App\Models\Enrollment::whereDate('created_at', $date)->count();
+        }
+        
         $recentEnrollments = \App\Models\Enrollment::with(['user', 'product'])->latest()->take(6)->get();
         $recentCourses = Product::where('type', 'course')->latest()->take(5)->get();
         $recentOrders = Order::latest()->take(6)->get();
@@ -45,7 +54,7 @@ class HomeController extends Controller
         return view('admin.index', compact(
             'totalCourses', 'totalInstructors', 'totalEnrollments', 'pendingEnrollments',
             'productcount', 'todayOrders', 'pendingOrders', 'totalRevenue',
-            'recentEnrollments', 'recentCourses', 'recentOrders'
+            'recentEnrollments', 'recentCourses', 'recentOrders', 'enrollmentData', 'enrollmentLabels'
         ));
     }
 
