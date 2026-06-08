@@ -21,8 +21,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     
     <style>
-
-
         html {
             scroll-behavior: smooth;
         }
@@ -31,8 +29,8 @@
             margin: 0;
             min-height: 100vh;
             font-family: 'Inter', sans-serif;
-            background: var(--bg);
-            color: var(--text-main);
+            background: var(--bg, #ffffff);
+            color: var(--text-main, inherit);
             line-height: 1.6;
         }
 
@@ -44,8 +42,7 @@
             position: sticky;
             top: 0;
             z-index: 1100;
-            background: rgba(255, 255, 255, 0.94);
-            backdrop-filter: blur(16px);
+            background: #ffffff;
             border-bottom: 1px solid rgba(148, 163, 184, 0.16);
             box-shadow: 0 18px 50px rgba(15, 23, 42, 0.06);
         }
@@ -82,7 +79,7 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            color: var(--text-main);
+            color: var(--text-main, inherit);
             font-weight: 600;
             padding: 10px 14px;
             border-radius: 999px;
@@ -92,8 +89,8 @@
 
         .nav-link:hover,
         .nav-link:focus {
-            background: var(--primary-soft);
-            color: var(--primary);
+            background: rgba(41, 82, 255, 0.1);
+            color: var(--primary, #2b2553);
             transform: translateY(-1px);
         }
 
@@ -111,11 +108,11 @@
             top: 100%;
             left: 0;
             min-width: 220px;
-            background: var(--surface);
+            background: #ffffff;
             border: 1px solid rgba(148, 163, 184, 0.18);
             border-radius: 18px;
             padding: 14px 0;
-            box-shadow: var(--shadow);
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
             opacity: 0;
             visibility: hidden;
             transform: translateY(10px);
@@ -148,8 +145,8 @@
 
         .dropdown-link:hover,
         .dropdown-link:focus {
-            background: var(--surface-soft);
-            color: var(--text-main);
+            background: #f1f5f9;
+            color: var(--text-main, inherit);
         }
 
         .drawer-overlay {
@@ -159,7 +156,12 @@
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.2s ease;
-            z-index: 1090;
+            z-index: 1290;
+        }
+
+        .drawer-overlay.open {
+            opacity: 1;
+            visibility: visible;
         }
 
         .drawer {
@@ -168,12 +170,16 @@
             right: -100%;
             width: min(320px, 100%);
             height: 100vh;
-            background: var(--surface);
+            background: #ffffff;
             box-shadow: -20px 0 80px rgba(15, 23, 42, 0.12);
             transition: right 0.25s ease;
-            z-index: 1100;
+            z-index: 1300;
             display: flex;
             flex-direction: column;
+        }
+
+        .drawer.open {
+            right: 0;
         }
 
         .drawer-head {
@@ -214,9 +220,22 @@
             gap: 10px;
         }
 
-        .icon-btn,
-        .menu-toggle {
+        .icon-btn {
             display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 46px;
+            height: 46px;
+            border-radius: 16px;
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            background: var(--surface);
+            color: var(--text-main);
+            cursor: pointer;
+            transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+        }
+
+        .menu-toggle {
+            display: none;
             align-items: center;
             justify-content: center;
             width: 46px;

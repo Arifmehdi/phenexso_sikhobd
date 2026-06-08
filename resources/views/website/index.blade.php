@@ -18,13 +18,13 @@
           <h1>{!! app()->getLocale() == 'bn' ? ($content->title_bn ?? 'শিখুন <em>যেকোনো কিছু</em>,<br>যেকোনো সময়, যেকোনো জায়গায়') : ($content->title_en ?? 'Learn <em>anything</em>,<br>anytime, anywhere') !!}</h1>
           <p>{{ app()->getLocale() == 'bn' ? ($content->description_bn ?? 'ক্লাস ৬ থেকে ১২, ভর্তি প্রস্তুতি, স্কিল ডেভেলপমেন্ট সহ ১০০০+ কোর্স একসাথে।') : ($content->description_en ?? '1000+ courses for Class 6-12, admission prep & skill development — all in one place.') }}</p>
           
-          <div class="hero-search">
+          {{--<div class="hero-search">
             <form action="{{ route('shop') }}" method="GET">
               <i class="fa-solid fa-magnifying-glass"></i>
               <input type="text" name="search" placeholder="{{ app()->getLocale() == 'bn' ? 'কী শিখতে চান? সার্চ করুন...' : 'What do you want to learn? Search...' }}" required>
               <button type="submit" class="btn btn-accent">{{ app()->getLocale() == 'bn' ? 'খুঁজুন' : 'Search' }}</button>
             </form>
-          </div>
+          </div>--}}
 
           <div class="hero-cta">
             <a href="{{ route('courses') }}" class="btn btn-primary"><span>{{ app()->getLocale() == 'bn' ? 'এক্সপ্লোর কোর্স' : 'Explore Courses' }}</span> <i class="fa-solid fa-arrow-right"></i></a>

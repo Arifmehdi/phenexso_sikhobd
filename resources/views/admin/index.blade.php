@@ -14,7 +14,7 @@
             </div>
             <div class="col-sm-6 text-sm-right mt-3 mt-sm-0">
                 <div class="btn-group shadow-sm rounded-pill overflow-hidden">
-                    <a href="{{ route('admin.productCreate') }}?type=course" class="btn btn-primary px-4">
+                    <a href="{{ route('admin.courseCreate') }}?type=course" class="btn btn-primary px-4">
                         <i class="fas fa-graduation-cap me-2"></i> New Course
                     </a>
                     <a href="{{ route('admin.productCreate') }}?type=product" class="btn btn-outline-primary px-4">
@@ -44,7 +44,7 @@
                                 <i class="fas fa-graduation-cap text-primary fs-3"></i>
                             </span>
                         </div>
-                        <div>
+                        <div class="p-4">
                             <span class="text-muted fw-bold d-block small">Total Courses</span>
                             <span class="text-dark fw-bolder fs-4">{{ $totalCourses }}</span>
                         </div>
@@ -61,7 +61,7 @@
                                 <i class="fas fa-chalkboard-teacher text-success fs-3"></i>
                             </span>
                         </div>
-                        <div>
+                        <div class="p-4">
                             <span class="text-muted fw-bold d-block small">Instructors</span>
                             <span class="text-dark fw-bolder fs-4">{{ $totalInstructors }}</span>
                         </div>
@@ -78,7 +78,7 @@
                                 <i class="fas fa-user-graduate text-info fs-3"></i>
                             </span>
                         </div>
-                        <div>
+                        <div class="p-4">
                             <span class="text-muted fw-bold d-block small">Total Enrollments</span>
                             <span class="text-dark fw-bolder fs-4">{{ $totalEnrollments }}</span>
                         </div>
@@ -95,7 +95,7 @@
                                 <i class="fas fa-clock text-warning fs-3"></i>
                             </span>
                         </div>
-                        <div>
+                        <div class="p-4">
                             <span class="text-muted fw-bold d-block small">Pending Requests</span>
                             <span class="text-dark fw-bolder fs-4">{{ $pendingEnrollments }}</span>
                         </div>
@@ -120,7 +120,7 @@
                                 <i class="fas fa-shopping-cart text-danger fs-3"></i>
                             </span>
                         </div>
-                        <div>
+                        <div class="p-4">
                             <span class="text-muted fw-bold d-block small">Today's Orders</span>
                             <span class="text-dark fw-bolder fs-4">{{ $todayOrders }}</span>
                         </div>
@@ -136,7 +136,7 @@
                                 <i class="fas fa-box text-info fs-3"></i>
                             </span>
                         </div>
-                        <div>
+                        <div class="p-4">
                             <span class="text-muted fw-bold d-block small">Active Products</span>
                             <span class="text-dark fw-bolder fs-4">{{ $productcount }}</span>
                         </div>
@@ -152,7 +152,7 @@
                                 <i class="fas fa-hourglass-half text-warning fs-3"></i>
                             </span>
                         </div>
-                        <div>
+                        <div class="p-4">
                             <span class="text-muted fw-bold d-block small">Pending Orders</span>
                             <span class="text-dark fw-bolder fs-4">{{ $pendingOrders }}</span>
                         </div>
@@ -163,12 +163,12 @@
             <div class="col-lg-3 col-6 mb-3">
                 <div class="card h-100 border-0 shadow-sm transition-hover rounded-4 bg-primary text-white">
                     <div class="card-body p-4 d-flex align-items-center">
-                        <div class="symbol symbol-50px bg-white bg-opacity-25 me-4">
-                            <span class="symbol-label">
-                                <i class="fas fa-wallet text-white fs-3"></i>
+                        <div class="symbol symbol-50px bg-dark bg-opacity-25 me-4">
+                            <span class="symbol-label ">
+                                <i class="fas fa-wallet text-white fs-3 "></i>
                             </span>
                         </div>
-                        <div>
+                        <div class="p-4">
                             <span class="text-white-50 fw-bold d-block small">Paid Revenue</span>
                             <span class="text-white fw-bolder fs-4">{{ number_format($totalRevenue, 0) }} ৳</span>
                         </div>
@@ -272,7 +272,7 @@
                     </div>
                     <div class="card-body p-4">
                         @foreach($recentCourses as $course)
-                        <div class="d-flex align-items-center mb-4">
+                        <div class="d-flex align-items-center mb-4" style="margin-left: .5rem;">
                             <div class="me-3">
                                 <img src="{{ route('imagecache', ['template' => 'sbixs', 'filename' => $course->fi()]) }}" alt="" class="rounded-3 shadow-sm" style="width: 65px; height: 45px; object-fit: cover;">
                             </div>
@@ -295,25 +295,25 @@
                 <div class="card shadow-sm border-0 rounded-4 bg-gradient-dark text-white p-4">
                     <h5 class="fw-bold mb-3">Quick Actions</h5>
                     <div class="row g-2">
-                        <div class="col-6">
+                        <div class="col-6 p-2">
                             <a href="{{ route('admin.all_user') }}" class="btn btn-dark w-100 text-start py-3 rounded-3 border-0 bg-white bg-opacity-10">
                                 <i class="fas fa-users-cog d-block mb-2 fs-4 text-info"></i>
                                 <span class="fw-bold small">Manage Users</span>
                             </a>
                         </div>
-                        <div class="col-6">
+                        <div class="col-6 p-2">
                             <a href="{{ route('websiteparam') }}" class="btn btn-dark w-100 text-start py-3 rounded-3 border-0 bg-white bg-opacity-10">
                                 <i class="fas fa-cogs d-block mb-2 fs-4 text-warning"></i>
                                 <span class="fw-bold small">Settings</span>
                             </a>
                         </div>
-                        <div class="col-6">
+                        <div class="col-6 p-2">
                             <a href="{{ route('admin.lessons.index', ['product' => 0]) }}" class="btn btn-dark w-100 text-start py-3 rounded-3 border-0 bg-white bg-opacity-10">
                                 <i class="fas fa-play-circle d-block mb-2 fs-4 text-danger"></i>
                                 <span class="fw-bold small">Manage Lessons</span>
                             </a>
                         </div>
-                        <div class="col-6">
+                        <div class="col-6 p-2">
                             <a href="{{ route('admin.exams.index') }}" class="btn btn-dark w-100 text-start py-3 rounded-3 border-0 bg-white bg-opacity-10">
                                 <i class="fas fa-file-alt d-block mb-2 fs-4 text-primary"></i>
                                 <span class="fw-bold small">Quiz/Exams</span>

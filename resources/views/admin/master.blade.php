@@ -125,23 +125,13 @@
                 <ul class="nav nav-pills nav-sidebar flex-column pb-5" data-widget="treeview" role="menu" data-accordion="false">
 
 
-                    <li class="nav-item {{ session('lsbm') == 'dashboardM'? ' menu-open ' : ''}}">
-                        <a href="Javascript:void()" class="nav-link {{ session('lsbm') == 'dashboardM'? ' active ' : ''}}">
+                    <li class="nav-item {{ session('lsbm') == 'dashboardM'? ' menu-open active' : ''}}">
+                        <a href="{{route('admin.dashboard')}}" class="nav-link {{ session('lsbm') == 'dashboardM'? ' active ' : ''}}">
                             <i class="nav-icon fas fa-th-large"></i>
                             <p>
                                 DashBoard
-                                <i class="fas fa-angle-left right"></i>
                             </p>
                         </a>
-                        <ul class="nav nav-treeview">
-                            <li class="nav-item">
-                                <a href="{{route('admin.dashboard')}}" class="nav-link {{ session('lsbsm') == 'dashboardSM'? ' active ' : ''}}">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>Admin DashBoard</p>
-                                </a>
-                            </li>
-                           
-                        </ul>
                     </li>
 
 

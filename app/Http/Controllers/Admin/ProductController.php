@@ -283,7 +283,7 @@ class ProductController extends Controller
         menuSubmenu('product', 'productsAll');
 
         // Fetch latest product categories for category dropdown/select
-        $data['categories'] = ProductCategory::latest()->get();
+        $data['categories'] = ProductCategory::where('type', 'product')->latest()->get();
 
         // Fetch paginated media items for media selection (20 per page)
         $data['medias'] = Media::latest()->paginate(20);
@@ -446,7 +446,7 @@ class ProductController extends Controller
         // Prepare data array to pass to view
         $data = [
             'product'    => $product,
-            'categories' => ProductCategory::latest()->get(),
+            'categories' => ProductCategory::where('type', 'product')->latest()->get(),
             'medias'     => Media::latest()->paginate(20),
             'riders'     => \App\Models\User::where('role', 'rider')->where('is_approve', 1)->get(),
             'instructors' => \App\Models\User::whereIn('role', ['instructor', 'teacher'])->where('is_approve', 1)->get(),

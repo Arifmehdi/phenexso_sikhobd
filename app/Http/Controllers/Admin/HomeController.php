@@ -39,7 +39,7 @@ class HomeController extends Controller
         $totalRevenue = Order::where('payment_status', 'paid')->sum('grand_total');
         
         $recentEnrollments = \App\Models\Enrollment::with(['user', 'product'])->latest()->take(6)->get();
-        $recentCourses = Product::where('type', 'course')->latest()->take(5)->get();
+        $recentCourses = Product::where('type', 'course')->latest()->take(6)->get();
         $recentOrders = Order::latest()->take(6)->get();
 
         return view('admin.index', compact(
