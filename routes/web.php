@@ -606,6 +606,15 @@ Route::middleware(['userRole:admin','auth'])->prefix('admin')->group(function(){
     Route::get('product/search/type/{type}', [ProductController::class, 'productSearch'])->name('admin.productSearch');
     Route::get('product/add/stock/{product}', [ProductController::class, 'productAddStock'])->name('admin.productAddStock');
 
+    // Course Routes
+    Route::get('courses/all', [\App\Http\Controllers\Admin\CourseController::class, 'coursesAll'])->name('admin.coursesAll');
+    Route::get('course/create', [\App\Http\Controllers\Admin\CourseController::class, 'courseCreate'])->name('admin.courseCreate');
+    Route::post('course/store', [\App\Http\Controllers\Admin\CourseController::class, 'courseStore'])->name('admin.courseStore');
+    Route::get('course/edit/{course}', [\App\Http\Controllers\Admin\CourseController::class, 'courseEdit'])->name('admin.courseEdit');
+    Route::post('course/update/{course}', [\App\Http\Controllers\Admin\CourseController::class, 'courseUpdate'])->name('admin.courseUpdate');
+    Route::post('course/delete/{course}', [\App\Http\Controllers\Admin\CourseController::class, 'courseDelete'])->name('admin.courseDelete');
+    Route::get('course/search', [\App\Http\Controllers\Admin\CourseController::class, 'courseSearch'])->name('admin.courseSearch');
+
 
     Route::get('order/list', [ProductController::class, 'orderList'])->name('admin.orderList');
     Route::get('order/details/{order}', [ProductController::class, 'orderDeatils'])->name('admin.orderDeatils');

@@ -10,7 +10,7 @@ class EnrollmentController extends Controller
 {
     public function index(Request $request)
     {
-        menuSubmenu('elearning', 'enrollments');
+        menuSubmenu('academy', 'enrollments');
 
         $query = Enrollment::with(['user', 'product', 'order'])->latest();
 

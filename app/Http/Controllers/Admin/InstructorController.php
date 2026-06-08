@@ -15,7 +15,7 @@ class InstructorController extends Controller
      */
     public function index(Request $request)
     {
-        menuSubmenu('instructors', 'allInstructors');
+        menuSubmenu('academy', 'allInstructors');
 
         $query = User::whereIn('role', ['instructor', 'teacher']);
 
@@ -88,7 +88,7 @@ class InstructorController extends Controller
      */
     public function edit($id)
     {
-        menuSubmenu('instructors', 'allInstructors');
+        menuSubmenu('academy', 'allInstructors');
 
         $data['instructor'] = User::whereIn('role', ['instructor', 'teacher'])->findOrFail($id);
         return view('admin.instructors.edit', $data);
@@ -99,7 +99,7 @@ class InstructorController extends Controller
      */
     public function update(Request $request, $id)
     {
-        menuSubmenu('instructors', 'allInstructors');
+        menuSubmenu('academy', 'allInstructors');
 
         $instructor = User::whereIn('role', ['instructor', 'teacher'])->findOrFail($id);
 

@@ -46,18 +46,6 @@
                     <div class="col-sm-7">
                         <div class="card card-primary card-outline">
                             <div class="card-body">
-                                {{-- Product Type --}}
-                                <div class="form-group">
-                                    <label for="type">Product Type <span class="text-danger">*</span></label>
-                                    <select name="type" id="type" class="form-control" required onchange="toggleCourseFields(this.value)">
-                                        <option value="product" {{ old('type', $product->type) == 'product' ? 'selected' : '' }}>Physical Product (Ecommerce)</option>
-                                        <option value="course" {{ old('type', $product->type) == 'course' ? 'selected' : '' }}>Digital Course (E-learning)</option>
-                                    </select>
-                                    @error('type')
-                                        <span class="text-danger">{{ $message }}</span>
-                                    @enderror
-                                </div>
-
                                 {{--Product Name (English) --}}
                                 <div class="form-group">
                                     <label for="name_en">Product Name (English)
@@ -83,27 +71,8 @@
                                     @enderror
                                 </div>
 
-                                {{-- Course Specific Fields --}}
-                                <div id="course_fields" style="display: {{ old('type', $product->type) == 'course' ? 'block' : 'none' }}; border: 1px dashed var(--primary); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                                    <h5 class="text-primary"><i class="fas fa-graduation-cap"></i> E-learning Details</h5>
-                                    <div class="form-group">
-                                        <label for="duration">Duration (e.g. 10 hours, 4 weeks)</label>
-                                        <input type="text" name="duration" value="{{ old('duration', $product->duration) }}" class="form-control" placeholder="Duration">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="lessons_count">Total Lessons (Classes)</label>
-                                        <input type="number" name="lessons_count" value="{{ old('lessons_count', $product->lessons_count ?? 0) }}" class="form-control" placeholder="Total Lessons">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="level">Course Level</label>
-                                        <select name="level" id="level" class="form-control">
-                                            <option value="">Select Level</option>
-                                            <option value="beginner" {{ old('level', $product->level) == 'beginner' ? 'selected' : '' }}>Beginner</option>
-                                            <option value="intermediate" {{ old('level', $product->level) == 'intermediate' ? 'selected' : '' }}>Intermediate</option>
-                                            <option value="advanced" {{ old('level', $product->level) == 'advanced' ? 'selected' : '' }}>Advanced</option>
-                                        </select>
-                                    </div>
-                                </div>
+                                {{-- Hidden type --}}
+                                <input type="hidden" name="type" value="product">
 
                                 {{-- Product Code --}}
                                 {{-- <div class="form-group">

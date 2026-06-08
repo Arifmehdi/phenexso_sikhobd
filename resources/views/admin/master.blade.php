@@ -504,64 +504,67 @@
                     </li>--}}
 
 
-                    {{-- E-learning --}}
-                    <li class="nav-item {{ session('lsbm') == 'elearning' ? ' menu-open ' : ''}}">
-                        <a href="#" class="nav-link {{ session('lsbm') == 'elearning' ? ' active ' : ''}}">
-                            <i class="nav-icon fas fa-graduation-cap"></i>
-                            <p>
-                                E-learning
-                                <i class="fas fa-angle-left right"></i>
-                            </p>
-                        </a>
-                        <ul class="nav nav-treeview">
-                            <li class="nav-item">
-                                <a href="{{ route('admin.enrollments.index') }}" class="nav-link {{ session('lsbsm') == 'enrollments' ? ' active ' : ''}}">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>Enrollments</p>
-                                </a>
-                            </li>
-                        </ul>
+                    {{-- Academy Management Hub --}}
+                    <li class="nav-header text-uppercase text-xs font-weight-bold text-muted mt-3 mb-1">
+                        <i class="fas fa-graduation-cap mr-1"></i> Academy Hub
                     </li>
-
-                    {{-- Instructors --}}
-                    <li class="nav-item {{ session('lsbm') == 'instructors'? ' menu-open ' : ''}}">
-                        <a href="#" class="nav-link {{ session('lsbm') == 'instructors'? ' active ' : ''}}">
-                            <i class="nav-icon fas fa-chalkboard-teacher"></i>
+                    
+                    {{-- Integrated Academy Menu --}}
+                    <li class="nav-item {{ in_array(session('lsbm'), ['academy', 'course', 'instructors', 'exams', 'elearning']) ? 'menu-open' : '' }}">
+                        <a href="#" class="nav-link {{ in_array(session('lsbm'), ['academy', 'course', 'instructors', 'exams', 'elearning']) ? 'active bg-primary' : '' }}">
+                            <i class="nav-icon fas fa-university"></i>
                             <p>
-                                Instructors
+                                Academy Management
                                 <i class="fas fa-angle-left right"></i>
                             </p>
                         </a>
-                        <ul class="nav nav-treeview">
+                        <ul class="nav nav-treeview shadow-sm border-left border-primary ml-2 mt-1">
+                            {{-- Courses Management --}}
                             <li class="nav-item">
-                                <a href="{{ route('admin.instructors.index') }}" class="nav-link {{ session('lsbsm') == 'allInstructors' ? ' active ' : '' }}">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>All Instructors</p>
+                                <a href="{{ route('admin.coursesAll') }}" class="nav-link {{ session('lsbsm') == 'coursesAll' ? 'active' : '' }}">
+                                    <i class="fas fa-book nav-icon text-info"></i>
+                                    <p>Courses Management</p>
                                 </a>
                             </li>
-                        </ul>
-                    </li>
 
-                    {{-- Exams --}}
-                    <li class="nav-item">
-                        <a href="#" class="nav-link">
-                            <i class="nav-icon fas fa-file-alt"></i>
-                            <p>
-                                Exam Management
-                                <i class="fas fa-angle-left right"></i>
-                            </p>
-                        </a>
-                        <ul class="nav nav-treeview">
+                            {{-- Instructors --}}
                             <li class="nav-item">
-                                <a href="{{ route('admin.questions.index') }}" class="nav-link">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>Question Bank</p>
+                                <a href="{{ route('admin.instructors.index') }}" class="nav-link {{ session('lsbsm') == 'allInstructors' ? 'active' : '' }}">
+                                    <i class="fas fa-chalkboard-teacher nav-icon text-warning"></i>
+                                    <p>Instructors Hub</p>
                                 </a>
                             </li>
+
+                            {{-- Exam & Assessment --}}
+                            <li class="nav-item {{ in_array(session('lsbsm'), ['questionsAll', 'examsAll']) ? 'menu-open' : '' }}">
+                                <a href="#" class="nav-link">
+                                    <i class="fas fa-file-signature nav-icon text-danger"></i>
+                                    <p>
+                                        Exam & Assessment
+                                        <i class="fas fa-angle-left right w3-tiny"></i>
+                                    </p>
+                                </a>
+                                <ul class="nav nav-treeview ml-3">
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.questions.index') }}" class="nav-link {{ session('lsbsm') == 'questionsAll' ? 'active' : '' }}">
+                                            <i class="far fa-question-circle nav-icon"></i>
+                                            <p>Question Bank</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.exams.index') }}" class="nav-link {{ session('lsbsm') == 'examsAll' ? 'active' : '' }}">
+                                            <i class="fas fa-edit nav-icon"></i>
+                                            <p>Manage Exams</p>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+
+                            {{-- Enrollments & Students --}}
                             <li class="nav-item">
-                                <a href="{{ route('admin.exams.index') }}" class="nav-link">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>Exams</p>
+                                <a href="{{ route('admin.enrollments.index') }}" class="nav-link {{ session('lsbsm') == 'enrollments' ? 'active' : '' }}">
+                                    <i class="fas fa-user-graduate nav-icon text-success"></i>
+                                    <p>Course Enrollments</p>
                                 </a>
                             </li>
                         </ul>

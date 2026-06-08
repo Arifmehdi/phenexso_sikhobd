@@ -10,14 +10,14 @@ class QuestionController extends Controller
 {
     public function index()
     {
-        menuSubmenu('masters', 'pageContentsAll');
+        menuSubmenu('academy', 'questionsAll');
         $questions = Question::latest()->paginate(20);
         return view('admin.questions.index', compact('questions'));
     }
 
     public function create()
     {
-        menuSubmenu('masters', 'pageContentsAll');
+        menuSubmenu('academy', 'questionsAll');
         return view('admin.questions.create');
     }
 
@@ -39,7 +39,7 @@ class QuestionController extends Controller
 
     public function edit(Question $question)
     {
-        menuSubmenu('masters', 'pageContentsAll');
+        menuSubmenu('academy', 'questionsAll');
         return view('admin.questions.edit', compact('question'));
     }
 

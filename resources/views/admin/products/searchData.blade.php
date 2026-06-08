@@ -5,7 +5,6 @@
             <th scope="col" width="60">Action</th>
             <th scope="col">Product Name</th>
             <th scope="col" width="80">Type</th>
-            <th scope="col">Instructor</th>
             <th scope="col">Product Stock</th>
             <th scope="col">Purchase Price</th>
             <th scope="col">Selling Price</th>
@@ -22,19 +21,12 @@
             <tr>
                 <td scope="row">{{ $i++ }}</td>
                 <td scope="row">
-                   
                     <div class="dropdown show">
                         <a class="btn btn-primary btn-xs dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             Action
                         </a>
-
                         <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
                             <a href="{{  route('admin.productEdit',$product)}}" class="dropdown-item"><i class="fa fa-edit"></i> Edit</a>
-                            
-                            @if($product->type === 'course')
-                            <a href="{{ route('admin.lessons.index', $product->id) }}" class="dropdown-item text-primary"><i class="fa fa-graduation-cap"></i> Manage Classes</a>
-                            @endif
-
                             <form action="{{ route('admin.productDelete',$product)}}" method="post" onclick="return confirm('Are you sure to delete?')">
                                 @csrf
                                 <button type="submit" class="dropdown-item"><i class="fa fa-trash"></i> Delete</button>
@@ -42,28 +34,13 @@
                         </div>
                     </div>
                 </td>
-               
-
                 <td>{{ Str::limit($product->name_en, 30) }}</td>
                 <td>
-                    @if($product->type === 'course')
-                        <span class="badge badge-success">Course</span>
-                    @else
-                        <span class="badge badge-info">Product</span>
-                    @endif
-                </td>
-                <td>
-                    @if($product->type === 'course' && $product->instructor)
-                        <span class="badge badge-secondary">{{ $product->instructor->name }}</span>
-                    @elseif($product->type === 'course')
-                        <span class="text-muted">Not assigned</span>
-                    @else
-                        <span class="text-muted">—</span>
-                    @endif
+                    <span class="badge badge-info">Product</span>
                 </td>
                 <td>{{ $product->stock ? $product->stock : 'N/A' }}</td>
-                <td>{{ $product->purchase_price }}</td>
-                <td>{{ $product->selling_price }}</td>
+                <td>{{ number_format($product->purchase_price, 2) }}</td>
+                <td>{{ number_format($product->selling_price, 2) }}</td>
                 <td>
                     <img width="30px" height="20px"src="{{ route('imagecache', ['template' => 'sbixs', 'filename' => $product->fi()]) }}"
                     alt="">

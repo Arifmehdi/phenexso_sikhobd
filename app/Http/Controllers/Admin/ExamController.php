@@ -13,12 +13,14 @@ class ExamController extends Controller
 {
     public function index()
     {
+        menuSubmenu('academy', 'examsAll');
         $exams = Exam::latest()->paginate(20);
         return view('admin.exams.index', compact('exams'));
     }
 
     public function create()
     {
+        menuSubmenu('academy', 'examsAll');
         $users = \App\Models\User::orderBy('name')->get();
         return view('admin.exams.create', compact('users'));
     }
@@ -46,6 +48,7 @@ class ExamController extends Controller
 
     public function edit(Exam $exam)
     {
+        menuSubmenu('academy', 'examsAll');
         $users = \App\Models\User::orderBy('name')->get();
         $selected_student_ids = $exam->students()->pluck('users.id')->toArray();
         return view('admin.exams.edit', compact('exam', 'users', 'selected_student_ids'));

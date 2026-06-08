@@ -260,22 +260,11 @@ class ProductController extends Controller
         // Set active menu and submenu for UI highlighting
         menuSubmenu('product', 'productsAll');
 
-        // Optional type filter: product, course, or all (default)
-        $type = $request->type;
+        // Only show products, not courses
+        $query = Product::where('type', 'product')->latest();
 
-        $query = Product::latest();
-
-        if ($type && in_array($type, ['product', 'course'])) {
-            $query->where('type', $type);
-        }
-
-        $data['products'] = $query->paginate(30)->appends(['type' => $type]);
-        $data['activeType'] = $type; // Pass active filter to view
-
-        // Counts for filter tabs
-        $data['totalCount'] = Product::count();
-        $data['productCount'] = Product::where('type', 'product')->count();
-        $data['courseCount'] = Product::where('type', 'course')->count();
+        $data['products'] = $query->paginate(30);
+        $data['totalCount'] = Product::where('type', 'product')->count();
 
         // Return the products list view with data
         return view('admin.products.productsAll', $data);
@@ -720,8 +709,8 @@ class ProductController extends Controller
         $filterType = $request->filter_type; // product, course, or null for all
 
         if ($type == 'product') {
-            // Search products by name, sku, prices or ID
-            $products = Product::where(function ($qq) use ($q) {
+            // Search products by name, sku, prices or ID, strictly type 'product'
+            $products = Product::where('type', 'product')->where(function ($qq) use ($q) {
                 $qq->orWhere('name_en', 'like', "%{$q}%")
                     ->orWhere('name_bn', 'like', "%{$q}%")
                     ->orWhere('sku', 'like', "%{$q}%")
@@ -729,11 +718,6 @@ class ProductController extends Controller
                     ->orWhere('final_price', 'like', "%{$q}%")
                     ->orWhere('id', 'like', "%{$q}%");
             });
-
-            // Apply type filter if provided
-            if ($filterType && in_array($filterType, ['product', 'course'])) {
-                $products->where('type', $filterType);
-            }
 
             $products = $products->orderBy('name_en')->paginate(100);
 
