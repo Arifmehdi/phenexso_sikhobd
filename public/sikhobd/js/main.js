@@ -3,36 +3,40 @@
    - Mobile drawer with N-level nesting
    - Language toggle (BN / EN) with localStorage
    ============================================ */
-
 /* ---------- Mobile drawer ---------- */
-const drawer = document.getElementById('drawer');
-const overlay = document.getElementById('drawerOverlay');
-const openBtn = document.getElementById('menuToggle');
-const closeBtn = document.getElementById('drawerClose');
+document.addEventListener('DOMContentLoaded', () => {
+  const drawer = document.getElementById('drawer');
+  const overlay = document.getElementById('drawerOverlay');
+  const openBtn = document.getElementById('menuToggle');
+  const closeBtn = document.getElementById('drawerClose');
 
-function openDrawer() {
-  drawer?.classList.add('open');
-  overlay?.classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-function closeDrawer() {
-  drawer?.classList.remove('open');
-  overlay?.classList.remove('open');
-  document.body.style.overflow = '';
-}
-openBtn?.addEventListener('click', openDrawer);
-closeBtn?.addEventListener('click', closeDrawer);
-overlay?.addEventListener('click', closeDrawer);
+  function openDrawer() {
+    drawer?.classList.add('open');
+    overlay?.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeDrawer() {
+    drawer?.classList.remove('open');
+    overlay?.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  openBtn?.addEventListener('click', openDrawer);
+  closeBtn?.addEventListener('click', closeDrawer);
+  overlay?.addEventListener('click', closeDrawer);
 
-/* Mobile collapsible items — works for unlimited depth */
-document.querySelectorAll('.m-toggle').forEach((btn) => {
-  btn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    btn.parentElement.classList.toggle('open');
+  /* Mobile collapsible items — works for unlimited depth */
+  document.querySelectorAll('.m-toggle').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const parent = btn.parentElement;
+      if (parent) {
+        parent.classList.toggle('open');
+      }
+    });
   });
 });
 
-/* ---------- Language toggle (BN / EN) ----------
+/* ---------- Language toggle (BN / EN) ---------- 
    Any element with data-i18n="key" gets translated.
    Any element with data-i18n-attr="placeholder|key" sets attribute.
 */
