@@ -12,7 +12,7 @@
                         <i class="fas fa-graduation-cap text-primary"></i> Classes for: {{ $product->name_en }}
                     </h3>
                     <div class="card-tools">
-                        <a href="{{ route('admin.productsAll') }}" class="btn btn-outline-primary btn-xs mr-2"><i class="fa fa-arrow-left"></i> Back</a>
+                        <a href="{{ route('admin.coursesAll') }}" class="btn btn-outline-primary btn-xs mr-2"><i class="fa fa-arrow-left"></i> Back</a>
                         <button type="button" class="btn btn-info btn-xs mr-1" data-toggle="modal" data-target="#addSectionModal">
                             <i class="fas fa-folder-plus"></i> Add Section
                         </button>

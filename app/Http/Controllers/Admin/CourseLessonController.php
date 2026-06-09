@@ -12,7 +12,7 @@ class CourseLessonController extends Controller
 {
     public function index(Product $product)
     {
-        menuSubmenu('product', 'productsAll');
+        menuSubmenu('academy', 'coursesAll');
         $lessons = $product->lessons()->orderBy('priority')->get();
         return view('admin.lessons.index', compact('product', 'lessons'));
     }
