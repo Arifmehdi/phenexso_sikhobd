@@ -430,7 +430,7 @@
             position: absolute;
             left: 0;
             top: 100%;
-            background: var(--surface);
+            background: #ffffff;
             min-width: 200px;
             box-shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
             border-radius: 18px;
