@@ -12,6 +12,8 @@ use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\MediaController;
 use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\ProductCategoryController;
+use App\Http\Controllers\Admin\CourseCategoryController;
 use App\Http\Controllers\Admin\UnitController;
 use App\Http\Controllers\Admin\SearchController;
 use App\Http\Controllers\Admin\ShippingMethodController;
@@ -572,14 +574,32 @@ Route::middleware(['userRole:admin','auth'])->prefix('admin')->group(function(){
     Route::get('all/appointments',[HomeController::class,'allAppointments'])->name('allAppointments');
     Route::delete('delete/appointment/{id}',[HomeController::class,'deleteAppointment'])->name('deleteAppointment');
 
-       // Category Routes
-    Route::get('product/categories/all', [ProductController::class, 'productCategoriesAll'])->name('admin.productCategoriesAll');
-    Route::get('product/category/create', [ProductController::class, 'productCategoryCreate'])->name('admin.productCategoryCreate');
-    Route::post('product/category/store', [ProductController::class, 'productCategoryStore'])->name('admin.productCategoryStore');
-    Route::get('product/category/edit/{category}', [ProductController::class, 'productCategoryEdit'])->name('admin.productCategoryEdit');
-    Route::post('product/category/update/{category}', [ProductController::class, 'productCategoryUpdate'])->name('admin.productCategoryUpdate');
-    Route::post('product/category/delete/{category}', [ProductController::class, 'productCategoryDelete'])->name('admin.productCategoryDelete');
-    Route::get('category/status/{category}', [ProductController::class, 'categoryStatus'])->name('admin.categoryStatus');
+       // Product Category Routes
+    Route::resource('product/categories', ProductCategoryController::class, [
+        'as' => 'admin',
+        'names' => [
+            'index'   => 'admin.productCategories.index',
+            'create'  => 'admin.productCategories.create',
+            'store'   => 'admin.productCategories.store',
+            'edit'    => 'admin.productCategories.edit',
+            'update'  => 'admin.productCategories.update',
+            'destroy' => 'admin.productCategories.destroy',
+        ]
+    ])->except(['show']);
+    Route::get('product/category/status', [ProductCategoryController::class, 'status'])->name('admin.categoryStatus');
+
+    // Course Category Routes
+    Route::resource('course/categories', CourseCategoryController::class, [
+        'as' => 'admin',
+        'names' => [
+            'index'   => 'admin.courseCategories.index',
+            'create'  => 'admin.courseCategories.create',
+            'store'   => 'admin.courseCategories.store',
+            'edit'    => 'admin.courseCategories.edit',
+            'update'  => 'admin.courseCategories.update',
+            'destroy' => 'admin.courseCategories.destroy',
+        ]
+    ])->except(['show']);
 
     // Unit Routes
     Route::get('units/all', [UnitController::class, 'unitsAll'])->name('admin.unitsAll');
@@ -613,6 +633,7 @@ Route::middleware(['userRole:admin','auth'])->prefix('admin')->group(function(){
     Route::get('course/edit/{course}', [\App\Http\Controllers\Admin\CourseController::class, 'courseEdit'])->name('admin.courseEdit');
     Route::post('course/update/{course}', [\App\Http\Controllers\Admin\CourseController::class, 'courseUpdate'])->name('admin.courseUpdate');
     Route::post('course/delete/{course}', [\App\Http\Controllers\Admin\CourseController::class, 'courseDelete'])->name('admin.courseDelete');
+    Route::get('course/status/{course}', [\App\Http\Controllers\Admin\CourseController::class, 'courseStatus'])->name('admin.courseStatus');
     Route::get('course/search', [\App\Http\Controllers\Admin\CourseController::class, 'courseSearch'])->name('admin.courseSearch');
 
 

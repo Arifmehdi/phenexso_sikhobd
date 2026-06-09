@@ -115,7 +115,7 @@
 
   .footer-bottom {
     padding-top: 24px;
-    border-top: 1px solid rgba(255,255,255,0.1);
+    /* border-top: 1px solid rgba(255,255,255,0.1); */
     text-align: center;
     color: rgba(255,255,255,0.5);
     font-size: 13px;

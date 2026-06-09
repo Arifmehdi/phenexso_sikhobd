@@ -515,9 +515,9 @@
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
-                                <a href="{{ route('admin.productCategoriesAll') }}" class="nav-link {{ session('lsbsm') == 'productCategoriesAll' ? ' active ' : '' }}">
+                                <a href="{{ route('admin.productCategories.index') }}" class="nav-link {{ session('lsbsm') == 'productCategoriesAll' ? ' active ' : '' }}">
                                     <i class="far fa-circle nav-icon"></i>
-                                    <p>Categories All</p>
+                                    <p>Product Categories</p>
                                 </a>
                             </li>
                             <li class="nav-item">

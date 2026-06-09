@@ -22,12 +22,12 @@
                     <a href="{{ $category->type == 'course' ? route('admin.courseCategories.index') : route('admin.productCategories.index') }}" class="btn btn-outline-primary btn-xs">
                         <i class="fa fa-arrow-left"></i> Back
                     </a>
-                    </div>
-                    </div>
+                </div>
+            </div>
 
-                    <!-- Form Card -->
-                    <div class="card card-primary card-outline shadow-lg">
-                    <div class="card-body bg-light px-3">
+            <!-- Form Card -->
+            <div class="card card-primary card-outline shadow-lg">
+                <div class="card-body bg-light px-3">
                     <form action="{{ $category->type == 'course' ? route('admin.courseCategories.update', $category) : route('admin.productCategories.update', $category) }}" method="POST" enctype="multipart/form-data">
 
                         @csrf
@@ -45,6 +45,7 @@
                                 @error('type') <span class="invalid-feedback">{{ $message }}</span> @enderror
                             </div>
                         </div>
+
 
 
                         {{-- Category Name (English) --}}
@@ -96,7 +97,6 @@
                                 </select>
                             </div>
                         </div>
-
                         <!-- Position -->
                         <div class="form-group row">
                             <label for="position" class="col-sm-3 col-form-label text-left">Position</label>

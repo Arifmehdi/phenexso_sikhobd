@@ -42,8 +42,6 @@
                             </div>
                         </div>
 
-
-
                         <!-- Category Name (English)-->
                         <div class="form-group row">
                             <label for="name_en" class="col-sm-3 col-form-label text-left">

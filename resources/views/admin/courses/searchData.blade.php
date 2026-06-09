@@ -52,11 +52,10 @@
                     <img width="30px" height="20px" src="{{ route('imagecache', ['template' => 'sbixs', 'filename' => $course->fi()]) }}" alt="">
                 </td>
                 <td>
-                    @if($course->active == 1)
-                        <span class="badge badge-primary">Active</span>
-                    @else
-                        <span class="badge badge-danger">Inactive</span>
-                    @endif
+                    <button class="badge border-0 {{ $course->active ? 'badge-primary' : 'badge-danger' }} courseStatus"
+                        data-url="{{ route('admin.courseStatus', ['course' => $course->id]) }}">
+                        {{ $course->active ? 'Active' : 'Inactive' }}
+                    </button>
                 </td>
                 <td>
                     <form action="{{ route('admin.product.toggle-approval', $course->id) }}" method="POST">

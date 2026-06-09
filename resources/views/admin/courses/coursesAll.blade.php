@@ -74,6 +74,21 @@
 @push('js')
 <script>
     $(document).ready(function () {
+        // Toggle Course Status
+        $(document).on('click', ".courseStatus", function(e){
+            e.preventDefault();
+            const $btn = $(this);
+            const url = $btn.data('url');
+
+            $.get(url, function(res) {
+                if (res.active) {
+                    $btn.removeClass('badge-danger').addClass('badge-primary').text('Active');
+                } else {
+                    $btn.removeClass('badge-primary').addClass('badge-danger').text('Inactive');
+                }
+            });
+        });
+
         // Live search courses with AJAX on keyup
         $(document).on('keyup', ".course-search", function(e){
             e.preventDefault();

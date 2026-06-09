@@ -262,6 +262,21 @@ class CourseController extends Controller
     }
 
     /**
+     * Toggle the active status of a course.
+     */
+    public function courseStatus(Request $request)
+    {
+        $course = Product::findOrFail($request->course);
+        $course->active = !$course->active;
+        $course->save();
+
+        return response()->json([
+            'success' => true,
+            'active' => $course->active
+        ]);
+    }
+
+    /**
      * Search courses.
      *
      * @param \Illuminate\Http\Request $request

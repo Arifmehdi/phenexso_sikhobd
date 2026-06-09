@@ -19,7 +19,7 @@
                     <h3 class="card-title w3-small text-bold text-muted pt-1">
                         <i class="fas fa-sitemap text-primary"></i> {{ $activeType == 'course' ? 'Course' : 'Product' }} Categories
                     </h3>
-                    <a href="{{ route('admin.productCategories.create') }}" class="btn btn-outline-primary btn-xs py-1">
+                    <a href="{{ route('admin.courseCategories.create') }}" class="btn btn-outline-primary btn-xs py-1">
                         <i class="fas fa-plus-square"></i> Add New {{ $activeType == 'course' ? 'Course' : 'Product' }} Category
                     </a>
                 </div>
@@ -55,7 +55,7 @@
                 <div class="card-body bg-light px-0 pb-0 pt-2">
                     <div class="col-sm-12">
                         <div class="table-responsive data-container">
-                            @include('admin.productCategories.searchData')
+                            @include('admin.courseCategories.searchData')
                         </div>
                         <div class="w3-small float-right pt-1">
                             {!! $categories->links() !!}
