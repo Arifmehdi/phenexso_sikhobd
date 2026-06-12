@@ -397,12 +397,53 @@
             color: var(--primary);
         }
 
-        .floating-cart {
+        .floating-whatsapp {
             position: fixed;
             bottom: 30px;
             right: 30px;
-            width: 64px;
-            height: 64px;
+            width: 60px;
+            height: 60px;
+            background: #25D366;
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 16px 40px rgba(37, 211, 102, 0.3);
+            z-index: 999;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 32px;
+        }
+
+        .floating-whatsapp:hover {
+            transform: translateY(-5px) scale(1.1);
+            color: #fff;
+            box-shadow: 0 24px 60px rgba(37, 211, 102, 0.4);
+        }
+
+        .floating-whatsapp::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: inherit;
+            border-radius: 50%;
+            z-index: -1;
+            animation: pulse-whatsapp 2s infinite;
+        }
+
+        @keyframes pulse-whatsapp {
+            0% { transform: scale(1); opacity: 0.6; }
+            100% { transform: scale(1.6); opacity: 0; }
+        }
+
+        .floating-cart {
+            position: fixed;
+            bottom: 105px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
             background: var(--primary);
             color: #fff;
             border-radius: 50%;
@@ -412,24 +453,26 @@
             box-shadow: 0 16px 40px rgba(41, 82, 255, 0.24);
             z-index: 999;
             text-decoration: none;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transition: all 0.3s ease;
+            font-size: 24px;
         }
 
         .floating-cart:hover {
-            transform: translateY(-4px);
+            transform: translateY(-5px) scale(1.1);
+            color: #fff;
             box-shadow: 0 24px 60px rgba(41, 82, 255, 0.28);
         }
 
         .floating-cart .cart-count-badge {
             position: absolute;
-            top: -6px;
-            right: -6px;
+            top: -5px;
+            right: -5px;
             background: var(--accent);
             color: #fff;
             font-size: 12px;
             font-weight: 800;
-            width: 26px;
-            height: 26px;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -439,11 +482,20 @@
         }
 
         @media (max-width: 768px) {
-            .floating-cart {
+            .floating-whatsapp {
                 bottom: 20px;
                 right: 20px;
-                width: 56px;
-                height: 56px;
+                width: 54px;
+                height: 54px;
+                font-size: 28px;
+            }
+
+            .floating-cart {
+                bottom: 85px;
+                right: 20px;
+                width: 54px;
+                height: 54px;
+                font-size: 20px;
             }
 
             .header-inner {
@@ -593,6 +645,51 @@
             overflow: hidden;
         }
 
+        .scroll-top {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            width: 50px;
+            height: 50px;
+            background: #fff;
+            color: var(--primary, #2b2553);
+            border: 2px solid var(--primary, #2b2553);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 998;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            transform: translateY(20px);
+        }
+
+        .scroll-top.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .scroll-top:hover {
+            background: var(--primary, #2b2553);
+            color: #fff;
+            transform: translateY(-5px);
+        }
+
+        @media (max-width: 768px) {
+            .scroll-top {
+                bottom: 20px;
+                left: 20px;
+                width: 44px;
+                height: 44px;
+                font-size: 18px;
+            }
+        }
+
         .swal2-container {
             z-index: 9999 !important;
         }
@@ -607,6 +704,16 @@
     <main>
         @yield('content')
     </main>
+
+    @if($ws->whatsapp)
+    <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $ws->whatsapp) }}" class="floating-whatsapp" target="_blank" title="Chat with us on WhatsApp">
+        <i class="fa-brands fa-whatsapp"></i>
+    </a>
+    @endif
+
+    <div class="scroll-top" id="scrollTop" title="Go to Top">
+        <i class="fa-solid fa-arrow-up"></i>
+    </div>
 
     <a href="{{ route('cart') }}" class="floating-cart">
         <i class="fa-solid fa-cart-shopping"></i>
@@ -683,6 +790,23 @@
                     closeSearch();
                 }
             });
+
+            // Scroll to Top Logic
+            const scrollTopBtn = document.getElementById('scrollTop');
+            window.onscroll = function() {
+                if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+                    scrollTopBtn.classList.add('show');
+                } else {
+                    scrollTopBtn.classList.remove('show');
+                }
+            };
+
+            scrollTopBtn.onclick = function() {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            };
         });
     </script>
     

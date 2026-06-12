@@ -35,6 +35,7 @@ class WebsiteParameterController extends Controller
         $wp->opening_hours = $request->opening_hours;
         $wp->twitter_url = $request->twitter_url;
         $wp->youtube_url = $request->youtube_url;
+        $wp->whatsapp = $request->whatsapp;
 
         //For SEO START
         $wp->twitter_title = $request->twitter_title;

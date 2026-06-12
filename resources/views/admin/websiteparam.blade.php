@@ -120,6 +120,11 @@
                                     <input type="text" name="youtube_url" class="form-control" value="{{ old('youtube_url') ?: $websiteParameter->youtube_url ?? '' }}" id="youtube_url" placeholder="Youtube Url" autocomplete="off">
                                 </div>
                                 <div class="form-group ">
+                                    <label for="whatsapp" class="  control-label">WhatsApp Number</label>
+                                    <input type="text" name="whatsapp" class="form-control" value="{{ old('whatsapp') ?: $websiteParameter->whatsapp ?? '' }}" id="whatsapp" placeholder="+8801XXXXXXXXX" autocomplete="off">
+                                    <small class="text-muted">Enter number with country code (e.g., +8801700000000) for the floating button.</small>
+                                </div>
+                                <div class="form-group ">
                                     <label for="iframe_map" class="  control-label">Iframe Map</label>
                                     <input type="text" name="iframe_map" class="form-control" value="{{ old('iframe_map') ?: $websiteParameter->iframe_map ?? '' }}" id="iframe_map" placeholder="Iframe Map" autocomplete="off">
                                 </div>
