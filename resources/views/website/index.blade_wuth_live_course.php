@@ -42,42 +42,21 @@
             @endif
           </div>
         </div>
-        <div class="hero-slider-wrap">
-          <div class="swiper hero-slider">
-            <div class="swiper-wrapper">
-              @forelse($sliders as $slider)
-                <div class="swiper-slide">
-                  <a href="{{ $slider->link ?? '#' }}" class="slider-item">
-                    <img src="{{ route('imagecache', ['template' => 'original', 'filename' => $slider->fi()]) }}" alt="{{ $slider->title }}">
-                    @if($slider->title || $slider->description)
-                      <div class="slider-overlay">
-                        <div class="slider-content">
-                          @if($slider->title)<h3>{{ $slider->title }}</h3>@endif
-                          @if($slider->description)<p>{{ $slider->description }}</p>@endif
-                        </div>
-                      </div>
-                    @endif
-                  </a>
-                </div>
-              @empty
-                <div class="swiper-slide">
-                  <div class="hero-card">
-                    <div>
-                      <span class="live-badge">LIVE</span>
-                      <h3>HSC Physics</h3>
-                      <p style="opacity:.85; margin-top:6px;">Chapter 3 — Motion & Force</p>
-                    </div>
-                    <div>
-                      <div class="progress"><div></div></div>
-                      <p style="font-size:13px; opacity:.85;">42 min left</p>
-                    </div>
-                  </div>
-                </div>
-              @endforelse
+        <div style="position: relative;">
+          <div class="hero-card">
+            <div>
+              <span class="live-badge">LIVE</span>
+              <h3>HSC Physics</h3>
+              <p style="opacity:.85; margin-top:6px;">Chapter 3 — Motion & Force</p>
             </div>
-            <div class="swiper-pagination"></div>
-            <div class="swiper-button-next"></div>
-            <div class="swiper-button-prev"></div>
+            <div>
+              <div class="progress"><div></div></div>
+              <p style="font-size:13px; opacity:.85;">42 min left</p>
+            </div>
+          </div>
+          <div class="floating-card">
+            <span>This month</span>
+            <strong>2.4M+</strong>
           </div>
         </div>
       </div>
@@ -203,7 +182,7 @@
     <div class="container">
       <div class="section-head">
         @if(isset($content->meta['features']))
-            <h2><span>{{ app()->getLocale() == 'bn' ? ($content->meta['features']['title_bn'] ?? 'আমাদের বৈশিষ্ট্য') : ($content->meta['features']['title_en'] ?? 'Our Features') }}</span></h2>
+            <h2><span>{{ app()->getLocale() == 'bn' ? $content->meta['features']['title_bn'] : $content->meta['features']['title_en'] }}</span></h2>
         @else
             <h2><span data-i18n="sec.why">কেন</span> <em data-i18n="sec.why2">{{ $ws->name ?? 'SikhoBD' }}?</em></h2>
         @endif
@@ -351,135 +330,21 @@
   </section>
   @endif
 
-  <section class="enrollment-section">
+  {{--<section class="section" style="padding-top:0;">
     <div class="container">
-        <div class="enroll-card">
-            <div class="row align-items-center">
-                <div class="col-lg-7">
-                    <div class="enroll-form-wrap">
-                        <div class="section-head text-start mb-4">
-                            <h2><span>{{ app()->getLocale() == 'bn' ? 'আজই' : 'Enroll' }}</span> <em>{{ app()->getLocale() == 'bn' ? 'এনরোল করুন' : 'Today' }}</em></h2>
-                            <p>{{ app()->getLocale() == 'bn' ? '২.৪ মিলিয়নেরও বেশি শিক্ষার্থীর সাথে যোগ দিন এবং আপনার দক্ষতা বৃদ্ধি করুন।' : 'Join 2.4M+ students and start learning the most in-demand skills.' }}</p>
-                        </div>
-                        <form action="{{ route('addToCart') }}" method="POST" id="home-enroll-form">
-                            @csrf
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">{{ app()->getLocale() == 'bn' ? 'পুরো নাম' : 'Full Name' }}</label>
-                                    <input type="text" name="name" class="form-control" placeholder="{{ app()->getLocale() == 'bn' ? 'আপনার নাম লিখুন' : 'Your Name' }}" required>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">{{ app()->getLocale() == 'bn' ? 'ফোন নম্বর' : 'Phone Number' }}</label>
-                                    <input type="text" name="phone" class="form-control" placeholder="01XXXXXXXXX" required>
-                                </div>
-                                <div class="col-12 mb-3">
-                                    <label class="form-label">{{ app()->getLocale() == 'bn' ? 'ইমেল ঠিকানা' : 'Email Address' }}</label>
-                                    <input type="email" name="email" class="form-control" placeholder="example@mail.com" required>
-                                </div>
-                                <div class="col-12 mb-4">
-                                    <label class="form-label">{{ app()->getLocale() == 'bn' ? 'কোর্স নির্বাচন করুন' : 'Select Course' }}</label>
-                                    <select name="product" class="form-select" required>
-                                        <option value="" selected disabled>{{ app()->getLocale() == 'bn' ? 'আপনার কোর্সটি বেছে নিন' : 'Choose your course' }}</option>
-                                        @foreach($feature_products as $product)
-                                            <option value="{{ $product->id }}">
-                                                {{ app()->getLocale() == 'bn' ? ($product->name_bn ?? $product->name_en) : ($product->name_en ?? $product->name_bn) }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <input type="hidden" name="qty" value="1">
-                                <div class="col-12">
-                                    <button type="submit" class="btn btn-accent btn-lg w-100 shadow-sm py-3">
-                                        <i class="fa-solid fa-graduation-cap mr-2"></i> {{ app()->getLocale() == 'bn' ? 'এখনই এনরোল করুন' : 'Enroll Now' }}
-                                    </button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-                <div class="col-lg-5 d-none d-lg-block">
-                    <div class="enroll-image">
-                        <img src="https://img.freepik.com/free-vector/learning-concept-illustration_114360-6186.jpg" alt="Enrollment" class="img-fluid">
-                    </div>
-                </div>
-            </div>
+      <div class="cta-strip">
+        <div>
+          <h2 data-i18n="cta.title">আজই অ্যাপ ডাউনলোড করুন</h2>
+          <p data-i18n="cta.desc">২ মিলিয়নের বেশি শিক্ষার্থীর সাথে যোগ দিন।</p>
         </div>
+        <a href="#" class="btn btn-accent"><i class="fa-solid fa-download"></i> <span data-i18n="cta.btn">এখনই ডাউনলোড</span></a>
+      </div>
     </div>
-  </section>
-
+  </section>--}}
 @endsection
 
 @push('css')
 <style>
-  .hero-slider-wrap {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 4 / 3;
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    box-shadow: var(--shadow-lg);
-  }
-  .hero-slider {
-    width: 100%;
-    height: 100%;
-  }
-  .slider-item {
-    display: block;
-    width: 100%;
-    height: 100%;
-    position: relative;
-  }
-  .slider-item img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.5s ease;
-  }
-  .slider-item:hover img {
-    transform: scale(1.05);
-  }
-  .slider-overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%);
-    display: flex;
-    align-items: flex-end;
-    padding: 32px;
-    color: #fff;
-  }
-  .slider-content h3 {
-    font-size: 24px;
-    font-weight: 700;
-    margin-bottom: 8px;
-  }
-  .slider-content p {
-    font-size: 14px;
-    opacity: 0.9;
-    margin: 0;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-  .hero-slider .swiper-pagination-bullet-active {
-    background: var(--accent) !important;
-  }
-  .hero-slider .swiper-button-next, .hero-slider .swiper-button-prev {
-    color: #fff !important;
-    background: rgba(0,0,0,0.2);
-    width: 40px !important;
-    height: 40px !important;
-    border-radius: 50%;
-    backdrop-filter: blur(4px);
-    transition: all 0.3s ease;
-  }
-  .hero-slider .swiper-button-next:hover, .hero-slider .swiper-button-prev:hover {
-    background: var(--accent);
-  }
-  .hero-slider .swiper-button-next:after, .hero-slider .swiper-button-prev:after {
-    font-size: 18px !important;
-  }
-
   .hero-search {
     margin-top: 32px;
     background: #fff;
@@ -678,114 +543,13 @@
     .hero-search form { padding-left: 8px; }
     .hero-search input { font-size: 14px; }
   }
-
-  .enrollment-section {
-    padding: 40px 0;
-    background: var(--bg-soft);
-  }
-  .enroll-card {
-    background: #fff;
-    border-radius: var(--radius-lg);
-    padding: 40px;
-    box-shadow: var(--shadow-lg);
-    border: 1px solid var(--border);
-    overflow: hidden;
-  }
-  .enroll-form-wrap .form-label {
-    font-weight: 600;
-    color: var(--primary);
-    margin-bottom: 8px;
-    display: block;
-    font-size: 14px;
-  }
-  .enroll-form-wrap .form-control, .enroll-form-wrap .form-select {
-    border-radius: 12px;
-    padding: 14px 18px;
-    border: 1px solid var(--border);
-    transition: all 0.3s;
-    background: var(--bg-soft);
-    font-size: 15px;
-  }
-  .enroll-form-wrap .form-control:focus, .enroll-form-wrap .form-select:focus {
-    border-color: var(--accent);
-    background: #fff;
-    box-shadow: 0 0 0 4px rgba(255, 40, 79, 0.1);
-    outline: none;
-  }
-  .enroll-image {
-    text-align: center;
-    position: relative;
-  }
-  .enroll-image img {
-    border-radius: var(--radius-lg);
-    width: 100%;
-    max-width: 420px;
-    height: auto;
-    filter: drop-shadow(0 20px 40px rgba(0,0,0,0.1));
-    animation: floating 6s ease-in-out infinite;
-  }
-  @keyframes floating {
-    0% { transform: translateY(0px); }
-    50% { transform: translateY(-20px); }
-    100% { transform: translateY(0px); }
-  }
-  @media (max-width: 992px) {
-    .enroll-card { padding: 40px 20px; }
-  }
 </style>
+
 @endpush
 
 @push('js')
 <script>
 $(document).ready(function() {
-  // Enrollment Form AJAX
-  $(document).on('submit', '#home-enroll-form', function(e) {
-      e.preventDefault();
-      const form = $(this);
-      const btn = form.find('button[type="submit"]');
-      const originalHtml = btn.html();
-      
-      btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Processing...');
-
-      $.ajax({
-          url: form.attr('action'),
-          type: "POST",
-          data: form.serialize(),
-          success: function(response) {
-              if (response.success) {
-                  showCartNotification(response.message, 'success');
-                  setTimeout(() => {
-                      window.location.href = "{{ route('cart') }}";
-                  }, 1000);
-              } else {
-                  btn.prop('disabled', false).html(originalHtml);
-                  showCartNotification(response.message || 'Something went wrong.', 'error');
-              }
-          },
-          error: function() {
-              btn.prop('disabled', false).html(originalHtml);
-              showCartNotification('Failed to add to cart.', 'error');
-          }
-      });
-  });
-
-  // Initialize Hero Slider
-  const heroSwiper = new Swiper('.hero-slider', {
-    loop: true,
-    autoplay: {
-      delay: 5000,
-      disableOnInteraction: false,
-    },
-    pagination: {
-      el: '.swiper-pagination',
-      clickable: true,
-    },
-    navigation: {
-      nextEl: '.swiper-button-next',
-      prevEl: '.swiper-button-prev',
-    },
-  });
-
   // Initialize Testimonial Slider
   const testimonialSwiper = new Swiper('.testimonial-slider', {
     slidesPerView: 1,
@@ -810,38 +574,56 @@ $(document).ready(function() {
     }
   });
 
+
+
     const readMoreText = `{!! __('আরও পড়ুন') !!}`;
     const showLessText = `{!! __('সংক্ষেপে দেখুন') !!}`;
 
     $('.testimonial-card').each(function () {
+
         const card = $(this);
         const container = card.find('.test-text-container');
         const text = card.find('.test-text');
         const toggle = card.find('.read-more-toggle');
 
+        // Check if content exceeds 120px
         if (text.outerHeight() > 120) {
+
             toggle.show();
+
+            // Add fade overlay
             if (container.find('.fade-overlay').length === 0) {
                 container.append('<div class="fade-overlay"></div>');
             }
         }
 
         toggle.on('click', function () {
-            card.toggleClass('expanded');
-            const isExpanded = card.hasClass('expanded');
-            $(this).html(isExpanded ? showLessText : readMoreText);
 
+            card.toggleClass('expanded');
+
+            const isExpanded = card.hasClass('expanded');
+
+            $(this).html(
+                isExpanded
+                    ? showLessText
+                    : readMoreText
+            );
+
+            // Update swiper height
             setTimeout(() => {
                 if (typeof testimonialSwiper !== 'undefined') {
                     testimonialSwiper.update();
                 }
             }, 400);
+
         });
+
     });
 
     $(document).on('click', '.add-to-wishlist-ajax', function() {
         const productId = $(this).data('id');
         const btn = $(this);
+        
         btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i>');
 
         $.ajax({
@@ -861,6 +643,8 @@ $(document).ready(function() {
             }
         });
     });
+
+
 });
 </script>
 @endpush

@@ -2,183 +2,227 @@
 @section('title',"Admin Dashboard | Front Sliders")
 
 @section('body')
-   <section class="pt-5">
-    <div class="card shadow bg-info">
-        <div class="card-header">
-            <div class="card-title">Front Slider</div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-12 col-md-5 m-auto">
-            <div class="card">
-                <div class="card-header text-info">
-                    <div class="card-title">Add Slider</div>
-                </div>
-
-                <div class="card-body">
-                    <form action="{{route('sliders.store')}}" method="POST" enctype="multipart/form-data">
-                        @csrf
-
-                        <div class="form-group">
-                            <label for="title">Title</label>
-                            <input type="text" name="title" id="title" placeholder="Title  here" class="form-control">
-                            @error('title')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-                        <div class="form-group">
-                            <label for="tag">Description</label>
-                            <textarea name="description" id="description" cols="30" rows="5" class="form-control" placeholder="Description Here"></textarea>
-                        </div>
-
-
-                        <div class="form-group">
-                            <label for="link">Link</label>
-                            <input type="text" name="link" id="link" class="form-control" placeholder="Link here...">
-                            @error('link')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-
-                        <div class="form-group">
-                            <label for="featured_image">Featured Image</label>
-                            <input type="file" name="featured_image" id="featured_image" class="form-control">
-                            @error('featured_image')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-
-                        <div class="form-group">
-                            <label for="active"><input type="checkbox" name="active" id="active"> Active</label>
-                        </div>
-                        <div class="form-group">
-                            <input type="submit" class="btn btn-info">
-                        </div>
-                    </form>
-                </div>
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">Slider Management</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Sliders</li>
+                </ol>
             </div>
         </div>
     </div>
-    <div class="card">
-        <div class="card-header bg-info">
-            <div class="card-title">All Sliders</div>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-borderd table-sm">
-                    <thead>
-                        <tr>
-                            <th>SL</th>
-                            <th>Action</th>
-                            <th>Title</th>
-                            <th>Description</th>
-                            <th>Featured Image</th>
-                            <th>Linik</th>
-                            <th>Active</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php $i = (($sliders->currentPage() - 1) * $sliders->perPage() + 1); ?>
-                        @forelse($sliders as $slider)
-                        <tr>
-                            <td>{{ $i++ }}</td>
-                            <td class="d-flex">
-                            <a href="{{route('sliders.edit',$slider)}}" data-toggle="modal" data-target="#fsedit{{$slider->id}}" class="text-success mr-2"><i class="fas fa-edit"></i></a>
+</div>
 
-                            <form action="{{route('sliders.destroy', $slider) }}" method="post">
-                                @csrf
-                                @method('delete')
-                                <button href="{{route('sliders.destroy', $slider)}}" class="text-danger" onclick="return confirm('Are you sure? you want to delete this Slider Item?')" style="all:unset; cursor: pointer;"><i class="fas fa-trash"></i></button>
-                            </form>
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card card-outline card-primary shadow-sm">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-plus-circle mr-1"></i> Add New Slider</h3>
+                    </div>
 
-                            </td>
+                    <div class="card-body">
+                        <form action="{{route('sliders.store')}}" method="POST" enctype="multipart/form-data">
+                            @csrf
 
-                            <td>{{ $slider->title}}</td>
-                            <td>{{ $slider->description }}</td>
-                            <td><img src="{{ route('imagecache', [ 'template'=>'sbixs','filename' => $slider->fi() ]) }}" alt=""></td>
-                            <td>{{$slider->link}}</td>
-                            <td>
-                            @if ($slider->active)
-                            <span class="badge badge-success">Actived</span>
-                            @else
-                            <span class="badge badge-danger">Inactived</span>
-                            @endif
-                            </td>
-                        </tr>
-
-
-                          {{-- MODAL START --}}
-                          <div class="modal fade" id="fsedit{{$slider->id}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                            <div class="modal-dialog" role="document">
-                              <div class="modal-content">
-                                <div class="modal-header">
-                                  <h5 class="modal-title" id="exampleModalLabel">Edit</h5>
-                                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                  </button>
-                                </div>
-                                <div class="modal-body">
-                                    <form action="{{route('sliders.update',$slider->id)}}" method="POST" enctype="multipart/form-data">
-                                        @method('PATCH')
-                                        @csrf
-                                        <div class="form-group">
-                                            <div class="form-group">
-                                                <label for="title">Title</label>
-                                                <input type="text" name="title" id="title" placeholder="Title  here"
-                                                    class="form-control @error('title') is_invalid @enderror" value="{{ $slider->title }}">
-                                                @error('title')
-                                                    <span class="text-danger">{{ $message }}</span>
-                                                @enderror
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="tag">Description</label>
-                                                <textarea name="description" id="description" cols="30" rows="5" class="form-control" placeholder="Description Here"> {{ $slider->description }}</textarea>
-                                            </div>
-
-                                            <div class="form-group">
-                                                <label for="link">Link</label>
-                                                <input type="text" name="link" id="link" class="form-control" placeholder="Link here..." value="{{ $slider->link ?? ""}}">
-                                                @error('link')
-                                                    <span class="text-danger">{{ $message }}</span>
-                                                @enderror
-                                            </div>
-
-                                        <div class="form-group">
-                                            <label for="featured_image">Featured Iamge</label><br>
-                                            <input type="file" name="featured_image" id="featured_image">
-                                            <img src="{{ route('imagecache', [ 'template'=>'sbixs','filename' => $slider->fi() ]) }}" alt="">
-                                            @error('featured_image')
-                                                <span class="text-danger">{{ $message }}</span>
-                                            @enderror
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="active"><input type="checkbox" {{$slider->active? 'checked' : ''}} name="active" id="active"> Active</label>
-                                        </div>
-                                        <div class="form-group">
-                                            <input type="submit" value="Update" class="btn btn-info">
-                                        </div>
-                                    </form>
-                                </div>
-
-                              </div>
+                            <div class="form-group">
+                                <label for="title">Title</label>
+                                <input type="text" name="title" id="title" placeholder="Enter title" class="form-control" value="{{ old('title') }}">
+                                @error('title')
+                                    <span class="text-danger small">{{ $message }}</span>
+                                @enderror
                             </div>
+
+                            <div class="form-group">
+                                <label for="description">Description</label>
+                                <textarea name="description" id="description" cols="30" rows="3" class="form-control" placeholder="Enter short description">{{ old('description') }}</textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="link">Action Link (URL)</label>
+                                <input type="text" name="link" id="link" class="form-control" placeholder="https://example.com/course" value="{{ old('link') }}">
+                                @error('link')
+                                    <span class="text-danger small">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            <div class="form-group">
+                                <label for="featured_image">Slider Image</label>
+                                <div class="custom-file">
+                                    <input type="file" name="featured_image" class="custom-file-input" id="featured_image">
+                                    <label class="custom-file-label" for="featured_image">Choose file</label>
+                                </div>
+                                <small class="text-muted mt-2 d-block">
+                                    <i class="fas fa-info-circle mr-1"></i> Recommended size: <strong>1000x750px</strong> (4:3 ratio) or <strong>1000x600px</strong>.
+                                </small>
+                                @error('featured_image')
+                                    <span class="text-danger small">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            <div class="custom-control custom-switch mb-3">
+                                <input type="checkbox" class="custom-control-input" id="activeSwitch" name="active" checked>
+                                <label class="custom-control-label" for="activeSwitch">Active Status</label>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-block">
+                                <i class="fas fa-save mr-1"></i> Save Slider
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-8">
+                <div class="card card-outline card-info shadow-sm">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-list mr-1"></i> Active Sliders</h3>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped mb-0">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th style="width: 50px">SL</th>
+                                        <th>Preview</th>
+                                        <th>Content</th>
+                                        <th>Status</th>
+                                        <th style="width: 120px" class="text-center">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @php $i = (($sliders->currentPage() - 1) * $sliders->perPage() + 1); @endphp
+                                    @forelse($sliders as $slider)
+                                    <tr>
+                                        <td class="align-middle text-center">{{ $i++ }}</td>
+                                        <td class="align-middle">
+                                            <div class="img-thumbnail" style="width: 100px; height: 60px; overflow: hidden;">
+                                                <img src="{{ route('imagecache', [ 'template'=>'sbixs','filename' => $slider->fi() ]) }}" 
+                                                     alt="Slider" style="width: 100%; height: 100%; object-fit: cover;">
+                                            </div>
+                                        </td>
+                                        <td class="align-middle">
+                                            <div class="font-weight-bold text-dark">{{ $slider->title ?? 'No Title' }}</div>
+                                            <div class="small text-muted text-truncate" style="max-width: 250px;">{{ $slider->description }}</div>
+                                            @if($slider->link)
+                                                <a href="{{ $slider->link }}" target="_blank" class="text-xs text-primary">
+                                                    <i class="fas fa-link mr-1"></i>{{ Str::limit($slider->link, 30) }}
+                                                </a>
+                                            @endif
+                                        </td>
+                                        <td class="align-middle">
+                                            @if ($slider->active)
+                                                <span class="badge badge-success shadow-sm">Active</span>
+                                            @else
+                                                <span class="badge badge-secondary shadow-sm">Inactive</span>
+                                            @endif
+                                        </td>
+                                        <td class="align-middle text-center">
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="#" class="btn btn-info" data-toggle="modal" data-target="#fsedit{{$slider->id}}" title="Edit">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <form action="{{route('sliders.destroy', $slider) }}" method="post" class="d-inline">
+                                                    @csrf
+                                                    @method('delete')
+                                                    <button type="submit" class="btn btn-danger" onclick="return confirm('Delete this slider permanently?')" title="Delete">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    {{-- Edit Modal --}}
+                                    <div class="modal fade" id="fsedit{{$slider->id}}" tabindex="-1" role="dialog" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered" role="document">
+                                          <div class="modal-content">
+                                            <div class="modal-header bg-info text-white">
+                                              <h5 class="modal-title"><i class="fas fa-edit mr-2"></i>Edit Slider</h5>
+                                              <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                              </button>
+                                            </div>
+                                            <form action="{{route('sliders.update',$slider->id)}}" method="POST" enctype="multipart/form-data">
+                                                @method('PATCH')
+                                                @csrf
+                                                <div class="modal-body">
+                                                    <div class="form-group">
+                                                        <label for="edit_title{{$slider->id}}">Title</label>
+                                                        <input type="text" name="title" id="edit_title{{$slider->id}}" class="form-control" value="{{ $slider->title }}">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="edit_desc{{$slider->id}}">Description</label>
+                                                        <textarea name="description" id="edit_desc{{$slider->id}}" cols="30" rows="3" class="form-control">{{ $slider->description }}</textarea>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="edit_link{{$slider->id}}">Link</label>
+                                                        <input type="text" name="link" id="edit_link{{$slider->id}}" class="form-control" value="{{ $slider->link }}">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Current Image</label>
+                                                        <div class="mb-2">
+                                                            <img src="{{ route('imagecache', [ 'template'=>'sbism','filename' => $slider->fi() ]) }}" 
+                                                                 class="img-fluid rounded border shadow-sm" style="max-height: 150px;">
+                                                        </div>
+                                                        <label for="edit_image{{$slider->id}}">Change Image</label>
+                                                        <div class="custom-file">
+                                                            <input type="file" name="featured_image" class="custom-file-input" id="edit_image{{$slider->id}}">
+                                                            <label class="custom-file-label">Choose new image</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="custom-control custom-switch mt-3">
+                                                        <input type="checkbox" class="custom-control-input" id="editActive{{$slider->id}}" name="active" {{$slider->active? 'checked' : ''}}>
+                                                        <label class="custom-control-label" for="editActive{{$slider->id}}">Active</label>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer bg-light">
+                                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                                    <button type="submit" class="btn btn-info px-4">Update Changes</button>
+                                                </div>
+                                            </form>
+                                          </div>
+                                        </div>
+                                    </div>
+                                    @empty
+                                    <tr>
+                                        <td colspan="5" class="text-center py-5">
+                                            <img src="https://cdn-icons-png.flaticon.com/512/7486/7486744.png" style="width: 80px; opacity: 0.3;">
+                                            <p class="text-muted mt-3">No sliders found. Add your first slider to get started!</p>
+                                        </td>
+                                    </tr>
+                                   @endforelse
+                                </tbody>
+                            </table>
                         </div>
-                        {{-- MODAL END --}}
-                        @empty
-                        <tr>
-                            <td colspan="6" class="text-danger h5 text-center">No Slider Found</td>
-                        </tr>
-                       @endforelse
-                    </tbody>
-                </table>
-                {{ $sliders->links() }}
+                    </div>
+                    @if($sliders->hasPages())
+                    <div class="card-footer clearfix bg-white">
+                        {{ $sliders->links() }}
+                    </div>
+                    @endif
+                </div>
             </div>
         </div>
     </div>
-   </section>
+</section>
 @endsection
+
+@push('js')
+<script>
+    // Show selected filename in custom-file-input
+    $('.custom-file-input').on('change', function() {
+        let fileName = $(this).val().split('\\').pop();
+        $(this).next('.custom-file-label').addClass("selected").html(fileName);
+    });
+</script>
+@endpush
 
 
 
