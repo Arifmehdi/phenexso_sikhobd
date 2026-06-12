@@ -119,7 +119,8 @@
                     <!-- Shipping Address -->
                     <div class="checkout-card">
                         <div class="checkout-card-header">
-                            <i class="fas fa-map-marker-alt"></i> SHIPPING ADDRESS
+                            <i class="fas {{ ($hasCourse && !$hasProduct) ? 'fa-user-graduate' : 'fa-map-marker-alt' }}"></i> 
+                            {{ ($hasCourse && !$hasProduct) ? 'REGISTRATION INFO' : (($hasCourse && $hasProduct) ? 'SHIPPING & REGISTRATION INFO' : 'SHIPPING ADDRESS') }}
                         </div>
                         <div class="checkout-card-body">
                             <form id="addressForm">
@@ -139,10 +140,26 @@
                                         <input type="email" class="form-control" id="email" name="email" 
                                                value="{{ $dl ? $dl->email : ($me ? $me->email : '') }}" placeholder="Email (optional)">
                                     </div>
-                                    <div class="col-12 mb-0">
+
+                                    @if($hasCourse)
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Class <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" id="student_class" name="student_class" placeholder="e.g. Class 10, HSC" required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Occupation <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" id="occupation" name="occupation" placeholder="e.g. Student" required>
+                                        </div>
+                                        <div class="col-12 mb-3">
+                                            <label class="form-label">Last Study <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" id="last_academic_status" name="last_academic_status" placeholder="e.g. GPA 5.00" required>
+                                        </div>
+                                    @endif
+
+                                    <div class="col-12 mb-0" id="address-section" {!! ($hasCourse && !$hasProduct) ? 'style="display:none;"' : '' !!}>
                                         <label class="form-label">Delivery Address <span class="text-danger">*</span></label>
                                         <textarea class="form-control" id="billing-address" name="billing_address" rows="3" 
-                                                  placeholder="Full address (House, Road, Area...)" required>{{ $dl ? $dl->address_title : '' }}</textarea>
+                                                  placeholder="Full address (House, Road, Area...)" {{ $hasProduct ? 'required' : '' }}>{{ $dl ? $dl->address_title : '' }}</textarea>
                                     </div>
                                 </div>
                             </form>
@@ -233,13 +250,18 @@ $(document).ready(function() {
         $shippingCharge = isset($ws) && isset($ws->shipping_charge) ? (float)$ws->shipping_charge : 0;
     @endphp
     const shippingCharge = {{ $shippingCharge }};
+    const hasCourse = {{ $hasCourse ? 'true' : 'false' }};
+    const hasProduct = {{ $hasProduct ? 'true' : 'false' }};
 
     function updateSummary(res) {
         $('.cartCountBadge').text(res.cartItemsCount);
         $('.subtotal-text').text('৳' + parseFloat(res.cartTotal).toFixed(2));
         $('.discount-text').text('-৳' + parseFloat(res.discount).toFixed(2));
         $('.total-discount-text').text(parseFloat(res.discount).toFixed(2));
-        $('.payable-text').text('৳' + (parseFloat(res.cartTotal) - parseFloat(res.discount) + shippingCharge).toFixed(2));
+        
+        const currentShipping = res.shippingCharge !== undefined ? res.shippingCharge : shippingCharge;
+        $('.shipping-text').text('৳' + parseFloat(currentShipping).toFixed(2));
+        $('.payable-text').text('৳' + (parseFloat(res.cartTotal) - parseFloat(res.discount) + currentShipping).toFixed(2));
         
         // Update header count
         $('.ad-cart-count').text(res.cartCount);
@@ -345,8 +367,22 @@ $(document).ready(function() {
         const address = $('#billing-address').val().trim();
         const paymentMethod = $('.paymentMethodSelect:checked').val();
 
-        if (!name || !mobile || !address) {
-            Swal.fire('Required Fields', 'Please fill in name, phone, and address.', 'warning');
+        const studentClass = $('#student_class').val() ? $('#student_class').val().trim() : '';
+        const occupation = $('#occupation').val() ? $('#occupation').val().trim() : '';
+        const lastStatus = $('#last_academic_status').val() ? $('#last_academic_status').val().trim() : '';
+
+        if (!name || !mobile) {
+            Swal.fire('Required Fields', 'Please fill in name and phone.', 'warning');
+            return;
+        }
+
+        if (hasProduct && !address) {
+            Swal.fire('Required Fields', 'Please fill in delivery address.', 'warning');
+            return;
+        }
+
+        if (hasCourse && (!studentClass || !occupation || !lastStatus)) {
+            Swal.fire('Required Fields', 'Please fill in all registration details.', 'warning');
             return;
         }
 
@@ -375,7 +411,10 @@ $(document).ready(function() {
                     billing_address: address,
                     order_note: $('#order_note').val(),
                     payment_method: paymentMethod,
-                    transaction_id: $('#transaction_id').val()
+                    transaction_id: $('#transaction_id').val(),
+                    student_class: studentClass,
+                    occupation: occupation,
+                    last_academic_status: lastStatus
                 };
 
                 $.each(data, function(key, value) {

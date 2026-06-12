@@ -39,6 +39,11 @@ class Order extends Model
         'delivered_at',
         'canceled_at',
         'order_status',
+        'student_class',
+        'occupation',
+        'last_academic_status',
+        'has_course',
+        'admin_approval',
     ];
 
     protected $casts = [

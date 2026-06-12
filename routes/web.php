@@ -169,7 +169,7 @@ Route::get('hopital/details/{id}',[FrontendController::class,'hospitalDetails'])
 
 Route::get('checkout',[FrontendController::class, 'new_checkout'])->name('new.checkout');
 Route::post('cod/order/store',[FrontendController::class, 'codOrderStore'])->name('codOrderStore');
-Route::post('order/store', [SslCommerzPaymentController::class, 'orderStore']);
+Route::post('order/store', [SslCommerzPaymentController::class, 'orderStore'])->name('onlineOrderStore');
 
 Route::get('department/list',[FrontendController::class,'departmentList'])->name('departmentList');
 

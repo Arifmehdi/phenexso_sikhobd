@@ -16,7 +16,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use App\Library\SslCommerz\SslCommerzNotification;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Hash;
+use App\Models\User;
 use App\Mail\OrderConfirmationEmail;
+use App\Mail\UserCredentialsEmail;
 
 class SslCommerzPaymentController extends Controller
 {
@@ -51,11 +54,11 @@ class SslCommerzPaymentController extends Controller
 
             $post_data = [
                 'total_amount'     => $appointment->doctor_fee,
-                'currency'         => config('currency'),
+                'currency'         => config('sslcommerz.currency'),
                 'tran_id'          => $tran_id,
-                'success_url'      => config('success_url'),
-                'fail_url'         => config('failed_url'),
-                'cancel_url'       => config('cancel_url'),
+                'success_url'      => config('sslcommerz.success_url'),
+                'fail_url'         => config('sslcommerz.failed_url'),
+                'cancel_url'       => config('sslcommerz.cancel_url'),
                 'cus_name'         => $appointment->name,
                 'cus_email'        => $appointment->email,
                 'cus_phone'        => $appointment->mobile,
@@ -106,9 +109,12 @@ class SslCommerzPaymentController extends Controller
             }
         }
 
+        $hasCourse = $cartItems->contains(fn($item) => $item->product && $item->product->type === 'course');
+        $hasProduct = $cartItems->contains(fn($item) => $item->product && $item->product->type !== 'course');
+
         $subtotal = $this->calculateSubtotal($cartItems);
 
-        $deliveryCost = $ws->shipping_charge ?? $request->shipping_price;
+        $deliveryCost = $hasProduct ? ($ws->shipping_charge ?? $request->shipping_price) : 0;
 
         $grandTotal = $subtotal + $deliveryCost;
 
@@ -120,7 +126,7 @@ class SslCommerzPaymentController extends Controller
 
                 $user = auth()->user();
 
-                if ($request->has('billing_address')) {
+                if ($request->has('billing_address') && $hasProduct) {
 
                     DeliveryLocation::updateOrCreate(
                         ['user_id' => $user->id],
@@ -136,32 +142,67 @@ class SslCommerzPaymentController extends Controller
                 $location = $this->getUserLocation($user);
 
                 if (!$location) {
-                    return redirect()->back()->with(
-                        'error',
-                        'No delivery location found.'
-                    );
+                    $location = new \stdClass();
+                    $location->name = $request->input('name') ?? $user->name;
+                    $location->email = $request->input('email') ?? $user->email;
+                    $location->mobile = $request->input('mobile') ?? $user->mobile;
+                    $location->address_title = $request->input('billing_address') ?? 'Course Enrollment';
                 }
 
-                $name = $user->name;
-                $email = $user->email;
-                $mobile = $user->mobile;
+                $name = $location->name;
+                $email = $location->email;
+                $mobile = $location->mobile;
                 $address = $location->address_title ?? ' ';
                 $userId = $user->id;
 
             } else {
 
-                $request->validate([
+                $rules = [
                     'name'             => 'required|string|max:255',
-                    'email'            => 'nullable|email|max:255',
+                    'email'            => 'required|email|max:255',
                     'mobile'           => 'required|string|max:20',
-                    'billing_address'  => 'required|string|max:1000',
-                ]);
+                ];
+                if ($hasProduct) {
+                    $rules['billing_address'] = 'required|string|max:1000';
+                }
+                if ($hasCourse) {
+                    $rules['occupation'] = 'required|string|max:255';
+                    $rules['last_academic_status'] = 'required|string|max:255';
+                }
+                $request->validate($rules);
 
-                $name = $request->input('name');
-                $email = $request->input('email');
-                $mobile = $request->input('mobile');
-                $address = $request->input('billing_address');
-                $userId = null;
+                // Handle Guest Registration for Course Enrollment
+                $user = User::where('email', $request->email)->orWhere('mobile', $request->mobile)->first();
+                $isNewUser = false;
+
+                if (!$user) {
+                    $isNewUser = true;
+                    $password = Str::random(8);
+                    $user = User::create([
+                        'name' => $request->name,
+                        'email' => $request->email,
+                        'mobile' => $request->mobile,
+                        'password' => Hash::make($password),
+                        'role' => 'user',
+                        'is_approve' => true,
+                    ]);
+                    
+                    if ($user->email) {
+                        try {
+                            Mail::to($user->email)->send(new UserCredentialsEmail($user, $password));
+                        } catch (\Exception $e) {
+                        }
+                    }
+                    session(['temp_password' => $password]);
+                }
+
+                session(['is_new_user' => $isNewUser]);
+
+                $name = $user->name;
+                $email = $user->email;
+                $mobile = $user->mobile;
+                $address = $request->input('billing_address') ?? 'Course Enrollment';
+                $userId = $user->id;
             }
 
             // 1. Create Order
@@ -179,6 +220,10 @@ class SslCommerzPaymentController extends Controller
                 'payment_gateway' => $paymentMethod,
                 'order_note'      => $request->order_note,
                 'addedby_id'      => $userId,
+                'occupation'      => $request->occupation,
+                'last_academic_status' => $request->last_academic_status,
+                'has_course'      => $hasCourse,
+                'admin_approval'  => $hasCourse ? 'pending' : 'approved',
             ]);
 
             // 2. Store Order Items
@@ -189,11 +234,22 @@ class SslCommerzPaymentController extends Controller
                     'user_id'       => $userId,
                     'product_id'    => $item->product_id,
                     'product_name'  => $item->product->name_en,
-                    'product_price' => $item->product->final_price,
+                    'product_price' => $item->product->selling_price,
                     'quantity'      => $item->quantity,
-                    'total_cost'    => $item->product->final_price * $item->quantity,
+                    'total_cost'    => $item->product->selling_price * $item->quantity,
                     'addedby_id'    => $userId,
                 ]);
+
+                // Also create pending enrollment if it's a course
+                if ($item->product->type === 'course' && $userId) {
+                    Enrollment::updateOrCreate(
+                        ['user_id' => $userId, 'product_id' => $item->product_id],
+                        [
+                            'order_id'    => $order->id,
+                            'status'      => 'pending', // Will be activated on success callback
+                        ]
+                    );
+                }
             }
 
             // 3. Clear Cart
@@ -215,11 +271,11 @@ class SslCommerzPaymentController extends Controller
 
                 $post_data = [
                     'total_amount'     => $grandTotal,
-                    'currency'         => config('currency'),
+                    'currency'         => config('sslcommerz.currency'),
                     'tran_id'          => $tran_id,
-                    'success_url'      => config('success_url'),
-                    'fail_url'         => config('failed_url'),
-                    'cancel_url'       => config('cancel_url'),
+                    'success_url'      => config('sslcommerz.success_url'),
+                    'fail_url'         => config('sslcommerz.failed_url'),
+                    'cancel_url'       => config('sslcommerz.cancel_url'),
                     'cus_name'         => $order->name,
                     'cus_email'        => $order->email,
                     'cus_add1'         => $order->address_title,
@@ -427,7 +483,7 @@ class SslCommerzPaymentController extends Controller
     private function calculateSubtotal($cartItems)
     {
         return $cartItems->sum(function ($cart) {
-            return $cart->product->final_price * $cart->quantity;
+            return $cart->product->selling_price * $cart->quantity;
         });
     }
 }

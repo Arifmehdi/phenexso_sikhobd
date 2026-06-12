@@ -37,6 +37,7 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\OrderConfirmationEmail;
+use App\Mail\UserCredentialsEmail;
 use App\Models\Testimonial;
 
 class FrontendController extends Controller
@@ -459,39 +460,53 @@ class FrontendController extends Controller
 
     public function enroll(Request $request, $slug)
     {
-        if (!Auth::check()) {
-            return redirect()->route('login')->with('info', 'Please login to enroll in this course.');
-        }
-
         $course = Product::where('slug', $slug)->where('active', true)->firstOrFail();
 
-        // Check if already enrolled
-        $existing = Enrollment::where('user_id', Auth::id())->where('product_id', $course->id)->first();
-        if ($existing) {
-            return redirect()->back()->with('info', 'You are already enrolled in this course.');
-        }
+        if (Auth::check()) {
+            // Check if already enrolled
+            $existing = Enrollment::where('user_id', Auth::id())->where('product_id', $course->id)->first();
+            if ($existing) {
+                return redirect()->back()->with('info', 'You are already enrolled in this course.');
+            }
 
-        // Handle Free Enrollment
-        if ($course->isFree()) {
-            Enrollment::create([
-                'user_id'     => Auth::id(),
-                'product_id'  => $course->id,
-                'enrolled_at' => now(),
-                'status'      => 'active',
-            ]);
+            // Handle Free Enrollment
+            if ($course->isFree()) {
+                Enrollment::create([
+                    'user_id'     => Auth::id(),
+                    'product_id'  => $course->id,
+                    'enrolled_at' => now(),
+                    'status'      => 'active',
+                ]);
 
-            return redirect()->back()->with('success', 'Congratulations! You have successfully enrolled in this course.');
-        }
+                return redirect()->back()->with('success', 'Congratulations! You have successfully enrolled in this course.');
+            }
 
-        // Handle Paid Enrollment (Add to Cart and Go to Checkout)
-        // Check if already in cart
-        $cart = Cart::where('user_id', Auth::id())->where('product_id', $course->id)->first();
-        if (!$cart) {
-            Cart::create([
-                'user_id'    => Auth::id(),
-                'product_id' => $course->id,
-                'quantity'   => 1,
-            ]);
+            // Handle Paid Enrollment (Add to Cart and Go to Checkout)
+            // Check if already in cart
+            $cart = Cart::where('user_id', Auth::id())->where('product_id', $course->id)->first();
+            if (!$cart) {
+                Cart::create([
+                    'user_id'    => Auth::id(),
+                    'product_id' => $course->id,
+                    'quantity'   => 1,
+                ]);
+            }
+        } else {
+            // Handle guest enrollment via session
+            $sessionId = session('session_id');
+            if (!$sessionId) {
+                $sessionId = Str::random(40);
+                session(['session_id' => $sessionId]);
+            }
+
+            $cart = Cart::where('session_id', $sessionId)->where('product_id', $course->id)->first();
+            if (!$cart) {
+                Cart::create([
+                    'session_id' => $sessionId,
+                    'product_id' => $course->id,
+                    'quantity'   => 1,
+                ]);
+            }
         }
 
         return redirect()->route('cart')->with('success', 'Course added to cart. Please complete checkout to enroll.');
@@ -1072,10 +1087,16 @@ class FrontendController extends Controller
 
         // Calculate totals
         $cartSubtotal = $cartItems->sum(function ($item) {
-            return $item->quantity * $item->product->final_price;
+            return $item->quantity * $item->product->selling_price;
         });
 
-        return view('website.cart', compact('cartItems', 'cartSubtotal'));
+        $hasCourse = $cartItems->contains(fn($item) => $item->product && $item->product->type === 'course');
+        $hasProduct = $cartItems->contains(fn($item) => $item->product && $item->product->type !== 'course');
+
+        $ws = WebsiteParameter::first();
+        $shippingCharge = $hasProduct ? ($ws->shipping_charge ?? 0) : 0;
+
+        return view('website.cart', compact('cartItems', 'cartSubtotal', 'hasCourse', 'hasProduct', 'shippingCharge'));
     }
 
         public function updateQuantity(Request $request, $cartId)
@@ -1345,6 +1366,13 @@ public function quickAdd(Request $request)
         }
 
         if ($request->ajax()) {
+            $cartItems = Cart::getCartItems();
+            $hasProduct = $cartItems->contains(fn($item) => $item->product && $item->product->type !== 'course');
+            $ws = WebsiteParameter::first();
+            $shippingCharge = $hasProduct ? ($ws->shipping_charge ?? 0) : 0;
+            $cartTotal = Cart::totalCartPrice();
+            $discount = Cart::totalDiscountAmount();
+
             return response()->json([
                 'status'        => true,
                 'message'       => 'Cart updated successfully!',
@@ -1352,9 +1380,10 @@ public function quickAdd(Request $request)
                 'add_to_cart_url' => route('addToCart'),
                 'cartCount'       => Cart::cartCount(),
                 'cartItemsCount'  => Cart::CartItemsCount(),
-                'cartTotal'       => Cart::totalCartPrice(),
-                'discount'        => Cart::totalDiscountAmount(),
-                'payable'         => Cart::totalCartPrice() - Cart::totalDiscountAmount(),
+                'cartTotal'       => $cartTotal,
+                'discount'        => $discount,
+                'shippingCharge'  => $shippingCharge,
+                'payable'         => $cartTotal - $discount + $shippingCharge,
             ]);
         }
 
@@ -1461,7 +1490,13 @@ public function quickAdd(Request $request)
         $shippingMethods = shippingMethod::get();
         $districts = District::all();
 
-        return view('frontend.home.new_checkout', compact( 'cartItems', 'shippingMethods','districts', 'location'));
+        $hasCourse = $cartItems->contains(fn($item) => $item->product && $item->product->type === 'course');
+        $hasProduct = $cartItems->contains(fn($item) => $item->product && $item->product->type !== 'course');
+        
+        $ws = WebsiteParameter::first();
+        $shippingCharge = $hasProduct ? ($ws->shipping_charge ?? 0) : 0;
+
+        return view('frontend.home.new_checkout', compact( 'cartItems', 'shippingMethods','districts', 'location', 'hasCourse', 'hasProduct', 'shippingCharge'));
     }
 
 
@@ -1509,15 +1544,28 @@ public function quickAdd(Request $request)
             return redirect()->back()->with('error', 'Your cart is empty.');
         }
 
+        $hasCourse = $cartItems->contains(fn($item) => $item->product && $item->product->type === 'course');
+        $hasProduct = $cartItems->contains(fn($item) => $item->product && $item->product->type !== 'course');
+
         $subtotal = $this->calculateSubtotal($cartItems);
-        $deliveryCost = $ws->shipping_charge ?? $request->shipping_price;
+        $deliveryCost = $hasProduct ? ($ws->shipping_charge ?? $request->shipping_price) : 0;
         $grandTotal = $subtotal + $deliveryCost;
         $paymentMethod = $request->input('payment_method');
         $orderNote = $request->order_note ?? null;
 
+        $courseFields = [];
+        if ($hasCourse) {
+            $courseFields = [
+                'occupation' => $request->occupation,
+                'last_academic_status' => $request->last_academic_status,
+                'has_course' => true,
+                'admin_approval' => 'pending',
+            ];
+        }
+
         if (Auth::check()) {
             $user = auth()->user();
-            if ($request->has('billing_address')) {
+            if ($request->has('billing_address') && $hasProduct) {
                 DeliveryLocation::updateOrCreate(
                     ['user_id' => $user->id],
                     [
@@ -1525,64 +1573,90 @@ public function quickAdd(Request $request)
                         'name' => $request->input('name'),
                         'mobile' => $request->input('mobile'),
                         'email' => $request->input('email'),
-                        // 'district_id' => $request->input('billing_district_id'),
-                        // 'upazila_id' => $request->input('billing_thana_id'),
                     ]
                 );
             }
 
             $location = $this->getUserLocation($user);
-
+            
             if (!$location) {
-                return redirect()->back()->with('error', 'No delivery location found.');
+                $location = new \stdClass();
+                $location->name = $request->input('name');
+                $location->email = $request->input('email');
+                $location->mobile = $request->input('mobile');
+                $location->address_title = $request->input('billing_address') ?? 'Course Enrollment';
             }
 
-            $order = $this->createOrder($user, $location, $deliveryCost, $paymentMethod, $subtotal, $deliveryCost, $grandTotal, $orderNote);
+            $order = $this->createOrder($user, $location, $deliveryCost, $paymentMethod, $subtotal, $deliveryCost, $grandTotal, $orderNote, $courseFields);
 
             $this->storeOrderItems($order, $cartItems, $user->id);
             Cart::where('user_id', $user->id)->delete();
 
-            // Send email to admin
-            // Mail::to('noreply@hublibd.com')->send(new OrderConfirmationEmail($order));
-            
-            // Send email to customer if email is provided
-            // if ($order->email) {
-            //     Mail::to($order->email)->send(new OrderConfirmationEmail($order));
-            // }
-
-            return redirect()->route('order.complete')->with('success', 'Order placed successfully!');
+            $msg = $hasCourse ? 'Complete registration and wait for admin approval.' : 'Order placed successfully!';
+            return redirect()->route('order.complete')->with('success', $msg);
         } else {
-            $request->validate([
+            $rules = [
                 'name' => 'required|string|max:255',
                 'mobile' => 'required|string|max:20',
-                'billing_address' => 'required|string|max:1000',
-                'email' => 'nullable|email|max:255',
-                // 'billing_district_id' => 'required',
-                // 'billing_thana_id' => 'required',
-            ]);
+                'email' => 'required|email|max:255',
+            ];
+            if ($hasProduct) {
+                $rules['billing_address'] = 'required|string|max:1000';
+            }
+            if ($hasCourse) {
+                $rules['occupation'] = 'required|string|max:255';
+                $rules['last_academic_status'] = 'required|string|max:255';
+            }
+            $request->validate($rules);
+
+            // Handle Guest Registration for Course Enrollment
+            $user = User::where('email', $request->email)->orWhere('mobile', $request->mobile)->first();
+            $isNewUser = false;
+
+            if (!$user) {
+                $isNewUser = true;
+                $password = Str::random(8);
+                $user = User::create([
+                    'name' => $request->name,
+                    'email' => $request->email,
+                    'mobile' => $request->mobile,
+                    'password' => Hash::make($password),
+                    'role' => 'user',
+                    'is_approve' => true,
+                ]);
+                
+                if ($user->email) {
+                    try {
+                        Mail::to($user->email)->send(new UserCredentialsEmail($user, $password));
+                    } catch (\Exception $e) {
+                        // Log or handle mail failure
+                    }
+                }
+                session(['temp_password' => $password]);
+            }
+
+            session(['is_new_user' => $isNewUser]);
 
             $location = new \stdClass();
             $location->name = $request->input('name');
             $location->email = $request->input('email');
             $location->mobile = $request->input('mobile');
-            $location->address_title = $request->input('billing_address');
-            // $location->district_id = $request->input('billing_district_id');
-            // $location->upazila_id = $request->input('billing_thana_id');
+            $location->address_title = $request->input('billing_address') ?? 'Course Enrollment';
 
-            $order = $this->createOrder(null, $location, $deliveryCost, $paymentMethod, $subtotal, $deliveryCost, $grandTotal, $orderNote);
+            $order = $this->createOrder($user, $location, $deliveryCost, $paymentMethod, $subtotal, $deliveryCost, $grandTotal, $orderNote, $courseFields);
 
-            $this->storeOrderItems($order, $cartItems, null);
+            $this->storeOrderItems($order, $cartItems, $user->id);
             Cart::where('session_id', session('session_id'))->delete();
 
-            // Send email to admin
-            // Mail::to('noreply@hublibd.com')->send(new OrderConfirmationEmail($order));
-            
-            // Send email to customer if email is provided
             if ($location->email) {
-                Mail::to($location->email)->send(new OrderConfirmationEmail($order));
+                try {
+                    Mail::to($location->email)->send(new OrderConfirmationEmail($order));
+                } catch (\Exception $e) {
+                }
             }
 
-            return redirect()->route('shop')->with('success', 'Order placed successfully!');
+            $msg = $hasCourse ? 'Complete registration and wait for admin approval.' : 'Order placed successfully!';
+            return redirect()->route('order.complete')->with('success', $msg);
         }
     }
 
@@ -1593,13 +1667,16 @@ public function quickAdd(Request $request)
         $order = null;
         if (Auth::check()) {
             $order = \App\Models\Order::where('user_id', Auth::id())->with('orderItems.product')->latest()->first();
+        } else {
+            // Check for last order in session or just latest?
+            $order = \App\Models\Order::with('orderItems.product')->latest()->first();
         }
         return view('website.order_complete', compact('order'));
     }
 
     private function getUserLocation($user)
     {
-        if ($user) {
+        if ($user && method_exists($user, 'locations')) {
             return $user->locations()->first();
         }
         return null;
@@ -1613,9 +1690,9 @@ public function quickAdd(Request $request)
         });
     }
 
-    private function createOrder($user, $location, $area, $paymentMethod, $subtotal, $deliveryCost, $grandTotal, $orderNote)
+    private function createOrder($user, $location, $area, $paymentMethod, $subtotal, $deliveryCost, $grandTotal, $orderNote, $courseFields = [])
     {
-        return Order::create([
+        return Order::create(array_merge([
             'user_id'        => $user ? $user->id : null,
             'name'           => $location->name,
             'email'          => $location->email,
@@ -1632,11 +1709,13 @@ public function quickAdd(Request $request)
             'pending_at'     => now(),
             'addedby_id'     => $user ? $user->id : null,
             'order_note'     => $orderNote,
-        ]);
+        ], $courseFields));
     }
 
     private function storeOrderItems($order, $cartItems, $userId)
     {
+        $userId = $userId ?? $order->user_id;
+
         foreach ($cartItems as $cart) {
             $product = $cart->product;
             
@@ -1657,8 +1736,8 @@ public function quickAdd(Request $request)
                     ['user_id' => $userId, 'product_id' => $product->id],
                     [
                         'order_id'    => $order->id,
-                        'enrolled_at' => ($order->payment_status == 'paid' || $order->payment_method == 'cod') ? now() : null,
-                        'status'      => ($order->payment_status == 'paid' || $order->payment_method == 'cod') ? 'active' : 'pending',
+                        'enrolled_at' => ($order->payment_status == 'paid') ? now() : null,
+                        'status'      => ($order->payment_status == 'paid') ? 'active' : 'pending',
                     ]
                 );
             }

@@ -65,7 +65,8 @@
 @php
     $totalCartPrice = \App\Models\Cart::totalCartPrice();
     $totalDiscountAmount = \App\Models\Cart::totalDiscountAmount();
-    $shippingCharge = isset($ws) && isset($ws->shipping_charge) ? $ws->shipping_charge : 0;
+    $hasProductInCart = $cartItems->contains(fn($item) => $item->product && $item->product->type !== 'course');
+    $shippingCharge = $hasProductInCart ? (isset($ws) && isset($ws->shipping_charge) ? $ws->shipping_charge : 0) : 0;
     $initialTotal = $totalCartPrice - $totalDiscountAmount + $shippingCharge;
 @endphp
 

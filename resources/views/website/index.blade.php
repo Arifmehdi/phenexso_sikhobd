@@ -27,8 +27,8 @@
           </div>--}}
 
           <div class="hero-cta">
-            <a href="{{ route('courses') }}" class="btn btn-primary"><span>{{ app()->getLocale() == 'bn' ? 'এক্সপ্লোর কোর্স' : 'Explore Courses' }}</span> <i class="fa-solid fa-arrow-right"></i></a>
-            <a href="#" class="btn btn-outline"><i class="fa-solid fa-play"></i> <span>{{ app()->getLocale() == 'bn' ? 'ফ্রি ক্লাস দেখুন' : 'Watch Free Class' }}</span></a>
+            <a href="{{ route('courses') }}" class="btn btn-primary"><span>{{ app()->getLocale() == 'bn' ? 'আমাদের  কোর্স' : 'Our Courses' }}</span> <i class="fa-solid fa-arrow-right"></i></a>
+            <a href="#" class="btn btn-outline"><i class="fa-solid fa-play"></i> <span>{{ app()->getLocale() == 'bn' ? 'শপ' : 'Shop' }}</span></a>
           </div>
           <div class="hero-stats">
             @if(isset($content->meta['hero_stats']))
@@ -63,7 +63,31 @@
     </div>
   </section>
 
-  <section class="section how-it-works">
+    <section class="section" >
+    <div class="container">
+      <div class="section-head">
+        <h2><span data-i18n="sec.cat">{{ app()->getLocale() == 'bn' ? 'ক্যাটাগরি অনুযায়ী' : 'Browse by' }}</span> <em data-i18n="sec.cat2">{{ app()->getLocale() == 'bn' ? 'কোর্স' : 'category' }}</em></h2>
+        <p data-i18n="sec.cat.sub">{{ app()->getLocale() == 'bn' ? 'আপনার আগ্রহ অনুযায়ী যেকোনো ক্যাটাগরি বেছে নিন' : 'Pick a category that matches your interest' }}</p>
+      </div>
+      <div class="categories-grid">
+        @foreach($categories->take(4) as $index => $category)
+        <a href="{{ route('courses', ['category' => $category->slug]) }}" class="category-card" style="--cat-color: {{ $index % 2 == 0 ? 'linear-gradient(135deg, rgba(108,92,231,.12), transparent)' : 'linear-gradient(135deg, rgba(255,40,79,.12), transparent)' }};">
+          <div class="cat-icon">
+              @if($index == 0) <i class="fa-solid fa-graduation-cap"></i>
+              @elseif($index == 1) <i class="fa-solid fa-bolt"></i>
+              @elseif($index == 2) <i class="fa-solid fa-language"></i>
+              @else <i class="fa-solid fa-user-graduate"></i>
+              @endif
+          </div>
+          <h3>{{ app()->getLocale() == 'bn' ? $category->name_bn : $category->name_en }}</h3>
+          <p>{{ $category->products_count ?? $category->products->count() }} {{ app()->getLocale() == 'bn' ? 'টি কোর্স' : 'Courses' }}</p>
+        </a>
+        @endforeach
+      </div>
+    </div>
+  </section>
+
+  <section class="section how-it-works" style="padding-top:0;">
     <div class="container">
       <div class="section-head">
         @if(isset($content->meta['how_it_works']))
@@ -98,30 +122,6 @@
               <p>ভিডিও লেসন, কুইজ এবং নোটের মাধ্যমে আপনার দক্ষতা বৃদ্ধি করুন।</p>
             </div>
         @endif
-      </div>
-    </div>
-  </section>
-
-  <section class="section" style="padding-top:0;">
-    <div class="container">
-      <div class="section-head">
-        <h2><span data-i18n="sec.cat">{{ app()->getLocale() == 'bn' ? 'ক্যাটাগরি অনুযায়ী' : 'Browse by' }}</span> <em data-i18n="sec.cat2">{{ app()->getLocale() == 'bn' ? 'কোর্স' : 'category' }}</em></h2>
-        <p data-i18n="sec.cat.sub">{{ app()->getLocale() == 'bn' ? 'আপনার আগ্রহ অনুযায়ী যেকোনো ক্যাটাগরি বেছে নিন' : 'Pick a category that matches your interest' }}</p>
-      </div>
-      <div class="categories-grid">
-        @foreach($categories->take(4) as $index => $category)
-        <a href="{{ route('courses', ['category' => $category->slug]) }}" class="category-card" style="--cat-color: {{ $index % 2 == 0 ? 'linear-gradient(135deg, rgba(108,92,231,.12), transparent)' : 'linear-gradient(135deg, rgba(255,40,79,.12), transparent)' }};">
-          <div class="cat-icon">
-              @if($index == 0) <i class="fa-solid fa-graduation-cap"></i>
-              @elseif($index == 1) <i class="fa-solid fa-bolt"></i>
-              @elseif($index == 2) <i class="fa-solid fa-language"></i>
-              @else <i class="fa-solid fa-user-graduate"></i>
-              @endif
-          </div>
-          <h3>{{ app()->getLocale() == 'bn' ? $category->name_bn : $category->name_en }}</h3>
-          <p>{{ $category->products_count ?? $category->products->count() }} {{ app()->getLocale() == 'bn' ? 'টি কোর্স' : 'Courses' }}</p>
-        </a>
-        @endforeach
       </div>
     </div>
   </section>

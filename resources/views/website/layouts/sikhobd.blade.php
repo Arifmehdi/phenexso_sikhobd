@@ -114,10 +114,21 @@
             box-shadow: 0 20px 50px rgba(15, 23, 42, 0.12);
             opacity: 0;
             visibility: hidden;
-            transform: translateY(12px);
-            transition: all 0.25s cubic-bezier(0.23, 1, 0.32, 1);
+            transform: translateY(10px);
+            transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.23, 1, 0.32, 1), visibility 0.3s;
             z-index: 1000;
             pointer-events: none;
+        }
+
+        /* Bridge the gap between nav-item and dropdown to maintain hover */
+        .dropdown::before {
+            content: '';
+            position: absolute;
+            top: -15px;
+            left: 0;
+            right: 0;
+            height: 15px;
+            background: transparent;
         }
 
         .nav-item:hover > .dropdown,
@@ -141,7 +152,7 @@
             left: 100%;
             margin-top: -12px;
             margin-left: -4px;
-            transform: translateX(12px);
+            transform: translateX(10px);
         }
 
         .dropdown-item:hover > .dropdown {
@@ -210,8 +221,7 @@
             box-shadow: -20px 0 80px rgba(15, 23, 42, 0.12);
             transition: right 0.25s ease;
             z-index: 1300;
-            display: flex;
-            flex-direction: column;
+            display: flex; flex-direction: column;
         }
 
         .drawer.open {
@@ -462,24 +472,10 @@
         }
 
         .user-dropdown .dropdown {
-            display: none;
-            position: absolute;
-            left: 0;
-            top: 100%;
-            background: #ffffff;
+            left: auto;
+            right: 0;
             min-width: 200px;
-            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
-            border-radius: 18px;
-            padding: 8px 0;
-            z-index: 9999;
-            list-style: none;
-            border: 1px solid rgba(148, 163, 184, 0.18);
             margin-top: 8px;
-        }
-
-        .user-dropdown:hover .dropdown,
-        .user-dropdown:focus-within .dropdown {
-            display: block;
         }
 
         .user-dropdown .dropdown-link {

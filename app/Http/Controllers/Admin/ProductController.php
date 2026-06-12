@@ -731,6 +731,17 @@ class ProductController extends Controller
         // Save the updated order
         $order->save();
 
+        // If order has a course and is confirmed/delivered, approve and activate enrollment
+        if ($order->has_course && in_array($request->order_status, ['confirmed', 'delivered'])) {
+            $order->update(['admin_approval' => 'approved']);
+            
+            // Activate all related enrollments
+            Enrollment::where('order_id', $order->id)->update([
+                'status' => 'active',
+                'enrolled_at' => now()
+            ]);
+        }
+
         // Send notification to the rider if assigned
         if ($order->driver_id) {
             $this->createNotification(

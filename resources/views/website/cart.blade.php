@@ -80,8 +80,8 @@
                 <div class="col-address">
                     <div class="modern-card">
                         <div class="card-header-clean">
-                            <i class="fa-solid fa-truck-fast"></i>
-                            <h2>১. শিপিং এবং ডেলিভারি তথ্য</h2>
+                            <i class="fa-solid {{ ($hasCourse && !$hasProduct) ? 'fa-user-graduate' : 'fa-truck-fast' }}"></i>
+                            <h2>১. {{ ($hasCourse && !$hasProduct) ? 'রেজিস্ট্রেশন তথ্য' : (($hasCourse && $hasProduct) ? 'শিপিং এবং রেজিস্ট্রেশন তথ্য' : 'শিপিং এবং ডেলিভারি তথ্য') }}</h2>
                         </div>
                         <div class="form-content">
                             <div class="row g-4">
@@ -94,13 +94,44 @@
                                     <input type="text" name="mobile" class="form-control custom-input" value="{{ optional(auth()->user())->mobile }}" placeholder="মোবাইল নম্বর" required>
                                 </div>
                                 <div class="col-12">
-                                    <label class="custom-label">ইমেইল ঠিকানা (ঐচ্ছিক)</label>
-                                    <input type="email" name="email" class="form-control custom-input" value="{{ optional(auth()->user())->email }}" placeholder="আপনার ইমেইল">
+                                    <label class="custom-label">ইমেইল ঠিকানা *</label>
+                                    <input type="email" name="email" class="form-control custom-input" value="{{ optional(auth()->user())->email }}" placeholder="আপনার ইমেইল" required>
                                 </div>
+
+                                @if($hasCourse)
+                                    <div class="col-md-6">
+                                        <label class="custom-label">পেশা *</label>
+                                        <select name="occupation" class="form-control custom-input" required>
+                                            <option value="">নির্বাচন করুন</option>
+                                            <option value="Student">ছাত্র (Student)</option>
+                                            <option value="Job Holder">চাকুরীজীবী (Job Holder)</option>
+                                            <option value="Business">ব্যবসায়ী (Business)</option>
+                                            <option value="Other">অন্যান্য (Other)</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="custom-label">সর্বশেষ পড়াশোনা (Last Study) *</label>
+                                        <select name="last_academic_status" class="form-control custom-input" required>
+                                            <option value="">নির্বাচন করুন</option>
+                                            <option value="PSC/Ebtedayee">PSC/ইবতেদায়ী</option>
+                                            <option value="JSC/JDC">JSC/জেডিসি</option>
+                                            <option value="SSC/Dakhil">SSC/দাখিল</option>
+                                            <option value="HSC/Alim">HSC/আলিম</option>
+                                            <option value="Bachelors/Honors">স্নাতক/অনার্স</option>
+                                            <option value="Masters">স্নাতকোত্তর</option>
+                                            <option value="Diploma">ডিপ্লোমা</option>
+                                            <option value="Other">অন্যান্য</option>
+                                        </select>
+                                    </div>
+                                @endif
+
+                                @if($hasProduct)
                                 <div class="col-12">
                                     <label class="custom-label">বিস্তারিত ঠিকানা (বাসা, রোড, এলাকা ও জেলা) *</label>
                                     <textarea name="billing_address" class="form-control custom-input" rows="4" placeholder="আপনার বিস্তারিত ঠিকানা লিখুন" required>{{ auth()->check() && auth()->user()->locations()->first() ? auth()->user()->locations()->first()->address_title : '' }}</textarea>
                                 </div>
+                                @endif
+
                                 <div class="col-12">
                                     <label class="custom-label">অর্ডার নোট (ঐচ্ছিক)</label>
                                     <textarea name="order_note" class="form-control custom-input" rows="2" placeholder="অর্ডার সম্পর্কে বিশেষ কোনো তথ্য থাকলে দিন"></textarea>
@@ -117,7 +148,7 @@
                     <div class="modern-card">
                         <div class="card-header-clean">
                             <i class="fa-solid fa-receipt"></i>
-                            <h2>অর্ডার সামারি</h2>
+                            <h2>{{ $hasCourse ? 'রেজিস্ট্রেশন সামারি' : 'অর্ডার সামারি' }}</h2>
                         </div>
                         <div class="summary-box">
                             <div class="summary-line">
@@ -126,11 +157,11 @@
                             </div>
                             <div class="summary-line">
                                 <span>ডেলিভারি চার্জ</span>
-                                <span class="fw-bold text-dark">৳{{ number_format($ws->shipping_charge ?? 0) }}</span>
+                                <span class="fw-bold text-dark">৳{{ number_format($shippingCharge) }}</span>
                             </div>
                             <div class="summary-line grand-total">
                                 <span>সর্বমোট</span>
-                                <span id="summary-total">৳{{ number_format($cartSubtotal + ($ws->shipping_charge ?? 0)) }}</span>
+                                <span id="summary-total">৳{{ number_format($cartSubtotal + $shippingCharge) }}</span>
                             </div>
                         </div>
                     </div>
@@ -139,7 +170,7 @@
                     <div class="modern-card">
                         <div class="card-header-clean">
                             <i class="fa-solid fa-box-open"></i>
-                            <h2>২. অর্ডারকৃত পণ্যসমূহ</h2>
+                            <h2>২. {{ $hasCourse ? 'এনরোলমেন্টকৃত কোর্সসমূহ' : 'অর্ডারকৃত পণ্যসমূহ' }}</h2>
                         </div>
                         <div class="items-list">
                             @foreach($cartItems as $item)
@@ -167,7 +198,7 @@
                     <div class="modern-card">
                         <div class="card-header-clean">
                             <i class="fa-solid fa-wallet"></i>
-                            <h2>৩. পেমেন্ট মেথড এবং অর্ডার</h2>
+                            <h2>৩. পেমেন্ট মেথড এবং {{ $hasCourse ? 'রেজিস্ট্রেশন' : 'অর্ডার' }}</h2>
                         </div>
                         <div class="form-content" style="padding-top: 20px;">
                             <label class="pay-card active">
@@ -191,7 +222,7 @@
                             </div>
 
                             <button type="submit" class="action-btn">
-                                অর্ডার সম্পন্ন করুন <i class="fa-solid fa-check-circle"></i>
+                                {{ $hasCourse ? 'রেজিস্ট্রেশন সম্পন্ন করুন' : 'অর্ডার সম্পন্ন করুন' }} <i class="fa-solid fa-check-circle"></i>
                             </button>
                         </div>
                     </div>
@@ -215,11 +246,22 @@
 @push('js')
 <script>
     $(document).ready(function() {
+        const codRoute = "{{ route('codOrderStore') }}";
+        const onlineRoute = "{{ route('onlineOrderStore') }}";
+
         $('.pay-card').click(function() {
             $('.pay-card').removeClass('active');
             $(this).addClass('active');
+            const val = $(this).find('input').val();
             $(this).find('input').prop('checked', true);
+            
+            // Update form action based on payment method
+            $('#checkoutForm').attr('action', val === 'cod' ? codRoute : onlineRoute);
         });
+
+        // Initialize form action
+        const initialVal = $('input[name="payment_method"]:checked').val();
+        $('#checkoutForm').attr('action', initialVal === 'cod' ? codRoute : onlineRoute);
     });
 
     function updateCartQty(cartId, change) {

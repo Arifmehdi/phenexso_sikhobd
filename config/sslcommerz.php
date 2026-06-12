@@ -52,10 +52,10 @@ return [
     | Default Appointment Callback URLs
     |--------------------------------------------------------------------------
     */
-    'success_url' => '/success',
-	'failed_url' => '/fail',
-	'cancel_url' => '/cancel',
-	'ipn_url' => '/ipn',
+    'success_url' => url('/success'),
+	'failed_url' => url('/fail'),
+	'cancel_url' => url('/cancel'),
+	'ipn_url' => url('/ipn'),
 
     /*
     |--------------------------------------------------------------------------

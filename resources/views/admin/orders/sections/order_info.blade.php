@@ -32,6 +32,18 @@
             Email: 
             {{ $order->email ?? optional($order->user)->email }}<br>
             @endif
+
+            @if($order->has_course)
+                <div class="mt-3 pt-2 border-top">
+                    <strong class="text-primary"><i class="fas fa-user-graduate"></i> Student Registration Info</strong><br>
+                    Class: {{ $order->student_class }}<br>
+                    Occupation: {{ $order->occupation }}<br>
+                    Academic Status: {{ $order->last_academic_status }}<br>
+                    <span class="badge {{ $order->admin_approval == 'approved' ? 'bg-success' : 'bg-warning' }}">
+                        Approval: {{ ucfirst($order->admin_approval) }}
+                    </span>
+                </div>
+            @endif
         </address>
         </div>
     </div>
