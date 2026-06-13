@@ -313,12 +313,21 @@ class FrontendController extends Controller
             }
         }
 
-        // Related courses
-        $relatedProducts = Product::where('type', 'course')
+        // Related courses (same category, type: course)
+        $relatedCourses = Product::where('type', 'course')
             ->whereHas('categories', function ($q) use ($product) {
                 $q->whereIn('product_categories.id', $product->categories->pluck('id'));
             })
             ->where('id', '!=', $product->id)
+            ->where('active', true)
+            ->take(4)
+            ->get();
+
+        // Related products (same category, type: product)
+        $relatedProducts = Product::where('type', 'product')
+            ->whereHas('categories', function ($q) use ($product) {
+                $q->whereIn('product_categories.id', $product->categories->pluck('id'));
+            })
             ->where('active', true)
             ->take(4)
             ->get();
@@ -336,7 +345,7 @@ class FrontendController extends Controller
                 ->toArray();
         }
 
-        return view('website.course_detail', compact('product', 'relatedProducts', 'lessons', 'sections', 'completions'));
+        return view('website.course_detail', compact('product', 'relatedCourses', 'relatedProducts', 'lessons', 'sections', 'completions'));
     }
 
     public function coursePlay($slug)

@@ -2,6 +2,79 @@
 
 @section('title', (lp($product, 'name') ?? 'Course Details') . ' — ' . ($ws->name ?? env('APP_NAME')))
 
+@push('css')
+<style>
+    .courses-grid, .shop-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 24px;
+    }
+    @media (max-width: 1200px) {
+        .courses-grid, .shop-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 991px) {
+        .courses-grid, .shop-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 575px) {
+        .courses-grid, .shop-grid { grid-template-columns: 1fr; }
+    }
+
+    .shop-product-thumb {
+        aspect-ratio: 1 / 1;
+        background: #fff;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        border-bottom: 1px solid var(--border);
+    }
+    .shop-product-thumb img {
+        max-width: 80%;
+        max-height: 80%;
+        object-fit: contain;
+        transition: transform 0.3s ease;
+    }
+    .course-card:hover .shop-product-thumb img {
+        transform: scale(1.1);
+    }
+    .shop-actions {
+        position: absolute;
+        bottom: 10px;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        opacity: 0;
+        transform: translateY(10px);
+        transition: all 0.3s ease;
+    }
+    .course-card:hover .shop-actions {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    .shop-action-btn {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        background: #fff;
+        color: var(--primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border);
+        transition: all 0.2s;
+    }
+    .shop-action-btn:hover {
+        background: var(--accent);
+        color: #fff;
+        border-color: var(--accent);
+    }
+</style>
+@endpush
+
 @section('content')
   <section class="section">
     <div class="container">
@@ -246,6 +319,100 @@
       </div>
     </div>
   </section>
+
+  {{-- Related Courses Section --}}
+  @if($relatedCourses->count() > 0)
+  <section class="section" style="padding: 60px 0; border-top: 1px solid var(--border); background: var(--bg-soft);">
+    <div class="container">
+      <div class="section-head" style="margin-bottom: 32px; display: flex; justify-content: space-between; align-items: flex-end;">
+        <div>
+            <h2 style="color: var(--primary); margin: 0 0 8px 0; font-size: 28px; font-weight: 700;">Related Courses</h2>
+            <p style="color: var(--text-soft); margin: 0; font-size: 15px;">Explore more courses from the same category</p>
+        </div>
+        <a href="{{ route('courses') }}" class="btn btn-outline btn-sm">View All Courses</a>
+      </div>
+      
+      <div class="courses-grid">
+        @foreach($relatedCourses as $course)
+          <article class="course-card">
+            <div class="course-thumb" style="--c1:#6c5ce7;--c2:#a29bfe;">
+              @if($course->feature)
+                <span class="course-tag">FEATURED</span>
+              @endif
+              <img src="{{ route('imagecache', ['template' => 'medium', 'filename' => $course->fi()]) }}" alt="{{ lp($course, 'name') }}" style="width:100%; height:100%; object-fit:cover; border-radius:12px 12px 0 0;">
+            </div>
+            <div class="course-body">
+              <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 12px;">{{ lp($course, 'name') }}</h3>
+              <div class="course-meta">
+                <span><i class="fa-solid fa-star"></i> {{ number_format($course->averageRating(), 1) }}</span>
+                <span><i class="fa-solid fa-users"></i> {{ $course->click_count }} views</span>
+              </div>
+              <div class="course-foot">
+                <div>
+                  @if($course->isFree())
+                    <span class="price">Free</span>
+                  @else
+                    <span class="price">৳ {{ number_format($course->selling_price) }}</span>
+                  @endif
+                </div>
+                <a href="{{ route('courseDetail', $course->slug) }}" class="btn btn-accent btn-sm">Enroll</a>
+              </div>
+            </div>
+          </article>
+        @endforeach
+      </div>
+    </div>
+  </section>
+  @endif
+
+  {{-- Related Products Section --}}
+  @if($relatedProducts->count() > 0)
+  <section class="section" style="padding: 60px 0;">
+    <div class="container">
+      <div class="section-head" style="margin-bottom: 32px; display: flex; justify-content: space-between; align-items: flex-end;">
+        <div>
+            <h2 style="color: var(--primary); margin: 0 0 8px 0; font-size: 28px; font-weight: 700;">Recommended Products</h2>
+            <p style="color: var(--text-soft); margin: 0; font-size: 15px;">Essential tools and materials for your learning journey</p>
+        </div>
+        <a href="{{ route('shop') }}" class="btn btn-outline btn-sm">Visit Shop</a>
+      </div>
+      
+      <div class="shop-grid">
+        @foreach($relatedProducts as $p)
+        <article class="course-card">
+            <div class="shop-product-thumb">
+              @if($p->discount > 0)
+                <span class="course-tag">{{ $p->discount }}% OFF</span>
+              @elseif($p->feature)
+                <span class="course-tag">HOT</span>
+              @endif
+              
+              <img src="{{ route('imagecache', ['template' => 'pnimd', 'filename' => $p->fi()]) }}" alt="{{ lp($p, 'name') }}">
+              
+              <div class="shop-actions">
+                  <button class="shop-action-btn addToCart" data-url="{{ route('addToCart') }}" data-product="{{ $p->id }}" title="Add to Cart"><i class="fa-solid fa-cart-shopping"></i></button>
+              </div>
+            </div>
+            <div class="course-body">
+              <span style="font-size: 11px; color: var(--accent); font-weight: 700; text-transform: uppercase;">{{ $p->categories->first()->name_en ?? 'Product' }}</span>
+              <h3 style="margin-top: 5px; font-size: 16px; font-weight: 700;"><a href="{{ route('productDetails', $p->slug) }}" style="text-decoration: none; color: inherit;">{{ Str::limit(lp($p, 'name'), 40) }}</a></h3>
+              
+              <div class="course-foot" style="border: none; padding-top: 10px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span class="price">৳{{ number_format($p->selling_price) }}</span>
+                  @if($p->discount > 0)
+                    <span style="font-size: 13px; color: var(--text-muted); text-decoration: line-through;">৳{{ number_format($p->price) }}</span>
+                  @endif
+                </div>
+                <button class="btn btn-accent btn-sm addToCart" data-url="{{ route('addToCart') }}" data-product="{{ $p->id }}">Buy Now</button>
+              </div>
+            </div>
+          </article>
+        @endforeach
+      </div>
+    </div>
+  </section>
+  @endif
 @endsection
 
 @push('js')
@@ -409,6 +576,30 @@
                 btn.prop('disabled', false).html('Added!');
                 showCartNotification(response.message, 'success');
                 setTimeout(() => btn.html('Add to Wishlist'), 2000);
+            }
+        });
+    });
+
+    // Add to Cart AJAX (for related products)
+    $(document).on('click', '.addToCart', function(e) {
+        e.preventDefault();
+        let btn = $(this);
+        let product_id = btn.data('product');
+        let url = btn.data('url');
+
+        $.ajax({
+            url: url,
+            method: "POST",
+            data: {
+                _token: "{{ csrf_token() }}",
+                product: product_id,
+                qty: 1
+            },
+            success: function(res) {
+                if(res.status) {
+                    showCartNotification(res.message);
+                    $('.cartCount').text(res.cartCount);
+                }
             }
         });
     });

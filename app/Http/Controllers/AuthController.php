@@ -407,7 +407,7 @@ class AuthController extends Controller
 
 
 
-    public function dashboard()
+    public function dashboard(Request $request)
     {
         $user = Auth::user();
         $todayOrdersCount = $user->orders()->whereDate('created_at', now()->toDateString())->count();
@@ -440,9 +440,20 @@ class AuthController extends Controller
             ->with('exam')
             ->get();
 
-        $activeTab = 'dashboard'; 
+        $activeTab = $request->activeTab ?? 'dashboard'; 
 
-        return view('user.dashboard', compact('user', 'todayOrdersCount', 'cancelOrdersCount', 'orders', 'activeTab','featured_products', 'stockRequests', 'products', 'enrollments', 'exams', 'completed_exams'));
+        $teacher_questions_count = 0;
+        $teacher_exams_count = 0;
+        $teacher_questions = collect();
+        $teacher_exams = collect();
+        if ($user->hasRole('instructor') || $user->role === 'instructor' || $user->hasRole('teacher') || $user->role === 'teacher') {
+            $teacher_questions = \App\Models\Question::where('created_by', $user->id)->latest()->paginate(20, ['*'], 'questions_page');
+            $teacher_exams = \App\Models\Exam::where('created_by', $user->id)->latest()->paginate(20, ['*'], 'exams_page');
+            $teacher_questions_count = \App\Models\Question::where('created_by', $user->id)->count();
+            $teacher_exams_count = \App\Models\Exam::where('created_by', $user->id)->count();
+        }
+
+        return view('user.dashboard', compact('user', 'todayOrdersCount', 'cancelOrdersCount', 'orders', 'activeTab','featured_products', 'stockRequests', 'products', 'enrollments', 'exams', 'completed_exams', 'teacher_questions_count', 'teacher_exams_count', 'teacher_questions', 'teacher_exams'));
     }
 
     public function orders(Request $request)

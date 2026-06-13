@@ -8,6 +8,13 @@ use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
 class QuestionsImport implements ToModel, WithHeadingRow
 {
+    private $userId;
+
+    public function __construct($userId = null)
+    {
+        $this->userId = $userId;
+    }
+
     /**
     * @param array $row
     *
@@ -25,6 +32,7 @@ class QuestionsImport implements ToModel, WithHeadingRow
             'option_c'      => trim($row['option_c']),
             'option_d'      => trim($row['option_d']),
             'correct_option'=> trim(strtolower($row['correct_answer'])),
+            'created_by'    => $this->userId,
         ]);
     }
 }

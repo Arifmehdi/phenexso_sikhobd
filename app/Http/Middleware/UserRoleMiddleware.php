@@ -17,12 +17,14 @@ class UserRoleMiddleware
      */
     public function handle(Request $request, Closure $next, $role)
     {
-//        dd($request->user()->hasRole($role));
-
-        if(! $request->user()->hasRole($role)){
-            abort(401);
+        $roles = explode('|', $role);
+        
+        foreach ($roles as $r) {
+            if ($request->user()->hasRole($r)) {
+                return $next($request);
+            }
         }
 
-        return $next($request);
+        abort(401);
     }
 }

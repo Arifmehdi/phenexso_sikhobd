@@ -341,6 +341,30 @@ Route::get('/logout',[AuthController::class,'logOut'])->name('logout');
 
 
 
+Route::middleware(['auth', 'userRole:instructor|teacher'])->prefix('teacher')->name('teacher.')->group(function () {
+    // Teacher Questions
+    Route::get('questions', [\App\Http\Controllers\Teacher\TeacherQuestionController::class, 'index'])->name('questions.index');
+    Route::get('questions/create', [\App\Http\Controllers\Teacher\TeacherQuestionController::class, 'create'])->name('questions.create');
+    Route::post('questions/bulk-upload', [\App\Http\Controllers\Teacher\TeacherQuestionController::class, 'bulkUpload'])->name('questions.bulk-upload');
+    Route::post('questions', [\App\Http\Controllers\Teacher\TeacherQuestionController::class, 'store'])->name('questions.store');
+    Route::get('questions/{question}/edit', [\App\Http\Controllers\Teacher\TeacherQuestionController::class, 'edit'])->name('questions.edit');
+    Route::post('questions/{question}/update', [\App\Http\Controllers\Teacher\TeacherQuestionController::class, 'update'])->name('questions.update');
+    Route::post('questions/{question}/delete', [\App\Http\Controllers\Teacher\TeacherQuestionController::class, 'destroy'])->name('questions.destroy');
+
+    // Teacher Exams
+    Route::get('exams', [\App\Http\Controllers\Teacher\TeacherExamController::class, 'index'])->name('exams.index');
+    Route::get('exams/create', [\App\Http\Controllers\Teacher\TeacherExamController::class, 'create'])->name('exams.create');
+    Route::post('exams', [\App\Http\Controllers\Teacher\TeacherExamController::class, 'store'])->name('exams.store');
+    Route::get('exams/{exam}/edit', [\App\Http\Controllers\Teacher\TeacherExamController::class, 'edit'])->name('exams.edit');
+    Route::post('exams/{exam}/update', [\App\Http\Controllers\Teacher\TeacherExamController::class, 'update'])->name('exams.update');
+    Route::get('exams/{exam}/select-questions', [\App\Http\Controllers\Teacher\TeacherExamController::class, 'selectQuestions'])->name('exams.select-questions');
+    Route::post('exams/{exam}/questions', [\App\Http\Controllers\Teacher\TeacherExamController::class, 'updateQuestions'])->name('exams.update-questions');
+
+    Route::post('exams/{exam}/finish', [\App\Http\Controllers\Teacher\TeacherExamController::class, 'finishExam'])->name('exams.finish');
+    Route::get('exams/{exam}/results', [\App\Http\Controllers\Teacher\TeacherExamController::class, 'results'])->name('exams.results');
+    Route::post('exams/{exam}/delete', [\App\Http\Controllers\Teacher\TeacherExamController::class, 'destroy'])->name('exams.destroy');
+});
+
 Route::middleware(['userRole:admin','auth'])->prefix('admin')->group(function(){
 
     //admin

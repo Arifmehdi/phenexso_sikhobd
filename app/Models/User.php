@@ -96,6 +96,9 @@ class User extends Authenticatable implements CanResetPassword
     }
 
     public function hasRole($role){
+        if ($this->role === $role) {
+            return true;
+        }
         return (bool) $this->roles()->where('role_name',$role)->count();
     }
     public function hasAnyRole(){

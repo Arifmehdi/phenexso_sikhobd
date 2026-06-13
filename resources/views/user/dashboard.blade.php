@@ -66,6 +66,15 @@
             <a href="#tab-exams" data-tab="tab-exams" class="{{ ($activeTab == 'exams') ? 'active' : '' }}">
                 <i class="fa-solid fa-file-pen"></i> <span>আমার পরীক্ষাসমূহ</span>
             </a>
+            @if(auth()->user()->hasRole('instructor') || auth()->user()->role === 'instructor' || auth()->user()->hasRole('teacher') || auth()->user()->role === 'teacher')
+            <div style="padding: 15px 20px 5px; font-size: 11px; font-weight: 800; color: var(--text-soft); text-transform: uppercase; letter-spacing: 1px;">Teacher Area</div>
+            <a href="#tab-teacher-questions" data-tab="tab-teacher-questions" class="{{ ($activeTab == 'teacher_questions') ? 'active' : '' }}">
+                <i class="fa-solid fa-circle-question"></i> <span>Manage Questions</span>
+            </a>
+            <a href="#tab-teacher-exams" data-tab="tab-teacher-exams" class="{{ ($activeTab == 'teacher_exams') ? 'active' : '' }}">
+                <i class="fa-solid fa-file-invoice"></i> <span>Manage Exams</span>
+            </a>
+            @endif
             @if($enrollments->count() > 0)
             <a href="#tab-featured" data-tab="tab-featured" class="{{ ($activeTab == 'feature_products') ? 'active' : '' }}">
                 <i class="fa-solid fa-star"></i> <span>ফিচার্ড প্রোডাক্ট</span>
@@ -120,11 +129,15 @@
                 </div>
                 @foreach($enrollments->take(3) as $enrollment)
                 <div class="course-row">
-                    <div class="thumb" style="--c1:#6c5ce7;--c2:#a29bfe;">
-                        {{ substr($enrollment->product->name_en ?? 'C', 0, 1) }}
-                    </div>
+                    <a href="{{ route('courseDetail', $enrollment->product->slug) }}" class="thumb" style="--c1:#6c5ce7;--c2:#a29bfe; overflow: hidden; display: flex; align-items: center; justify-content: center; text-decoration: none;">
+                        @if($enrollment->product->fi())
+                            <img src="{{ route('imagecache', ['template' => 'sbixs', 'filename' => $enrollment->product->fi()]) }}" alt="" style="width: 100%; height: 100%; object-fit: cover;">
+                        @else
+                            {{ substr($enrollment->product->name_en ?? 'C', 0, 1) }}
+                        @endif
+                    </a>
                     <div class="body">
-                        <h4>{{ $enrollment->product->name_en ?? 'Course' }}</h4>
+                        <h4><a href="{{ route('courseDetail', $enrollment->product->slug) }}" style="text-decoration: none; color: inherit;">{{ $enrollment->product->name_en ?? 'Course' }}</a></h4>
                         <div class="meta">
                             @if($enrollment->status == 'active')
                                 Enrolled: {{ $enrollment->enrolled_at ? $enrollment->enrolled_at->format('d M, Y') : 'Recently' }}
@@ -203,11 +216,15 @@
             <div class="panel">
                 @forelse($enrollments as $enrollment)
                 <div class="course-row">
-                    <div class="thumb" style="--c1:#6c5ce7;--c2:#a29bfe;">
-                        {{ substr($enrollment->product->name_en ?? 'C', 0, 1) }}
-                    </div>
+                    <a href="{{ route('courseDetail', $enrollment->product->slug) }}" class="thumb" style="--c1:#6c5ce7;--c2:#a29bfe; overflow: hidden; display: flex; align-items: center; justify-content: center; text-decoration: none;">
+                        @if($enrollment->product->fi())
+                            <img src="{{ route('imagecache', ['template' => 'sbixs', 'filename' => $enrollment->product->fi()]) }}" alt="" style="width: 100%; height: 100%; object-fit: cover;">
+                        @else
+                            {{ substr($enrollment->product->name_en ?? 'C', 0, 1) }}
+                        @endif
+                    </a>
                     <div class="body">
-                        <h4>{{ $enrollment->product->name_en ?? 'Course' }}</h4>
+                        <h4><a href="{{ route('courseDetail', $enrollment->product->slug) }}" style="text-decoration: none; color: inherit;">{{ $enrollment->product->name_en ?? 'Course' }}</a></h4>
                         <div class="meta">
                             @if($enrollment->enrolled_at)
                                 Enrolled: {{ $enrollment->enrolled_at->format('d M, Y') }}
@@ -563,7 +580,159 @@
             </div>
         </div>
 
+        @if(auth()->user()->hasRole('instructor') || auth()->user()->role === 'instructor' || auth()->user()->hasRole('teacher') || auth()->user()->role === 'teacher')
+        <!-- Tab: Teacher Questions -->
+        <div class="tab-content-item" id="tab-teacher-questions" style="display:none;">
+            <div class="dash-head">
+                <div>
+                    <h1>Manage Questions</h1>
+                    <p>Your personal question bank ({{ $teacher_questions_count }} questions)</p>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <a href="{{ asset('100_plus_mcq_questions.csv') }}" class="btn btn-outline-info" download>
+                        <i class="fa-solid fa-download"></i> Demo CSV
+                    </a>
+                    <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#bulkUploadModal">
+                        <i class="fa-solid fa-file-import"></i> Bulk Upload
+                    </button>
+                    <a href="{{ route('teacher.questions.create') }}" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Create New Question</a>
+                </div>
+            </div>
+            <div class="panel">
+                <div style="overflow-x: auto;">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Question Text</th>
+                                <th>Correct Option</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($teacher_questions as $question)
+                            <tr>
+                                <td>{{ Str::limit($question->question_text, 100) }}</td>
+                                <td><span class="status-pill status-approved">{{ strtoupper($question->correct_option) }}</span></td>
+                                <td>
+                                    <div class="btn-group-custom">
+                                        <a href="{{ route('teacher.questions.edit', $question->id) }}" class="btn-circle" title="Edit"><i class="fa-solid fa-pen-to-square"></i></a>
+                                        <form action="{{ route('teacher.questions.destroy', $question->id) }}" method="POST" onsubmit="return confirm('Are you sure?')">
+                                            @csrf
+                                            <button type="submit" class="btn-circle text-danger" title="Delete"><i class="fa-solid fa-trash"></i></button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="3" class="empty-state">You haven't created any questions yet.</td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+                <div style="padding: 20px;">
+                    {{ $teacher_questions->appends(['activeTab' => 'teacher_questions'])->links() }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab: Teacher Exams -->
+        <div class="tab-content-item" id="tab-teacher-exams" style="display:none;">
+            <div class="dash-head">
+                <div>
+                    <h1>Manage Exams</h1>
+                    <p>Exams created by you ({{ $teacher_exams_count }} exams)</p>
+                </div>
+                <a href="{{ route('teacher.exams.create') }}" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Create New Exam</a>
+            </div>
+            <div class="panel">
+                <div style="overflow-x: auto;">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Exam Title</th>
+                                <th>Schedule</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($teacher_exams as $exam)
+                            <tr>
+                                <td><strong>{{ $exam->title }}</strong></td>
+                                <td style="font-size: 12px; color: var(--text-soft);">
+                                    {{ $exam->start_time->format('M d, h:i A') }} -<br>
+                                    {{ $exam->end_time->format('M d, h:i A') }}
+                                </td>
+                                <td>
+                                    @php
+                                        $statusClass = $exam->status == 'published' ? 'status-approved' : ($exam->status == 'finished' ? 'status-rejected' : 'status-pending');
+                                    @endphp
+                                    <span class="status-pill {{ $statusClass }}">{{ ucfirst($exam->status) }}</span>
+                                </td>
+                                <td>
+                                    <div class="btn-group-custom">
+                                        <a href="{{ route('teacher.exams.edit', $exam->id) }}" class="btn-circle" title="Edit"><i class="fa-solid fa-pen-to-square"></i></a>
+                                        <a href="{{ route('teacher.exams.select-questions', $exam->id) }}" class="btn-circle" title="Select Questions"><i class="fa-solid fa-list-check"></i></a>
+                                        <a href="{{ route('teacher.exams.results', $exam->id) }}" class="btn-circle" title="View Results"><i class="fa-solid fa-chart-bar"></i></a>
+                                        @if($exam->status == 'published')
+                                        <form action="{{ route('teacher.exams.finish', $exam->id) }}" method="POST" onsubmit="return confirm('Finish this exam? Results will be released to students.')">
+                                            @csrf
+                                            <button type="submit" class="btn-circle text-info" title="Finish Exam"><i class="fa-solid fa-flag-checkered"></i></button>
+                                        </form>
+                                        @endif
+                                        <form action="{{ route('teacher.exams.destroy', $exam->id) }}" method="POST" onsubmit="return confirm('Delete this exam?')">
+                                            @csrf
+                                            <button type="submit" class="btn-circle text-danger" title="Delete"><i class="fa-solid fa-trash"></i></button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="4" class="empty-state">You haven't created any exams yet.</td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+                <div style="padding: 20px;">
+                    {{ $teacher_exams->appends(['activeTab' => 'teacher_exams'])->links() }}
+                </div>
+            </div>
+        </div>
+        @endif
+
     </section>
+</div>
+
+<!-- Bulk Upload Modal -->
+<div class="modal fade" id="bulkUploadModal" tabindex="-1" aria-labelledby="bulkUploadModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content" style="border-radius: 15px;">
+            <form action="{{ route('teacher.questions.bulk-upload') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-header">
+                    <h5 class="modal-title" id="bulkUploadModalLabel">Bulk Upload Questions</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="alert alert-info" style="font-size: 13px;">
+                        <i class="fa-solid fa-circle-info"></i> Please use our demo CSV format. The first row should be headers: <strong>Question, Option_A, Option_B, Option_C, Option_D, Correct_Answer</strong>.
+                    </div>
+                    <div class="form-group">
+                        <label class="custom-label">Select File (.csv, .xlsx, .xls)</label>
+                        <input type="file" name="file" class="custom-input" required accept=".csv, .xlsx, .xls">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Start Import</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -616,6 +785,10 @@
             switchTab('tab-courses');
         } else if ('{{ $activeTab }}' === 'exams') {
             switchTab('tab-exams');
+        } else if ('{{ $activeTab }}' === 'teacher_questions') {
+            switchTab('tab-teacher-questions');
+        } else if ('{{ $activeTab }}' === 'teacher_exams') {
+            switchTab('tab-teacher-exams');
         } else {
             switchTab('tab-dashboard');
         }

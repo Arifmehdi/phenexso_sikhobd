@@ -35,6 +35,11 @@ class AppServiceProvider extends ServiceProvider
         //     app()->setLocale(session('locale'));
         // }
 
+        if ($this->app->runningInConsole()) {
+            Paginator::useBootstrap();
+            return;
+        }
+
         // Share basic data with all views
         View::composer('*', function ($view) {
             View::share('headerMenus', Menu::whereActive(true)->where('type','header_menu')->orderBy('drag_id')->latest()->get());
