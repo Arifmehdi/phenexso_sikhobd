@@ -300,8 +300,10 @@
         // Media Logic
         let mediaHtml = '';
         if (lesson.video_file) {
-            mediaHtml = `<video controls style="width: 100%; border-radius: 12px; background:#000; aspect-ratio: 16/9;">
-                            <source src="${window.storageBase}/${lesson.video_file}" type="video/mp4">
+            const streamUrl = "{{ url('lesson/stream') }}/" + lesson.id;
+            mediaHtml = `<video controls controlsList="nodownload" oncontextmenu="return false;" style="width: 100%; border-radius: 12px; background:#000; aspect-ratio: 16/9;">
+                            <source src="${streamUrl}" type="video/mp4">
+                            Your browser does not support the video tag.
                          </video>`;
         } else if (lesson.video_url) {
             const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;

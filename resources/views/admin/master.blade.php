@@ -316,26 +316,6 @@
                             </li>
                         </ul>
                     </li>
-
-                    <li class="nav-item {{ session('lsbm') == 'slider'? ' menu-open ' : ''}}">
-                        <a href="#" class="nav-link {{ session('lsbm') == 'slider'? ' active ' : ''}}">
-                            <i class="nav-icon fas fa-sliders-h"></i>
-                            <p>
-                                Sliders
-                                <i class="fas fa-angle-left right"></i>
-                            </p>
-                        </a>
-                        <ul class="nav nav-treeview">
-                            <li class="nav-item">
-                                <a href="{{ route('sliders.index') }}" class="nav-link {{ session('lsbsm') == 'allFrontSlider' ? ' active ' : ''}}">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>All Sliders</p>
-                                </a>
-                            </li>
-
-                        </ul>
-                    </li>
-
                    
                     {{-- Content Management Hub --}}
                     <li class="nav-header text-uppercase text-xs font-weight-bold text-muted mt-3 mb-1">
@@ -358,6 +338,24 @@
                                     <p>Page Contents</p>
                                 </a>
                             </li>
+                        </ul>
+                    </li>
+                    <li class="nav-item {{ session('lsbm') == 'slider'? ' menu-open ' : ''}}">
+                        <a href="#" class="nav-link {{ session('lsbm') == 'slider'? ' active ' : ''}}">
+                            <i class="nav-icon fas fa-sliders-h"></i>
+                            <p>
+                                Sliders
+                                <i class="fas fa-angle-left right"></i>
+                            </p>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a href="{{ route('sliders.index') }}" class="nav-link {{ session('lsbsm') == 'allFrontSlider' ? ' active ' : ''}}">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>All Sliders</p>
+                                </a>
+                            </li>
+
                         </ul>
                     </li>
 

@@ -101,6 +101,7 @@ Route::get('/test-email', function () {
 
 Route::middleware(['web', 'auth'])->group(function() {
     Route::get('/course-play/{slug}', [FrontendController::class, 'coursePlay'])->name('course.play');
+    Route::get('/lesson/stream/{lesson}', [FrontendController::class, 'streamVideo'])->name('lesson.stream');
     Route::post('/lesson/toggle-completion', [FrontendController::class, 'toggleLessonCompletion'])->name('lesson.toggleCompletion');
     Route::post('/pay', [SslCommerzPaymentController::class, 'index']);
     Route::post('/pay-via-ajax', [SslCommerzPaymentController::class, 'payViaAjax']);

@@ -409,6 +409,66 @@ class FrontendController extends Controller
         return view('website.search', compact('products', 'queryString', 'type', 'suggestions'));
     }
 
+    public function streamVideo(\App\Models\CourseLesson $lesson)
+    {
+        // Security check: must be enrolled or lesson must be free
+        $isEnrolled = \App\Models\Enrollment::where('user_id', Auth::id())
+            ->where('product_id', $lesson->product_id)
+            ->where('status', 'active')
+            ->exists();
+
+        if (!$isEnrolled && !$lesson->is_free) {
+            abort(403, 'Unauthorized access to this lesson.');
+        }
+
+        if (!$lesson->video_file) {
+            abort(404, 'Video file not found.');
+        }
+
+        $path = storage_path('app/public/' . $lesson->video_file);
+
+        if (!file_exists($path)) {
+            abort(404, 'Video file does not exist on server.');
+        }
+
+        $size = filesize($path);
+        $file = fopen($path, 'rb');
+        $contentType = 'video/mp4';
+
+        if (isset($_SERVER['HTTP_RANGE'])) {
+            $range = $_SERVER['HTTP_RANGE'];
+            preg_match('/bytes=(\d+)-(\d+)?/', $range, $matches);
+            $start = intval($matches[1]);
+            $end = isset($matches[2]) ? intval($matches[2]) : $size - 1;
+
+            header('HTTP/1.1 206 Partial Content');
+            header('Content-Type: ' . $contentType);
+            header('Accept-Ranges: bytes');
+            header('Content-Range: bytes ' . $start . '-' . $end . '/' . $size);
+            header('Content-Length: ' . ($end - $start + 1));
+            
+            fseek($file, $start);
+            while (!feof($file) && ($pos = ftell($file)) <= $end) {
+                if ($pos + 1024 * 8 > $end) {
+                    echo fread($file, $end - $pos + 1);
+                    break;
+                }
+                echo fread($file, 1024 * 8);
+                flush();
+            }
+            fclose($file);
+            exit;
+        }
+
+        header('Content-Type: ' . $contentType);
+        header('Content-Length: ' . $size);
+        header('Accept-Ranges: bytes');
+        
+        fpassthru($file);
+        fclose($file);
+        exit;
+    }
+
     public function toggleLessonCompletion(Request $request)
     {
         if (!Auth::check()) {

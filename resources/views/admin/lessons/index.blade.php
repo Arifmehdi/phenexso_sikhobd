@@ -198,7 +198,7 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>Upload local Video (MP4)</label>
-                                <input type="file" name="video_file" class="form-control-file" accept="video/mp4">
+                                <input type="file" name="video_file" class="form-control-file upload-input" accept="video/mp4">
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -213,16 +213,21 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>Upload Audio (MP3)</label>
-                                <input type="file" name="audio_file" class="form-control-file" accept="audio/*">
+                                <input type="file" name="audio_file" class="form-control-file upload-input" accept="audio/*">
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>Upload PDF Material</label>
-                                <input type="file" name="pdf_file" class="form-control-file" accept="application/pdf">
+                                <input type="file" name="pdf_file" class="form-control-file upload-input" accept="application/pdf">
                             </div>
                         </div>
                     </div>
+
+                    <div class="progress mb-3 d-none" id="upload-progress-container">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%;" id="upload-progress-bar">0%</div>
+                    </div>
+                    <div id="upload-status" class="small text-muted mb-2"></div>
 
                     <div class="form-check mb-2">
                         <input type="checkbox" name="is_free" class="form-check-input" id="is_free">
@@ -408,18 +413,23 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>Change Audio (MP3)</label>
-                                <input type="file" name="audio_file" class="form-control-file" accept="audio/*">
+                                <input type="file" name="audio_file" class="form-control-file upload-input" accept="audio/*">
                                 <small id="current_audio_file" class="text-muted"></small>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>Change PDF Material</label>
-                                <input type="file" name="pdf_file" class="form-control-file" accept="application/pdf">
+                                <input type="file" name="pdf_file" class="form-control-file upload-input" accept="application/pdf">
                                 <small id="current_pdf_file" class="text-muted"></small>
                             </div>
                         </div>
                     </div>
+
+                    <div class="progress mb-3 d-none" id="edit-upload-progress-container">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%;" id="edit-upload-progress-bar">0%</div>
+                    </div>
+                    <div id="edit-upload-status" class="small text-muted mb-2"></div>
 
                     <div class="form-check mb-2">
                         <input type="checkbox" name="is_free" class="form-check-input" id="edit_is_free">
@@ -473,5 +483,61 @@
         $('#edit_section_title_bn').val(section.title_bn);
         $('#edit_section_priority').val(section.priority);
     });
+
+    // AJAX Form Submission with Progress
+    function handleAjaxForm(formId, progressContainer, progressBar, statusId) {
+        $(`#${formId}`).on('submit', function(e) {
+            e.preventDefault();
+            const form = $(this);
+            const formData = new FormData(this);
+            const submitBtn = form.find('button[type="submit"]');
+
+            // Reset progress
+            $(`#${progressContainer}`).removeClass('d-none');
+            $(`#${progressBar}`).css('width', '0%').text('0%');
+            $(`#${statusId}`).text('Uploading... Please wait.');
+            submitBtn.prop('disabled', true);
+
+            $.ajax({
+                url: form.attr('action'),
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                xhr: function() {
+                    const xhr = new window.XMLHttpRequest();
+                    xhr.upload.addEventListener("progress", function(evt) {
+                        if (evt.lengthComputable) {
+                            const percentComplete = Math.round((evt.loaded / evt.total) * 100);
+                            $(`#${progressBar}`).css('width', percentComplete + '%').text(percentComplete + '%');
+                            if (percentComplete === 100) {
+                                $(`#${statusId}`).text('Upload complete. Processing file on server...');
+                            }
+                        }
+                    }, false);
+                    return xhr;
+                },
+                success: function(response) {
+                    $(`#${statusId}`).text('Success! Reloading...').addClass('text-success');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                },
+                error: function(xhr) {
+                    submitBtn.prop('disabled', false);
+                    $(`#${progressContainer}`).addClass('d-none');
+                    let errorMsg = 'An error occurred during upload.';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMsg = xhr.responseJSON.message;
+                    }
+                    $(`#${statusId}`).text(errorMsg).addClass('text-danger');
+                    alert(errorMsg);
+                }
+            });
+        });
+    }
+
+    handleAjaxForm('addLessonModal form', 'upload-progress-container', 'upload-progress-bar', 'upload-status');
+    handleAjaxForm('editLessonForm', 'edit-upload-progress-container', 'edit-upload-progress-bar', 'edit-upload-status');
 </script>
 @endpush
