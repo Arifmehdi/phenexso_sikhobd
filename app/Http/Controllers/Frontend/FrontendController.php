@@ -1165,7 +1165,14 @@ class FrontendController extends Controller
         $ws = WebsiteParameter::first();
         $shippingCharge = $hasProduct ? ($ws->shipping_charge ?? 0) : 0;
 
-        return view('website.cart', compact('cartItems', 'cartSubtotal', 'hasCourse', 'hasProduct', 'shippingCharge'));
+        $view = 'website.cart';
+        if ($hasCourse && !$hasProduct) {
+            $view = 'website.cart_course';
+        } elseif (!$hasCourse && $hasProduct) {
+            $view = 'website.cart_product';
+        }
+
+        return view($view, compact('cartItems', 'cartSubtotal', 'hasCourse', 'hasProduct', 'shippingCharge', 'ws'));
     }
 
         public function updateQuantity(Request $request, $cartId)
@@ -1306,9 +1313,10 @@ public function update(Request $request)
         $cart->save();
 
         if ($request->ajax()) {
+            $message = $product->type === 'course' ? 'কোর্সটি কার্টে যোগ করা হয়েছে' : 'পণ্যটি কার্টে যোগ করা হয়েছে';
             return response()->json([
                 'status'          => true,
-                'message'         => 'Item added to cart!',
+                'message'         => $message,
                 'productCartItem' => view('frontend.home.includes.productCartItem', compact('cart', 'product'))->render(),
                 'cartCount'       => Cart::cartCount(),
                 'cartItemsCount'  => Cart::CartItemsCount(),
@@ -1355,9 +1363,10 @@ public function quickAdd(Request $request)
     $cart->addedby_id = $user_id;
     $cart->save();
 
+    $message = $product->type === 'course' ? 'কোর্সটি কার্টে যোগ করা হয়েছে' : 'পণ্যটি কার্টে যোগ করা হয়েছে';
     return response()->json([
         'success' => true,
-        'message' => $product->name_en . ' added to cart successfully!',
+        'message' => $message,
         'id'      => $product->id,
         'name'    => $product->name_en,
         'price'   => $product->final_price,
@@ -1407,8 +1416,9 @@ public function quickAdd(Request $request)
         $cart->save();
 
 
+        $message = $product->type === 'course' ? 'কোর্সটি কার্টে যোগ করা হয়েছে' : 'পণ্যটি কার্টে যোগ করা হয়েছে';
         return redirect()->back()->with([
-            'success' => '(' . $product->name_en . ') added to cart successfully!',
+            'success' => $message,
         ]);
     }
 
@@ -1726,6 +1736,233 @@ public function quickAdd(Request $request)
 
             $msg = $hasCourse ? 'Complete registration and wait for admin approval.' : 'Order placed successfully!';
             return redirect()->route('order.complete')->with('success', $msg);
+        }
+    }
+
+    public function courseOrderStore(Request $request)
+    {
+        $ws = WebsiteParameter::first();
+        $cartItems = Cart::getCartItems();
+
+        if ($cartItems->isEmpty()) {
+            return redirect()->back()->with('error', 'Your cart is empty.');
+        }
+
+        $subtotal = $this->calculateSubtotal($cartItems);
+        $deliveryCost = 0;
+        $grandTotal = $subtotal + $deliveryCost;
+        $paymentMethod = $request->input('payment_method');
+        $orderNote = $request->order_note ?? null;
+
+        $courseFields = [
+            'occupation' => $request->occupation,
+            'last_academic_status' => $request->last_academic_status,
+            'has_course' => true,
+            'admin_approval' => 'pending',
+        ];
+
+        $isBn = app()->getLocale() == 'bn';
+        $successMsg = $isBn ? 'অর্ডারটি সফলভাবে সম্পন্ন হয়েছে।' : 'Order has been placed successfully.';
+
+        if (Auth::check()) {
+            $user = auth()->user();
+            $location = $this->getUserLocation($user);
+            
+            if (!$location) {
+                $location = new \stdClass();
+                $location->name = $request->input('name') ?? $user->name;
+                $location->email = $request->input('email') ?? $user->email;
+                $location->mobile = $request->input('mobile') ?? $user->mobile;
+                $location->address_title = 'Course Enrollment';
+            }
+
+            $order = $this->createOrder($user, $location, $deliveryCost, $paymentMethod, $subtotal, $deliveryCost, $grandTotal, $orderNote, $courseFields);
+            $this->storeOrderItems($order, $cartItems, $user->id);
+            Cart::where('user_id', $user->id)->delete();
+
+            return redirect()->route('order.complete')->with('success', $successMsg);
+        } else {
+            $rules = [
+                'name' => 'required|string|max:255',
+                'mobile' => 'required|string|max:20',
+                'email' => 'nullable|email|max:255',
+                'occupation' => 'required|string|max:255',
+                'last_academic_status' => 'required|string|max:255',
+            ];
+            $messages = [
+                'name.required' => $isBn ? 'আপনার নাম লিখুন' : 'Please enter your name',
+                'mobile.required' => $isBn ? 'আপনার মোবাইল নম্বর লিখুন' : 'Please enter your mobile number',
+                'occupation.required' => $isBn ? 'পেশা নির্বাচন করুন' : 'Please select your occupation',
+                'last_academic_status.required' => $isBn ? 'সর্বশেষ পড়াশোনার অবস্থা নির্বাচন করুন' : 'Please select your last academic status',
+            ];
+            $request->validate($rules, $messages);
+
+            $user = null;
+            $isNewUser = false;
+            if ($request->email || $request->mobile) {
+                $user = User::where(function($q) use ($request) {
+                    if ($request->email) $q->where('email', $request->email);
+                    if ($request->mobile) $q->orWhere('mobile', $request->mobile);
+                })->first();
+            }
+
+            if (!$user) {
+                $isNewUser = true;
+                $password = Str::random(8);
+                $user = User::create([
+                    'name' => $request->name ?? 'Guest User',
+                    'email' => $request->email,
+                    'mobile' => $request->mobile,
+                    'password' => Hash::make($password),
+                    'role' => 'user',
+                    'is_approve' => true,
+                ]);
+                
+                if ($user->email) {
+                    try {
+                        Mail::to($user->email)->send(new \App\Mail\UserCredentialsEmail($user, $password));
+                    } catch (\Exception $e) {}
+                }
+                session(['temp_password' => $password]);
+                session(['is_new_user' => true]);
+            } else {
+                session(['is_new_user' => false]);
+            }
+
+            $location = new \stdClass();
+            $location->name = $request->input('name') ?? $user->name;
+            $location->email = $request->input('email') ?? $user->email;
+            $location->mobile = $request->input('mobile') ?? $user->mobile;
+            $location->address_title = 'Course Enrollment';
+
+            $order = $this->createOrder($user, $location, $deliveryCost, $paymentMethod, $subtotal, $deliveryCost, $grandTotal, $orderNote, $courseFields);
+            $this->storeOrderItems($order, $cartItems, $user->id);
+            Cart::where('session_id', session('session_id'))->delete();
+
+            if ($location->email) {
+                try {
+                    Mail::to($location->email)->send(new \App\Mail\OrderConfirmationEmail($order));
+                } catch (\Exception $e) {}
+            }
+
+            return redirect()->route('order.complete')->with('success', $successMsg);
+        }
+    }
+
+    public function productOrderStore(Request $request)
+    {
+        $ws = WebsiteParameter::first();
+        $cartItems = Cart::getCartItems();
+
+        if ($cartItems->isEmpty()) {
+            return redirect()->back()->with('error', 'Your cart is empty.');
+        }
+
+        $subtotal = $this->calculateSubtotal($cartItems);
+        $deliveryCost = $ws->shipping_charge ?? 0;
+        $grandTotal = $subtotal + $deliveryCost;
+        $paymentMethod = $request->input('payment_method');
+        
+        $orderNote = $request->order_note ?? null;
+        if ($request->office_address || $request->office_time) {
+            $extraNote = "";
+            if ($request->office_address) $extraNote .= "Office Address: " . $request->office_address . "\n";
+            if ($request->office_time) $extraNote .= "Office Time: " . $request->office_time . "\n";
+            $orderNote = $extraNote . ($orderNote ? "Note: " . $orderNote : "");
+        }
+
+        $isBn = app()->getLocale() == 'bn';
+        $successMsg = $isBn ? 'অর্ডারটি সফলভাবে সম্পন্ন হয়েছে।' : 'Order has been placed successfully.';
+
+        if (Auth::check()) {
+            $user = auth()->user();
+            if ($request->has('billing_address')) {
+                DeliveryLocation::updateOrCreate(
+                    ['user_id' => $user->id],
+                    [
+                        'address_title' => $request->input('billing_address'),
+                        'name' => $request->input('name'),
+                        'mobile' => $request->input('mobile'),
+                        'email' => $request->input('email'),
+                    ]
+                );
+            }
+
+            $location = $this->getUserLocation($user);
+            if (!$location) {
+                $location = new \stdClass();
+                $location->name = $request->input('name') ?? $user->name;
+                $location->email = $request->input('email') ?? $user->email;
+                $location->mobile = $request->input('mobile') ?? $user->mobile;
+                $location->address_title = $request->input('billing_address') ?? 'Product Order';
+            }
+
+            $order = $this->createOrder($user, $location, $deliveryCost, $paymentMethod, $subtotal, $deliveryCost, $grandTotal, $orderNote);
+            $this->storeOrderItems($order, $cartItems, $user->id);
+            Cart::where('user_id', $user->id)->delete();
+
+            return redirect()->route('order.complete')->with('success', $successMsg);
+        } else {
+            $rules = [
+                'name' => 'required|string|max:255',
+                'mobile' => 'required|string|max:20',
+                'email' => 'nullable|email|max:255',
+                'billing_address' => 'required|string|max:1000',
+            ];
+            $messages = [
+                'name.required' => $isBn ? 'আপনার নাম লিখুন' : 'Please enter your name',
+                'mobile.required' => $isBn ? 'আপনার মোবাইল নম্বর লিখুন' : 'Please enter your mobile number',
+                'billing_address.required' => $isBn ? 'ডেলিভারি ঠিকানা প্রদান করুন' : 'Please provide delivery address',
+            ];
+            $request->validate($rules, $messages);
+
+            $user = null;
+            if ($request->email || $request->mobile) {
+                $user = User::where(function($q) use ($request) {
+                    if ($request->email) $q->where('email', $request->email);
+                    if ($request->mobile) $q->orWhere('mobile', $request->mobile);
+                })->first();
+            }
+
+            if (!$user) {
+                $password = Str::random(8);
+                $user = User::create([
+                    'name' => $request->name ?? 'Guest User',
+                    'email' => $request->email,
+                    'mobile' => $request->mobile,
+                    'password' => Hash::make($password),
+                    'role' => 'user',
+                    'is_approve' => true,
+                ]);
+                
+                if ($user->email) {
+                    try {
+                        Mail::to($user->email)->send(new \App\Mail\UserCredentialsEmail($user, $password));
+                    } catch (\Exception $e) {}
+                }
+                session(['temp_password' => $password]);
+                session(['is_new_user' => true]);
+            } else {
+                session(['is_new_user' => false]);
+            }
+
+            $location = new \stdClass();
+            $location->name = $request->input('name') ?? $user->name;
+            $location->email = $request->input('email') ?? $user->email;
+            $location->mobile = $request->input('mobile') ?? $user->mobile;
+            $location->address_title = $request->input('billing_address');
+
+            $order = $this->createOrder($user, $location, $deliveryCost, $paymentMethod, $subtotal, $deliveryCost, $grandTotal, $orderNote);
+            $this->storeOrderItems($order, $cartItems, $user->id);
+            Cart::where('session_id', session('session_id'))->delete();
+
+            if ($location->email) {
+                try {
+                    Mail::to($location->email)->send(new \App\Mail\OrderConfirmationEmail($order));
+                } catch (\Exception $e) {}
+            }
+
+            return redirect()->route('order.complete')->with('success', $successMsg);
         }
     }
 

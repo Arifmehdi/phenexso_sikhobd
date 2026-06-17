@@ -18,9 +18,8 @@ class ProductCategoryController extends Controller
      */
     public function index(Request $request)
     {
-        menuSubmenu('product', 'productCategoriesAll');
-
-        $type = 'product';
+        $type = $request->type ?? 'product';
+        menuSubmenu($type, $type . 'CategoriesAll');
 
         $query = ProductCategory::whereNull('parent_id')
             ->where('type', $type)
@@ -39,15 +38,16 @@ class ProductCategoryController extends Controller
     /**
      * Show the form for creating a new product category.
      */
-    public function create()
+    public function create(Request $request)
     {
-        menuSubmenu('product', 'productCategoriesAll');
+        $type = $request->type ?? 'product';
+        menuSubmenu($type, $type . 'CategoriesAll');
 
         $data['categories'] = ProductCategory::whereNull('parent_id')
-            ->where('type', 'product')
+            ->where('type', $type)
             ->orderBy('name_en')
             ->get();
-        $data['type'] = 'product';
+        $data['type'] = $type;
 
         return view('admin.productCategories.productCategoryCreate', $data);
     }
@@ -61,7 +61,7 @@ class ProductCategoryController extends Controller
 
         $request->validate([
             'name_en' => 'required|string|max:255',
-            'type'    => 'required|in:product,course',
+            'type'    => 'required|in:product,course,ebook',
             'slug'    => 'required|string|unique:product_categories,slug',
             'image'   => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048'
         ]);
@@ -87,7 +87,7 @@ class ProductCategoryController extends Controller
         $category->save();
         Cache::flush();
 
-        return redirect()->route('admin.productCategories.index')->with('success', 'Product Category successfully created');
+        return redirect()->route('admin.productCategories.index', ['type' => $category->type])->with('success', 'Product Category successfully created');
     }
 
     /**
@@ -117,7 +117,7 @@ class ProductCategoryController extends Controller
 
         $validation = Validator::make($request->all(), [
             'name_en' => 'required|string',
-            'type'    => 'required|in:product,course',
+            'type'    => 'required|in:product,course,ebook',
             'slug'    => 'required|string|unique:product_categories,slug,' . $category->id . ',id',
         ]);
 
@@ -149,7 +149,7 @@ class ProductCategoryController extends Controller
         $category->save();
         Cache::flush();
 
-        return redirect()->route('admin.productCategories.index')->with('success', 'Product Category successfully updated');
+        return redirect()->route('admin.productCategories.index', ['type' => $category->type])->with('success', 'Product Category successfully updated');
     }
 
     /**

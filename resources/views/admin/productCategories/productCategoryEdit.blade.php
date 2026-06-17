@@ -41,6 +41,7 @@
                                 <select name="type" id="type" class="form-control @error('type') is-invalid @enderror" required>
                                     <option value="product" {{ old('type', $category->type) == 'product' ? 'selected' : '' }}>Physical Product (Ecommerce)</option>
                                     <option value="course" {{ old('type', $category->type) == 'course' ? 'selected' : '' }}>Digital Course (E-learning)</option>
+                                    <option value="ebook" {{ old('type', $category->type) == 'ebook' ? 'selected' : '' }}>E-book (Digital Library)</option>
                                 </select>
                                 @error('type') <span class="invalid-feedback">{{ $message }}</span> @enderror
                             </div>

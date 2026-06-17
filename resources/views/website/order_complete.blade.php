@@ -17,26 +17,27 @@
                     $isNewUser = session('is_new_user', false);
                     $tempPassword = session('temp_password');
                     $hasCourses = $order && ($order->has_course || $order->orderItems->contains(fn($item) => $item->product && $item->product->type === 'course'));
+                    $hasProducts = $order && $order->orderItems->contains(fn($item) => $item->product && $item->product->type !== 'course');
                 @endphp
 
                 <h1 style="font-size: 28px; font-weight: 800; color: #1e293b; margin-bottom: 12px;">
                     @if($isNewUser)
-                        স্বাগতম! আপনার রেজিস্ট্রেশন সফলভাবে সম্পন্ন হয়েছে
+                        {{ app()->getLocale() == 'bn' ? 'স্বাগতম! আপনার অর্ডারটি সফলভাবে সম্পন্ন হয়েছে' : 'Welcome! Your order has been successfully placed' }}
                     @else
-                        ওয়েলকাম ব্যাক! আপনার এনরোলমেন্ট সম্পন্ন হয়েছে
+                        {{ app()->getLocale() == 'bn' ? 'ওয়েলকাম ব্যাক! আপনার অর্ডারটি সম্পন্ন হয়েছে' : 'Welcome Back! Your order has been placed' }}
                     @endif
                 </h1>
 
                 <p style="color: #64748b; font-size: 16px; line-height: 1.6; max-width: 600px; margin: 0 auto 30px;">
                     @if($isNewUser)
                         @if(app()->getLocale() == 'bn')
-                            আপনার নিবন্ধন সফলভাবে সম্পন্ন হয়েছে। কোর্সে প্রবেশের জন্য আপনার লগইন তথ্য প্রস্তুত করা হয়েছে। নিচে আপনার অস্থায়ী পাসওয়ার্ড প্রদান করা হলো। নিরাপত্তার স্বার্থে প্রথম লগইনের পর পাসওয়ার্ড পরিবর্তন করার পরামর্শ দেওয়া হচ্ছে।
+                            আপনার অ্যাকাউন্টটি সফলভাবে তৈরি করা হয়েছে। অর্ডার ট্র্যাকিং এবং কোর্স অ্যাক্সেস করার জন্য আপনার অস্থায়ী পাসওয়ার্ড নিচে দেওয়া হলো:
                             <br>
                             <strong style="color: var(--primary); font-size: 18px; display: block; margin-top: 10px;">
                                 পাসওয়ার্ড: {{ $tempPassword }}
                             </strong>
                         @else
-                            Your registration has been completed successfully. Your login credentials have been prepared for course access. Please find your temporary password below. For security reasons, we recommend changing your password after your first login.
+                            Your account has been successfully created. Please find your temporary password below for order tracking and course access:
                             <br>
                             <strong style="color: var(--primary); font-size: 18px; display: block; margin-top: 10px;">
                                 Password: {{ $tempPassword }}
@@ -44,19 +45,21 @@
                         @endif
                     @else
                         @if(app()->getLocale() == 'bn')
-                            এই ইমেইল ঠিকানার মাধ্যমে পূর্বে একটি অ্যাকাউন্ট নিবন্ধিত হয়েছে। আপনার বিদ্যমান লগইন তথ্য ব্যবহার করে কোর্সে প্রবেশ করতে পারবেন। পাসওয়ার্ড ভুলে গেলে "পাসওয়ার্ড পুনরুদ্ধার" অপশন ব্যবহার করুন।
+                            আপনার বিদ্যমান অ্যাকাউন্টের মাধ্যমে অর্ডারটি সম্পন্ন করা হয়েছে। আপনি ড্যাশবোর্ড থেকে অর্ডারের বিস্তারিত দেখতে পারবেন।
                         @else
-                            An account is already registered with this email address. You may access the course using your existing login credentials. If you have forgotten your password, please use the password recovery option.
+                            The order has been completed using your existing account. You can view order details from your dashboard.
                         @endif
                     @endif
                 </p>
 
+                @if($hasCourses)
                 <div style="background: #f0fdf4; border: 1px dashed #22c55e; padding: 15px; border-radius: 12px; margin-bottom: 30px;">
                     <p style="margin: 0; color: #166534; font-weight: 600; font-size: 14px;">
                         <i class="fa-solid fa-circle-info mr-2"></i>
-                        আপনার এনরোলমেন্ট বর্তমানে এডমিন অনুমোদনের অপেক্ষায় আছে। পেমেন্ট ভেরিফাই হওয়ার পর আপনি কোর্সটি এক্সেস করতে পারবেন।
+                        {{ app()->getLocale() == 'bn' ? 'কোর্স এনরোলমেন্ট বর্তমানে এডমিন অনুমোদনের অপেক্ষায় আছে। পেমেন্ট ভেরিফাই হওয়ার পর আপনি কোর্সটি এক্সেস করতে পারবেন।' : 'Course enrollment is currently awaiting admin approval. You can access the course after payment verification.' }}
                     </p>
                 </div>
+                @endif
 
                 <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
                     <a href="{{ route('user.dashboard') }}" class="btn btn-primary" style="padding: 12px 25px; border-radius: 12px; font-weight: 700;">

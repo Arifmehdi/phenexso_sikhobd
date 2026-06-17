@@ -807,6 +807,20 @@
                     behavior: 'smooth'
                 });
             };
+
+            @if(session('success'))
+                showCartNotification("{{ session('success') }}", 'success');
+            @endif
+
+            @if(session('error'))
+                showCartNotification("{{ session('error') }}", 'error');
+            @endif
+
+            @if($errors->any())
+                @foreach($errors->all() as $error)
+                    showCartNotification("{{ $error }}", 'error', 5000);
+                @endforeach
+            @endif
         });
     </script>
     

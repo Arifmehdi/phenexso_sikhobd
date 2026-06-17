@@ -235,6 +235,14 @@
                                     <p>Course Enrollments</p>
                                 </a>
                             </li>
+
+                            {{-- Course Sales Report --}}
+                            <li class="nav-item">
+                                <a href="{{ route('admin.courseSalesReport') }}" class="nav-link {{ session('lsbsm') == 'courseSalesReport' ? 'active' : '' }}">
+                                    <i class="fas fa-chart-pie nav-icon text-info"></i>
+                                    <p>Sales Report</p>
+                                </a>
+                            </li>
                         </ul>
                     </li>
 
@@ -313,6 +321,37 @@
                                 <i class="far fa-dot-circle nav-icon"></i>
                                 <p>Order List</p>
                             </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('admin.productSalesReport') }}" class="nav-link {{ session('lsbsm') == 'productSalesReport' ? 'active' : '' }}">
+                                    <i class="far fa-dot-circle nav-icon text-info"></i>
+                                    <p>Sales Report</p>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    {{-- Ebooks --}}
+                    <li class="nav-item {{ session('lsbm') == 'ebook' ? 'menu-open' : '' }}">
+                        <a href="#" class="nav-link {{ session('lsbm') == 'ebook' ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-book-reader"></i>
+                            <p>
+                            E-books
+                            <i class="right fas fa-angle-left"></i>
+                            </p>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                            <a href="{{ route('admin.ebooks.index') }}" class="nav-link {{ session('lsbsm') == 'ebookList' ? 'active' : '' }}">
+                                <i class="far fa-dot-circle nav-icon"></i>
+                                <p>E-book List</p>
+                            </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('admin.productCategories.index', ['type' => 'ebook']) }}" class="nav-link {{ session('lsbsm') == 'ebookCategoriesAll' ? 'active' : '' }}">
+                                    <i class="far fa-dot-circle nav-icon text-warning"></i>
+                                    <p>E-book Categories</p>
+                                </a>
                             </li>
                         </ul>
                     </li>

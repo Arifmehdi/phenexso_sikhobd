@@ -616,6 +616,45 @@ class ProductController extends Controller
         return view('admin.orders.orderList', compact('orders'));
     }
 
+    public function productSalesReport(Request $request)
+    {
+        menuSubmenu('order', 'productSalesReport');
+        $ordersQuery = Order::where('has_course', 0);
+        return $this->generateSalesReport($request, $ordersQuery, 'Product Sales Report', 'product_sales.xlsx');
+    }
+
+    public function courseSalesReport(Request $request)
+    {
+        menuSubmenu('elearning', 'courseSalesReport');
+        $ordersQuery = Order::where('has_course', 1);
+        return $this->generateSalesReport($request, $ordersQuery, 'Course Sales Report', 'course_sales.xlsx');
+    }
+
+    private function generateSalesReport(Request $request, $query, $title, $filename)
+    {
+        $query->where(function ($q) use ($request) {
+            if ($request->filled(['date_from', 'date_to'])) {
+                $q->whereBetween('created_at', [$request->date_from . ' 00:00:00', $request->date_to . ' 23:59:59']);
+            }
+            if ($request->status) {
+                $q->where('order_status', $request->status);
+            }
+            if ($request->mobile) {
+                $q->where('mobile', 'like', '%' . $request->mobile . '%');
+            }
+        });
+
+        if ($request->download == 'excel') {
+            return Excel::download(new OrdersExport($query->get()), $filename);
+        }
+
+        $totalSales = (clone $query)->where('payment_status', 'paid')->sum('grand_total');
+        $totalOrders = (clone $query)->count();
+        $orders = $query->paginate(30);
+
+        return view('admin.orders.salesReport', compact('orders', 'totalSales', 'totalOrders', 'title'));
+    }
+
 
 
 

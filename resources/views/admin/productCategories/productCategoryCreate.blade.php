@@ -37,6 +37,7 @@
                                 <select name="type" id="type" class="form-control" required>
                                     <option value="product" {{ (old('type') ?? ($type ?? '')) == 'product' ? 'selected' : '' }}>Physical Product (Ecommerce)</option>
                                     <option value="course" {{ (old('type') ?? ($type ?? '')) == 'course' ? 'selected' : '' }}>Digital Course (E-learning)</option>
+                                    <option value="ebook" {{ (old('type') ?? ($type ?? '')) == 'ebook' ? 'selected' : '' }}>E-book (Digital Library)</option>
                                 </select>
                                 @error('type') <span class="text-danger">{{ $message }}</span> @enderror
                             </div>

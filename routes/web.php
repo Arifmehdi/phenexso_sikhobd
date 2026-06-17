@@ -170,6 +170,8 @@ Route::get('hopital/details/{id}',[FrontendController::class,'hospitalDetails'])
 
 Route::get('checkout',[FrontendController::class, 'new_checkout'])->name('new.checkout');
 Route::post('cod/order/store',[FrontendController::class, 'codOrderStore'])->name('codOrderStore');
+Route::post('course/order/store',[FrontendController::class, 'courseOrderStore'])->name('courseOrderStore');
+Route::post('product/order/store',[FrontendController::class, 'productOrderStore'])->name('productOrderStore');
 Route::post('order/store', [SslCommerzPaymentController::class, 'orderStore'])->name('onlineOrderStore');
 
 Route::get('department/list',[FrontendController::class,'departmentList'])->name('departmentList');
@@ -663,6 +665,8 @@ Route::middleware(['userRole:admin','auth'])->prefix('admin')->group(function(){
 
 
     Route::get('order/list', [ProductController::class, 'orderList'])->name('admin.orderList');
+    Route::get('sales-report/ecommerce', [ProductController::class, 'productSalesReport'])->name('admin.productSalesReport');
+    Route::get('sales-report/elearning', [ProductController::class, 'courseSalesReport'])->name('admin.courseSalesReport');
     Route::get('order/details/{order}', [ProductController::class, 'orderDeatils'])->name('admin.orderDeatils');
     Route::post('order/assign-driver/{order}', [ProductController::class, 'assignDriver'])->name('admin.assignDriver');
     Route::post('order/status/{order}', [ProductController::class, 'orderStatus'])->name('admin.orderStatus');
@@ -734,7 +738,22 @@ Route::middleware(['userRole:admin','auth'])->prefix('admin')->group(function(){
     Route::post('exams/{exam}/finish', [\App\Http\Controllers\Admin\ExamController::class, 'finishExam'])->name('admin.exams.finish');
     Route::get('exams/{exam}/results', [\App\Http\Controllers\Admin\ExamController::class, 'results'])->name('admin.exams.results');
 
+    // E-book Management Admin
+    Route::get('ebooks', [\App\Http\Controllers\Admin\EbookController::class, 'index'])->name('admin.ebooks.index');
+    Route::get('ebooks/search', [\App\Http\Controllers\Admin\EbookController::class, 'ebookSearch'])->name('admin.ebooks.search');
+    Route::get('ebooks/create', [\App\Http\Controllers\Admin\EbookController::class, 'create'])->name('admin.ebooks.create');
+    Route::post('ebooks/store', [\App\Http\Controllers\Admin\EbookController::class, 'store'])->name('admin.ebooks.store');
+    Route::get('ebooks/{ebook}/edit', [\App\Http\Controllers\Admin\EbookController::class, 'edit'])->name('admin.ebooks.edit');
+    Route::post('ebooks/{ebook}/update', [\App\Http\Controllers\Admin\EbookController::class, 'update'])->name('admin.ebooks.update');
+    Route::delete('ebooks/{ebook}/delete', [\App\Http\Controllers\Admin\EbookController::class, 'destroy'])->name('admin.ebooks.destroy');
+    Route::post('ebooks/status', [\App\Http\Controllers\Admin\EbookController::class, 'status'])->name('admin.ebooks.status');
+    Route::post('ebooks/toggle-approval', [\App\Http\Controllers\Admin\EbookController::class, 'toggleApproval'])->name('admin.ebooks.toggleApproval');
+
 });
+
+Route::get('ebooks', [\App\Http\Controllers\Frontend\EbookController::class, 'index'])->name('ebooks.index');
+Route::get('ebooks/show/{id}', [\App\Http\Controllers\Frontend\EbookController::class, 'show'])->name('ebooks.show');
+Route::get('ebooks/preview/{id}', [\App\Http\Controllers\Frontend\EbookController::class, 'preview'])->name('ebooks.preview');
 
 Route::get('exams', [\App\Http\Controllers\ExamController::class, 'index'])->name('exams.index');
 

@@ -66,6 +66,11 @@
         @endif
     </div>
     <div class="nav-item">
+        <a href="{{ route('ebooks.index') }}" class="nav-link">
+            {{ app()->getLocale() == 'bn' ? 'ই-বুক' : 'E-book' }}
+        </a>
+    </div>
+    <div class="nav-item">
         <a href="{{ route('shop') }}" class="nav-link">
             {{ app()->getLocale() == 'bn' ? 'শপ' : 'Shop' }}
         </a>
@@ -233,6 +238,7 @@
           @endif
         </li>
       @endforeach
+      <li class="m-item"><a href="{{ route('ebooks.index') }}" class="m-link">ই-বুক</a></li>
       <li class="m-item"><a href="{{ route('shop') }}" class="m-link" data-i18n="nav.shop">Shop</a></li>
       <li class="m-item"><a href="{{ route('about') }}" class="m-link" data-i18n="nav.about">আমাদের সম্পর্কে</a></li>
       <li class="m-item"><a href="{{ route('contact') }}" class="m-link" data-i18n="nav.contact">যোগাযোগ</a></li>
