@@ -755,6 +755,11 @@ Route::get('ebooks', [\App\Http\Controllers\Frontend\EbookController::class, 'in
 Route::get('ebooks/show/{id}', [\App\Http\Controllers\Frontend\EbookController::class, 'show'])->name('ebooks.show');
 Route::get('ebooks/preview/{id}', [\App\Http\Controllers\Frontend\EbookController::class, 'preview'])->name('ebooks.preview');
 
+Route::middleware(['auth', 'web'])->group(function() {
+    Route::get('ebooks/buy/{id}', [\App\Http\Controllers\Frontend\EbookController::class, 'buy'])->name('ebooks.buy');
+    Route::get('ebooks/read/{id}', [\App\Http\Controllers\Frontend\EbookController::class, 'read'])->name('ebooks.read');
+});
+
 Route::get('exams', [\App\Http\Controllers\ExamController::class, 'index'])->name('exams.index');
 
 Route::middleware(['auth', 'web'])->group(function() {

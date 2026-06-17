@@ -1149,30 +1149,32 @@ class FrontendController extends Controller
         $user_id = Auth::id() ?? 0;
 
         // Fetch cart items for this user/session
-        $cartItems = Cart::with('product') // make sure Cart model has 'product' relation
-            ->where('session_id', $session_id)
-            ->orWhere('user_id', $user_id)
+        $cartItems = Cart::with(['product', 'ebook'])
+            ->where(function($q) use ($session_id, $user_id) {
+                $q->where('session_id', $session_id);
+                if ($user_id > 0) {
+                    $q->orWhere('user_id', $user_id);
+                }
+            })
             ->get();
 
         // Calculate totals
         $cartSubtotal = $cartItems->sum(function ($item) {
+            if ($item->ebook_id) {
+                return $item->quantity * $item->ebook->final_price;
+            }
             return $item->quantity * $item->product->selling_price;
         });
 
         $hasCourse = $cartItems->contains(fn($item) => $item->product && $item->product->type === 'course');
+        $hasEbook = $cartItems->contains(fn($item) => $item->ebook_id !== null);
         $hasProduct = $cartItems->contains(fn($item) => $item->product && $item->product->type !== 'course');
 
         $ws = WebsiteParameter::first();
         $shippingCharge = $hasProduct ? ($ws->shipping_charge ?? 0) : 0;
 
-        $view = 'website.cart';
-        if ($hasCourse && !$hasProduct) {
-            $view = 'website.cart_course';
-        } elseif (!$hasCourse && $hasProduct) {
-            $view = 'website.cart_product';
-        }
-
-        return view($view, compact('cartItems', 'cartSubtotal', 'hasCourse', 'hasProduct', 'shippingCharge', 'ws'));
+        // We'll use website.cart as the unified checkout page
+        return view('website.cart', compact('cartItems', 'cartSubtotal', 'hasCourse', 'hasEbook', 'hasProduct', 'shippingCharge', 'ws'));
     }
 
         public function updateQuantity(Request $request, $cartId)
@@ -1541,41 +1543,12 @@ public function quickAdd(Request $request)
 
     public function checkout(Request $request)
     {
-
-        $sessionId = session('session_id'); 
-        $cartItems = Cart::with('product')
-            ->when(auth()->check(), fn($q) => $q->where('user_id', auth()->id()))
-            ->when(!auth()->check(), fn($q) => $q->where('session_id', $sessionId))
-            ->get();
-
-        $shippingMethods = shippingMethod::get();
-
-        return view('frontend.home.checkout', compact( 'cartItems', 'shippingMethods'));
+        return $this->cart();
     }
 
     public function new_checkout(Request $request)
     {
-
-        $sessionId = session('session_id');
-        $cartItems = Cart::with('product')
-            ->when(auth()->check(), fn($q) => $q->where('user_id', auth()->id()))
-            ->when(!auth()->check(), fn($q) => $q->where('session_id', $sessionId))
-            ->get();
-
-        $location = null;
-        if(Auth::check()){
-            $location = Auth::user()->locations()->first();
-        }
-        $shippingMethods = shippingMethod::get();
-        $districts = District::all();
-
-        $hasCourse = $cartItems->contains(fn($item) => $item->product && $item->product->type === 'course');
-        $hasProduct = $cartItems->contains(fn($item) => $item->product && $item->product->type !== 'course');
-        
-        $ws = WebsiteParameter::first();
-        $shippingCharge = $hasProduct ? ($ws->shipping_charge ?? 0) : 0;
-
-        return view('frontend.home.new_checkout', compact( 'cartItems', 'shippingMethods','districts', 'location', 'hasCourse', 'hasProduct', 'shippingCharge'));
+        return $this->cart();
     }
 
 
@@ -1624,20 +1597,29 @@ public function quickAdd(Request $request)
         }
 
         $hasCourse = $cartItems->contains(fn($item) => $item->product && $item->product->type === 'course');
+        $hasEbook = $cartItems->contains(fn($item) => $item->ebook_id !== null);
         $hasProduct = $cartItems->contains(fn($item) => $item->product && $item->product->type !== 'course');
 
         $subtotal = $this->calculateSubtotal($cartItems);
         $deliveryCost = $hasProduct ? ($ws->shipping_charge ?? $request->shipping_price) : 0;
         $grandTotal = $subtotal + $deliveryCost;
         $paymentMethod = $request->input('payment_method');
+        
         $orderNote = $request->order_note ?? null;
+        if ($request->office_address || $request->office_time) {
+            $extraNote = "";
+            if ($request->office_address) $extraNote .= "Office Address: " . $request->office_address . "\n";
+            if ($request->office_time) $extraNote .= "Office Time: " . $request->office_time . "\n";
+            $orderNote = $extraNote . ($orderNote ? "Note: " . $orderNote : "");
+        }
 
-        $courseFields = [];
-        if ($hasCourse) {
-            $courseFields = [
+        $registrationFields = [];
+        if ($hasCourse || $hasEbook) {
+            $registrationFields = [
                 'occupation' => $request->occupation,
                 'last_academic_status' => $request->last_academic_status,
-                'has_course' => true,
+                'has_course' => $hasCourse,
+                'has_ebook' => $hasEbook,
                 'admin_approval' => 'pending',
             ];
         }
@@ -1660,18 +1642,18 @@ public function quickAdd(Request $request)
             
             if (!$location) {
                 $location = new \stdClass();
-                $location->name = $request->input('name');
-                $location->email = $request->input('email');
-                $location->mobile = $request->input('mobile');
-                $location->address_title = $request->input('billing_address') ?? 'Course Enrollment';
+                $location->name = $request->input('name') ?? $user->name;
+                $location->email = $request->input('email') ?? $user->email;
+                $location->mobile = $request->input('mobile') ?? $user->mobile;
+                $location->address_title = $request->input('billing_address') ?? (($hasCourse || $hasEbook) ? 'Registration' : 'Order');
             }
 
-            $order = $this->createOrder($user, $location, $deliveryCost, $paymentMethod, $subtotal, $deliveryCost, $grandTotal, $orderNote, $courseFields);
+            $order = $this->createOrder($user, $location, $deliveryCost, $paymentMethod, $subtotal, $deliveryCost, $grandTotal, $orderNote, $registrationFields);
 
             $this->storeOrderItems($order, $cartItems, $user->id);
             Cart::where('user_id', $user->id)->delete();
 
-            $msg = $hasCourse ? 'Complete registration and wait for admin approval.' : 'Order placed successfully!';
+            $msg = ($hasCourse || $hasEbook) ? 'রেজিস্ট্রেশন সম্পন্ন হয়েছে। এডমিন অ্যাপ্রুভালের জন্য অপেক্ষা করুন।' : 'অর্ডারটি সফলভাবে সম্পন্ন হয়েছে।';
             return redirect()->route('order.complete')->with('success', $msg);
         } else {
             $rules = [
@@ -1682,13 +1664,13 @@ public function quickAdd(Request $request)
             if ($hasProduct) {
                 $rules['billing_address'] = 'required|string|max:1000';
             }
-            if ($hasCourse) {
+            if ($hasCourse || $hasEbook) {
                 $rules['occupation'] = 'required|string|max:255';
                 $rules['last_academic_status'] = 'required|string|max:255';
             }
             $request->validate($rules);
 
-            // Handle Guest Registration for Course Enrollment
+            // Handle Guest Registration
             $user = User::where('email', $request->email)->orWhere('mobile', $request->mobile)->first();
             $isNewUser = false;
 
@@ -1707,9 +1689,7 @@ public function quickAdd(Request $request)
                 if ($user->email) {
                     try {
                         Mail::to($user->email)->send(new UserCredentialsEmail($user, $password));
-                    } catch (\Exception $e) {
-                        // Log or handle mail failure
-                    }
+                    } catch (\Exception $e) {}
                 }
                 session(['temp_password' => $password]);
             }
@@ -1720,9 +1700,9 @@ public function quickAdd(Request $request)
             $location->name = $request->input('name');
             $location->email = $request->input('email');
             $location->mobile = $request->input('mobile');
-            $location->address_title = $request->input('billing_address') ?? 'Course Enrollment';
+            $location->address_title = $request->input('billing_address') ?? (($hasCourse || $hasEbook) ? 'Registration' : 'Order');
 
-            $order = $this->createOrder($user, $location, $deliveryCost, $paymentMethod, $subtotal, $deliveryCost, $grandTotal, $orderNote, $courseFields);
+            $order = $this->createOrder($user, $location, $deliveryCost, $paymentMethod, $subtotal, $deliveryCost, $grandTotal, $orderNote, $registrationFields);
 
             $this->storeOrderItems($order, $cartItems, $user->id);
             Cart::where('session_id', session('session_id'))->delete();
@@ -1730,11 +1710,10 @@ public function quickAdd(Request $request)
             if ($location->email) {
                 try {
                     Mail::to($location->email)->send(new OrderConfirmationEmail($order));
-                } catch (\Exception $e) {
-                }
+                } catch (\Exception $e) {}
             }
 
-            $msg = $hasCourse ? 'Complete registration and wait for admin approval.' : 'Order placed successfully!';
+            $msg = ($hasCourse || $hasEbook) ? 'রেজিস্ট্রেশন সম্পন্ন হয়েছে। এডমিন অ্যাপ্রুভালের জন্য অপেক্ষা করুন।' : 'অর্ডারটি সফলভাবে সম্পন্ন হয়েছে।';
             return redirect()->route('order.complete')->with('success', $msg);
         }
     }
@@ -1992,11 +1971,14 @@ public function quickAdd(Request $request)
     private function calculateSubtotal($cartItems)
     {
         return $cartItems->sum(function ($cart) {
+            if ($cart->ebook_id) {
+                return $cart->ebook->final_price * $cart->quantity;
+            }
             return $cart->product->selling_price * $cart->quantity;
         });
     }
 
-    private function createOrder($user, $location, $area, $paymentMethod, $subtotal, $deliveryCost, $grandTotal, $orderNote, $courseFields = [])
+    private function createOrder($user, $location, $area, $paymentMethod, $subtotal, $deliveryCost, $grandTotal, $orderNote, $registrationFields = [])
     {
         return Order::create(array_merge([
             'user_id'        => $user ? $user->id : null,
@@ -2004,8 +1986,6 @@ public function quickAdd(Request $request)
             'email'          => $location->email,
             'address_title'  => $location->address_title,
             'mobile'         => $location->mobile,
-            // 'district_id'  => $location->district_id,
-            // 'upazila_id'  => $location->upazila_id,
             'subtotal'       => $subtotal,
             'grand_total'    => $grandTotal,
             'payment_method' => $paymentMethod,
@@ -2015,7 +1995,7 @@ public function quickAdd(Request $request)
             'pending_at'     => now(),
             'addedby_id'     => $user ? $user->id : null,
             'order_note'     => $orderNote,
-        ], $courseFields));
+        ], $registrationFields));
     }
 
     private function storeOrderItems($order, $cartItems, $userId)
@@ -2023,29 +2003,56 @@ public function quickAdd(Request $request)
         $userId = $userId ?? $order->user_id;
 
         foreach ($cartItems as $cart) {
-            $product = $cart->product;
-            
-            OrderItem::create([
-                'order_id'      => $order->id,
-                'user_id'       => $userId,
-                'product_id'    => $cart->product_id,
-                'product_name'  => $product->name_en,
-                'product_price' => $product->selling_price,
-                'quantity'      => $cart->quantity,
-                'total_cost'    => $product->selling_price * $cart->quantity,
-                'addedby_id'    => $userId,
-            ]);
+            if ($cart->ebook_id) {
+                $product_name = $cart->ebook->title_bn ?? $cart->ebook->title_en;
+                $product_price = $cart->ebook->final_price;
+                
+                OrderItem::create([
+                    'order_id'      => $order->id,
+                    'user_id'       => $userId,
+                    'ebook_id'      => $cart->ebook_id,
+                    'product_name'  => $product_name,
+                    'product_price' => $product_price,
+                    'quantity'      => $cart->quantity,
+                    'total_cost'    => $product_price * $cart->quantity,
+                    'addedby_id'    => $userId,
+                ]);
 
-            // If it's a course, create enrollment (status pending/active depending on payment)
-            if ($product->isCourse() && $userId) {
-                Enrollment::updateOrCreate(
-                    ['user_id' => $userId, 'product_id' => $product->id],
-                    [
-                        'order_id'    => $order->id,
-                        'enrolled_at' => ($order->payment_status == 'paid') ? now() : null,
-                        'status'      => ($order->payment_status == 'paid') ? 'active' : 'pending',
-                    ]
-                );
+                if ($userId) {
+                    Enrollment::updateOrCreate(
+                        ['user_id' => $userId, 'ebook_id' => $cart->ebook_id],
+                        [
+                            'order_id'    => $order->id,
+                            'enrolled_at' => ($order->payment_status == 'paid') ? now() : null,
+                            'status'      => ($order->payment_status == 'paid') ? 'active' : 'pending',
+                        ]
+                    );
+                }
+            } else {
+                $product = $cart->product;
+                
+                OrderItem::create([
+                    'order_id'      => $order->id,
+                    'user_id'       => $userId,
+                    'product_id'    => $cart->product_id,
+                    'product_name'  => $product->name_en,
+                    'product_price' => $product->selling_price,
+                    'quantity'      => $cart->quantity,
+                    'total_cost'    => $product->selling_price * $cart->quantity,
+                    'addedby_id'    => $userId,
+                ]);
+
+                // If it's a course, create enrollment
+                if ($product->isCourse() && $userId) {
+                    Enrollment::updateOrCreate(
+                        ['user_id' => $userId, 'product_id' => $product->id],
+                        [
+                            'order_id'    => $order->id,
+                            'enrolled_at' => ($order->payment_status == 'paid') ? now() : null,
+                            'status'      => ($order->payment_status == 'paid') ? 'active' : 'pending',
+                        ]
+                    );
+                }
             }
         }
     }

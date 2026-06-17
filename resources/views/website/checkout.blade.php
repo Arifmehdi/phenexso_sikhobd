@@ -1,4 +1,4 @@
-@extends('website.layouts.master')
+@extends('website.layouts.sikhobd')
 
 @section('title', 'Checkout - '. env('APP_NAME') )
 

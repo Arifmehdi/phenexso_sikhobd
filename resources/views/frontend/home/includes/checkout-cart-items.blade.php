@@ -25,18 +25,30 @@
                                     <button title="Remove" class="btn btn-sm p-0 ajaxDeleteCartItem" data-url="{{ route('cartRemoveItem', $cart->id) }}">
                                         <i class="fas fa-times-circle text-danger"></i>
                                     </button>
-                                    <img src="{{ route('imagecache', ['template'=>'ppsm','filename' => $cart->product->fi()]) }}"
-                                         class="rounded" style="width:50px; height:50px; object-fit:cover;">
-                                    <div>
-                                        <a href="{{ route('productDetails', ['slug' => $cart->product->slug, 'id' => $cart->product_id]) }}"
-                                           class="text-dark text-decoration-none fw-semibold d-block small">
-                                            {{ Str::limit($cart->product->name_en, 30) }}
-                                        </a>
-                                    </div>
+                                    @if($cart->ebook_id)
+                                        <img src="{{ asset('storage/ebook_covers/' . $cart->ebook->cover_image) }}"
+                                             class="rounded" style="width:50px; height:50px; object-fit:cover;">
+                                        <div>
+                                            <a href="{{ route('ebooks.show', $cart->ebook_id) }}"
+                                               class="text-dark text-decoration-none fw-semibold d-block small">
+                                                {{ Str::limit($cart->ebook->title_bn ?? $cart->ebook->title_en, 30) }}
+                                            </a>
+                                            <span class="badge bg-info text-white small">E-book</span>
+                                        </div>
+                                    @else
+                                        <img src="{{ route('imagecache', ['template'=>'ppsm','filename' => $cart->product->fi()]) }}"
+                                             class="rounded" style="width:50px; height:50px; object-fit:cover;">
+                                        <div>
+                                            <a href="{{ route('productDetails', ['slug' => $cart->product->slug, 'id' => $cart->product_id]) }}"
+                                               class="text-dark text-decoration-none fw-semibold d-block small">
+                                                {{ Str::limit($cart->product->name_en, 30) }}
+                                            </a>
+                                        </div>
+                                    @endif
                                 </div>
                             </td>
                             <td class="text-center py-3 border-bottom-0 small fw-bold">
-                                ৳{{ number_format($cart->product->selling_price, 2) }}
+                                ৳{{ number_format($cart->ebook_id ? $cart->ebook->final_price : $cart->product->selling_price, 2) }}
                             </td>
                             <td class="text-center py-3 border-bottom-0">
                                 <div class="d-flex align-items-center justify-content-center gap-1">
@@ -51,8 +63,8 @@
                             </td>
                             <td class="text-end pe-4 py-3 border-bottom-0 fw-bold text-primary row-subtotal" 
                                 style="color: #A45517 !important;"
-                                data-unit-price="{{ $cart->product->selling_price }}">
-                                ৳{{ number_format($cart->quantity * $cart->product->selling_price, 2) }}
+                                data-unit-price="{{ $cart->ebook_id ? $cart->ebook->final_price : $cart->product->selling_price }}">
+                                ৳{{ number_format($cart->quantity * ($cart->ebook_id ? $cart->ebook->final_price : $cart->product->selling_price), 2) }}
                             </td>
                         </tr>
                     @endforeach

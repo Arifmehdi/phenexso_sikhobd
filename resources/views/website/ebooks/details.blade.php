@@ -35,9 +35,16 @@
                         <a href="{{ route('ebooks.preview', $ebook->id) }}" class="btn btn-outline-primary px-5 py-3" style="border-radius: 50px; font-weight: 700;">
                             <i class="fa-solid fa-book-open mr-2"></i> বইটি কিছু অংশ পড়ুন
                         </a>
-                        <button class="btn btn-primary px-5 py-3" style="border-radius: 50px; font-weight: 700;">
-                            <i class="fa-solid fa-cart-shopping mr-2"></i> সম্পূর্ণ বইটি কিনুন
-                        </button>
+                        
+                        @if($isEnrolled)
+                            <a href="{{ route('ebooks.read', $ebook->id) }}" class="btn btn-success px-5 py-3" style="border-radius: 50px; font-weight: 700;">
+                                <i class="fa-solid fa-book-reader mr-2"></i> সম্পূর্ণ বইটি পড়ুন
+                            </a>
+                        @else
+                            <a href="{{ route('ebooks.buy', $ebook->id) }}" class="btn btn-primary px-5 py-3" style="border-radius: 50px; font-weight: 700;">
+                                <i class="fa-solid fa-cart-shopping mr-2"></i> সম্পূর্ণ বইটি কিনুন
+                            </a>
+                        @endif
                     </div>
 
                     <div class="description mt-5">

@@ -12,6 +12,7 @@ class Enrollment extends Model
     protected $fillable = [
         'user_id',
         'product_id',
+        'ebook_id',
         'order_id',
         'enrolled_at',
         'expires_at',
@@ -31,6 +32,11 @@ class Enrollment extends Model
     public function product()
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function ebook()
+    {
+        return $this->belongsTo(Ebook::class);
     }
 
     public function order()

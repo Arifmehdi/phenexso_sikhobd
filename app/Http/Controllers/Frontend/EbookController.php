@@ -5,10 +5,13 @@ namespace App\Http\Controllers\Frontend;
 use App\Http\Controllers\Controller;
 use App\Models\Ebook;
 use App\Models\ProductCategory;
+use App\Models\Enrollment;
+use App\Models\Cart;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Session;
 
 class EbookController extends Controller
 {
@@ -30,7 +33,65 @@ class EbookController extends Controller
     {
         $ebook = Ebook::where('active', 1)->where('status', 'approved')->findOrFail($id);
         $ebook->increment('view_count');
-        return view('website.ebooks.details', compact('ebook'));
+
+        $isEnrolled = false;
+        if (Auth::check()) {
+            $isEnrolled = Enrollment::where('user_id', Auth::id())
+                ->where('ebook_id', $id)
+                ->where('status', 'active')
+                ->exists();
+        }
+
+        return view('website.ebooks.details', compact('ebook', 'isEnrolled'));
+    }
+
+    public function buy($id)
+    {
+        $ebook = Ebook::findOrFail($id);
+        
+        $session_id = Session::get('session_id', function () {
+            $id = Session::getId();
+            Session::put('session_id', $id);
+            return $id;
+        });
+
+        $user_id = Auth::id() ?? 0;
+
+        // Check if already in cart
+        $cart = Cart::firstOrNew([
+            'ebook_id'   => $ebook->id,
+            'session_id' => $session_id,
+            'user_id'    => $user_id,
+        ]);
+
+        $cart->quantity   = 1;
+        $cart->addedby_id = $user_id;
+        $cart->save();
+
+        return redirect()->route('new.checkout')->with('success', 'ই-বুকটি কার্টে যোগ করা হয়েছে।');
+    }
+
+    public function read($id)
+    {
+        $ebook = Ebook::findOrFail($id);
+        
+        $isEnrolled = false;
+        if (Auth::check()) {
+            $isEnrolled = Enrollment::where('user_id', Auth::id())
+                ->where('ebook_id', $id)
+                ->where('status', 'active')
+                ->exists();
+        }
+
+        if (!$isEnrolled) {
+            return redirect()->route('ebooks.show', $id)->with('error', 'সম্পূর্ণ বইটি পড়তে প্রথমে এটি কিনুন।');
+        }
+
+        if (!$ebook->file_path) {
+            return back()->with('error', 'বইটির ফাইল পাওয়া যায়নি।');
+        }
+
+        return view('website.ebooks.read', compact('ebook'));
     }
 
     public function uploadForm()

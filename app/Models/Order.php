@@ -43,6 +43,7 @@ class Order extends Model
         'occupation',
         'last_academic_status',
         'has_course',
+        'has_ebook',
         'admin_approval',
     ];
 

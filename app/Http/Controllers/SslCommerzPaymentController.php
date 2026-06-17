@@ -110,13 +110,21 @@ class SslCommerzPaymentController extends Controller
         }
 
         $hasCourse = $cartItems->contains(fn($item) => $item->product && $item->product->type === 'course');
+        $hasEbook = $cartItems->contains(fn($item) => $item->ebook_id !== null);
         $hasProduct = $cartItems->contains(fn($item) => $item->product && $item->product->type !== 'course');
 
         $subtotal = $this->calculateSubtotal($cartItems);
 
         $deliveryCost = $hasProduct ? ($ws->shipping_charge ?? $request->shipping_price) : 0;
-
         $grandTotal = $subtotal + $deliveryCost;
+
+        $orderNote = $request->order_note ?? null;
+        if ($request->office_address || $request->office_time) {
+            $extraNote = "";
+            if ($request->office_address) $extraNote .= "Office Address: " . $request->office_address . "\n";
+            if ($request->office_time) $extraNote .= "Office Time: " . $request->office_time . "\n";
+            $orderNote = $extraNote . ($orderNote ? "Note: " . $orderNote : "");
+        }
 
         DB::beginTransaction();
 
@@ -146,7 +154,7 @@ class SslCommerzPaymentController extends Controller
                     $location->name = $request->input('name') ?? $user->name;
                     $location->email = $request->input('email') ?? $user->email;
                     $location->mobile = $request->input('mobile') ?? $user->mobile;
-                    $location->address_title = $request->input('billing_address') ?? 'Course Enrollment';
+                    $location->address_title = $request->input('billing_address') ?? 'Course/Ebook Enrollment';
                 }
 
                 $name = $location->name;
@@ -165,7 +173,7 @@ class SslCommerzPaymentController extends Controller
                 if ($hasProduct) {
                     $rules['billing_address'] = 'required|string|max:1000';
                 }
-                if ($hasCourse) {
+                if ($hasCourse || $hasEbook) {
                     $rules['occupation'] = 'required|string|max:255';
                     $rules['last_academic_status'] = 'required|string|max:255';
                 }
@@ -201,7 +209,7 @@ class SslCommerzPaymentController extends Controller
                 $name = $user->name;
                 $email = $user->email;
                 $mobile = $user->mobile;
-                $address = $request->input('billing_address') ?? 'Course Enrollment';
+                $address = $request->input('billing_address') ?? 'Course/Ebook Enrollment';
                 $userId = $user->id;
             }
 
@@ -218,37 +226,61 @@ class SslCommerzPaymentController extends Controller
                 'payment_method'  => $paymentMethod,
                 'payment_status'  => 'unpaid',
                 'payment_gateway' => $paymentMethod,
-                'order_note'      => $request->order_note,
+                'order_note'      => $orderNote,
                 'addedby_id'      => $userId,
                 'occupation'      => $request->occupation,
                 'last_academic_status' => $request->last_academic_status,
                 'has_course'      => $hasCourse,
-                'admin_approval'  => $hasCourse ? 'pending' : 'approved',
+                'has_ebook'       => $hasEbook,
+                'admin_approval'  => ($hasCourse || $hasEbook) ? 'pending' : 'approved',
             ]);
 
             // 2. Store Order Items
             foreach ($cartItems as $item) {
 
-                OrderItem::create([
-                    'order_id'      => $order->id,
-                    'user_id'       => $userId,
-                    'product_id'    => $item->product_id,
-                    'product_name'  => $item->product->name_en,
-                    'product_price' => $item->product->selling_price,
-                    'quantity'      => $item->quantity,
-                    'total_cost'    => $item->product->selling_price * $item->quantity,
-                    'addedby_id'    => $userId,
-                ]);
+                if ($item->ebook_id) {
+                    OrderItem::create([
+                        'order_id'      => $order->id,
+                        'user_id'       => $userId,
+                        'ebook_id'      => $item->ebook_id,
+                        'product_name'  => $item->ebook->title_en,
+                        'product_price' => $item->ebook->final_price,
+                        'quantity'      => $item->quantity,
+                        'total_cost'    => $item->ebook->final_price * $item->quantity,
+                        'addedby_id'    => $userId,
+                    ]);
 
-                // Also create pending enrollment if it's a course
-                if ($item->product->type === 'course' && $userId) {
-                    Enrollment::updateOrCreate(
-                        ['user_id' => $userId, 'product_id' => $item->product_id],
-                        [
-                            'order_id'    => $order->id,
-                            'status'      => 'pending', // Will be activated on success callback
-                        ]
-                    );
+                    if ($userId) {
+                        Enrollment::updateOrCreate(
+                            ['user_id' => $userId, 'ebook_id' => $item->ebook_id],
+                            [
+                                'order_id'    => $order->id,
+                                'status'      => 'pending',
+                            ]
+                        );
+                    }
+                } else {
+                    OrderItem::create([
+                        'order_id'      => $order->id,
+                        'user_id'       => $userId,
+                        'product_id'    => $item->product_id,
+                        'product_name'  => $item->product->name_en,
+                        'product_price' => $item->product->selling_price,
+                        'quantity'      => $item->quantity,
+                        'total_cost'    => $item->product->selling_price * $item->quantity,
+                        'addedby_id'    => $userId,
+                    ]);
+
+                    // Also create pending enrollment if it's a course
+                    if ($item->product->type === 'course' && $userId) {
+                        Enrollment::updateOrCreate(
+                            ['user_id' => $userId, 'product_id' => $item->product_id],
+                            [
+                                'order_id'    => $order->id,
+                                'status'      => 'pending', // Will be activated on success callback
+                            ]
+                        );
+                    }
                 }
             }
 
@@ -436,6 +468,20 @@ class SslCommerzPaymentController extends Controller
                         ]
                     );
                 }
+
+                if ($item->ebook_id) {
+                    Enrollment::updateOrCreate(
+                        [
+                            'user_id'    => $order->user_id,
+                            'ebook_id'   => $item->ebook_id
+                        ],
+                        [
+                            'order_id'    => $order->id,
+                            'enrolled_at' => now(),
+                            'status'      => 'active'
+                        ]
+                    );
+                }
             }
 
             return redirect()
@@ -483,6 +529,9 @@ class SslCommerzPaymentController extends Controller
     private function calculateSubtotal($cartItems)
     {
         return $cartItems->sum(function ($cart) {
+            if ($cart->ebook_id) {
+                return $cart->ebook->final_price * $cart->quantity;
+            }
             return $cart->product->selling_price * $cart->quantity;
         });
     }

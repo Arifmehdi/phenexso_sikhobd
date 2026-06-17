@@ -13,14 +13,21 @@ class Cart extends Model
 
     protected $fillable = [
         'product_id',
+        'ebook_id',
         'session_id',
         'user_id',
         'quantity',
+        'addedby_id',
     ];
 
     public function product()
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function ebook()
+    {
+        return $this->belongsTo(Ebook::class);
     }
     
 
@@ -44,7 +51,7 @@ class Cart extends Model
                 ->when(!auth()->check(), function ($query) {
                     return $query->where('session_id', session('session_id'));
                 })
-                ->with('product') // যদি cart table এ product_id থাকে এবং relation define থাকে
+                ->with(['product', 'ebook'])
                 ->get();
     }
 
@@ -57,17 +64,19 @@ class Cart extends Model
             ->when(!auth()->check(), function ($query) {
                 $query->where('session_id', session('session_id'));
             })
-            ->with('product') // optional, শুধু relation access করতে চাইলে
             ->count();
     }
 
     public static function totalCartPrice(): float
     {
-        return self::with('product')
+        return self::with(['product', 'ebook'])
             ->when(auth()->check(), fn($q) => $q->where('user_id', auth()->id()))
             ->when(!auth()->check(), fn($q) => $q->where('session_id', session('session_id')))
             ->get()
             ->sum(function ($cart) {
+                if ($cart->ebook_id) {
+                    return $cart->quantity * ($cart->ebook->final_price ?? 0);
+                }
                 return $cart->quantity * ($cart->product->selling_price ?? 0);
             });
     }
@@ -88,6 +97,8 @@ class Cart extends Model
         foreach ($query->get() as $cart) {
             if ($cart->product) {
                 $total_price += $cart->product->discount * $cart->quantity;
+            } elseif ($cart->ebook) {
+                $total_price += $cart->ebook->discount * $cart->quantity;
             }
         }
 

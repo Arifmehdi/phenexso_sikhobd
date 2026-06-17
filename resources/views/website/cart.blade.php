@@ -80,10 +80,15 @@
                 <div class="col-address">
                     <div class="modern-card">
                         <div class="card-header-clean">
-                            <i class="fa-solid {{ ($hasCourse && !$hasProduct) ? 'fa-user-graduate' : 'fa-truck-fast' }}"></i>
-                            <h2>১. {{ ($hasCourse && !$hasProduct) ? 'রেজিস্ট্রেশন তথ্য' : (($hasCourse && $hasProduct) ? 'শিপিং এবং রেজিস্ট্রেশন তথ্য' : 'শিপিং এবং ডেলিভারি তথ্য') }}</h2>
+                            <i class="fa-solid {{ ($hasCourse || $hasEbook) && !$hasProduct ? 'fa-user-graduate' : 'fa-truck-fast' }}"></i>
+                            <h2>১. {{ ($hasCourse || $hasEbook) && !$hasProduct ? 'রেজিস্ট্রেশন তথ্য' : ((($hasCourse || $hasEbook) && $hasProduct) ? 'শিপিং এবং রেজিস্ট্রেশন তথ্য' : 'শিপিং এবং ডেলিভারি তথ্য') }}</h2>
                         </div>
                         <div class="form-content">
+                            @if(!auth()->check())
+                            <div class="alert alert-info mb-4" style="border-radius: 12px; font-size: 14px;">
+                                <i class="fa-solid fa-circle-info mr-2"></i> আপনার কি আগে থেকেই অ্যাকাউন্ট আছে? <a href="{{ route('login') }}" class="fw-bold">লগইন করুন</a>
+                            </div>
+                            @endif
                             <div class="row g-4">
                                 <div class="col-md-6">
                                     <label class="custom-label">পুরো নাম *</label>
@@ -98,15 +103,15 @@
                                     <input type="email" name="email" class="form-control custom-input" value="{{ optional(auth()->user())->email }}" placeholder="আপনার ইমেইল" required>
                                 </div>
 
-                                @if($hasCourse)
+                                @if($hasCourse || $hasEbook)
                                     <div class="col-md-6">
                                         <label class="custom-label">পেশা *</label>
                                         <select name="occupation" class="form-control custom-input" required>
                                             <option value="">নির্বাচন করুন</option>
-                                            <option value="Student">ছাত্র (Student)</option>
-                                            <option value="Job Holder">চাকুরীজীবী (Job Holder)</option>
-                                            <option value="Business">ব্যবসায়ী (Business)</option>
-                                            <option value="Other">অন্যান্য (Other)</option>
+                                            <option value="Student" {{ optional(auth()->user())->occupation == 'Student' ? 'selected' : '' }}>ছাত্র (Student)</option>
+                                            <option value="Job Holder" {{ optional(auth()->user())->occupation == 'Job Holder' ? 'selected' : '' }}>চাকুরীজীবী (Job Holder)</option>
+                                            <option value="Business" {{ optional(auth()->user())->occupation == 'Business' ? 'selected' : '' }}>ব্যবসায়ী (Business)</option>
+                                            <option value="Other" {{ optional(auth()->user())->occupation == 'Other' ? 'selected' : '' }}>অন্যান্য (Other)</option>
                                         </select>
                                     </div>
                                     <div class="col-md-6">
@@ -130,6 +135,14 @@
                                     <label class="custom-label">বিস্তারিত ঠিকানা (বাসা, রোড, এলাকা ও জেলা) *</label>
                                     <textarea name="billing_address" class="form-control custom-input" rows="4" placeholder="আপনার বিস্তারিত ঠিকানা লিখুন" required>{{ auth()->check() && auth()->user()->locations()->first() ? auth()->user()->locations()->first()->address_title : '' }}</textarea>
                                 </div>
+                                <div class="col-md-6">
+                                    <label class="custom-label">অফিসের ঠিকানা (ঐচ্ছিক)</label>
+                                    <input type="text" name="office_address" class="form-control custom-input" placeholder="অফিসের ঠিকানা লিখুন">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="custom-label">অফিস টাইম (ঐচ্ছিক)</label>
+                                    <input type="text" name="office_time" class="form-control custom-input" placeholder="উদাহরণ: সকাল ৯টা - বিকাল ৫টা">
+                                </div>
                                 @endif
 
                                 <div class="col-12">
@@ -148,7 +161,7 @@
                     <div class="modern-card">
                         <div class="card-header-clean">
                             <i class="fa-solid fa-receipt"></i>
-                            <h2>{{ $hasCourse ? 'রেজিস্ট্রেশন সামারি' : 'অর্ডার সামারি' }}</h2>
+                            <h2>{{ ($hasCourse || $hasEbook) ? 'রেজিস্ট্রেশন সামারি' : 'অর্ডার সামারি' }}</h2>
                         </div>
                         <div class="summary-box">
                             <div class="summary-line">
@@ -170,25 +183,40 @@
                     <div class="modern-card">
                         <div class="card-header-clean">
                             <i class="fa-solid fa-box-open"></i>
-                            <h2>২. {{ $hasCourse ? 'এনরোলমেন্টকৃত কোর্সসমূহ' : 'অর্ডারকৃত পণ্যসমূহ' }}</h2>
+                            <h2>২. {{ ($hasCourse || $hasEbook) ? 'এনরোলমেন্টকৃত কোর্স/ই-বুক' : 'অর্ডারকৃত পণ্যসমূহ' }}</h2>
                         </div>
                         <div class="items-list">
                             @foreach($cartItems as $item)
                             <div class="item-row" id="cart-row-{{ $item->id }}">
-                                <img src="{{ route('imagecache', ['template' => 'pnism', 'filename' => $item->product->fi()]) }}" class="item-img" alt="">
-                                <div class="item-info">
-                                    <a href="{{ route('productDetails', $item->product->slug) }}" class="item-name">{{ Str::limit($item->product->name_en, 40) }}</a>
-                                    
-                                    <div class="qty-ctrl">
-                                        <button type="button" class="qty-btn" onclick="updateCartQty({{ $item->id }}, -1)">-</button>
-                                        <input type="text" id="qty-input-{{ $item->id }}" class="qty-val" value="{{ $item->quantity }}" readonly>
-                                        <button type="button" class="qty-btn" onclick="updateCartQty({{ $item->id }}, 1)">+</button>
+                                @if($item->ebook_id)
+                                    <img src="{{ asset('storage/ebook_covers/' . $item->ebook->cover_image) }}" class="item-img" alt="">
+                                    <div class="item-info">
+                                        <a href="{{ route('ebooks.show', $item->ebook_id) }}" class="item-name">{{ Str::limit($item->ebook->title_bn ?? $item->ebook->title_en, 40) }}</a>
+                                        
+                                        <div class="qty-ctrl">
+                                            <input type="text" class="qty-val" value="1" readonly style="width: 40px;">
+                                        </div>
+                                        
+                                        <div class="item-price-val">৳{{ number_format($item->ebook->final_price) }}</div>
+                                        
+                                        <i class="fa-solid fa-xmark remove-x" onclick="removeCartItem({{ $item->id }})"></i>
                                     </div>
-                                    
-                                    <div class="item-price-val" id="item-subtotal-{{ $item->id }}">৳{{ number_format($item->quantity * $item->product->final_price) }}</div>
-                                    
-                                    <i class="fa-solid fa-xmark remove-x" onclick="removeCartItem({{ $item->id }})"></i>
-                                </div>
+                                @else
+                                    <img src="{{ route('imagecache', ['template' => 'pnism', 'filename' => $item->product->fi()]) }}" class="item-img" alt="">
+                                    <div class="item-info">
+                                        <a href="{{ route('productDetails', $item->product->slug) }}" class="item-name">{{ Str::limit($item->product->name_en, 40) }}</a>
+                                        
+                                        <div class="qty-ctrl">
+                                            <button type="button" class="qty-btn" onclick="updateCartQty({{ $item->id }}, -1)">-</button>
+                                            <input type="text" id="qty-input-{{ $item->id }}" class="qty-val" value="{{ $item->quantity }}" readonly>
+                                            <button type="button" class="qty-btn" onclick="updateCartQty({{ $item->id }}, 1)">+</button>
+                                        </div>
+                                        
+                                        <div class="item-price-val" id="item-subtotal-{{ $item->id }}">৳{{ number_format($item->quantity * $item->product->final_price) }}</div>
+                                        
+                                        <i class="fa-solid fa-xmark remove-x" onclick="removeCartItem({{ $item->id }})"></i>
+                                    </div>
+                                @endif
                             </div>
                             @endforeach
                         </div>
@@ -198,7 +226,7 @@
                     <div class="modern-card">
                         <div class="card-header-clean">
                             <i class="fa-solid fa-wallet"></i>
-                            <h2>৩. পেমেন্ট মেথড এবং {{ $hasCourse ? 'রেজিস্ট্রেশন' : 'অর্ডার' }}</h2>
+                            <h2>৩. পেমেন্ট মেথড এবং {{ ($hasCourse || $hasEbook) ? 'রেজিস্ট্রেশন' : 'অর্ডার' }}</h2>
                         </div>
                         <div class="form-content" style="padding-top: 20px;">
                             <label class="pay-card active">
@@ -222,7 +250,7 @@
                             </div>
 
                             <button type="submit" class="action-btn">
-                                {{ $hasCourse ? 'রেজিস্ট্রেশন সম্পন্ন করুন' : 'অর্ডার সম্পন্ন করুন' }} <i class="fa-solid fa-check-circle"></i>
+                                {{ ($hasCourse || $hasEbook) ? 'রেজিস্ট্রেশন সম্পন্ন করুন' : 'অর্ডার সম্পন্ন করুন' }} <i class="fa-solid fa-check-circle"></i>
                             </button>
                         </div>
                     </div>
@@ -277,7 +305,7 @@
                 if(res.status) {
                     input.val(newQty);
                     $('#summary-subtotal').text('৳' + res.cartTotal.toLocaleString());
-                    $('#summary-total').text('৳' + (res.cartTotal + {{ $ws->shipping_charge ?? 0 }}).toLocaleString());
+                    $('#summary-total').text('৳' + (res.cartTotal + res.shippingCharge).toLocaleString());
                     $('.cartCount').text(res.cartCount);
                     location.reload(); 
                 }
@@ -307,7 +335,7 @@
                                 if($('.item-row').length == 0) location.reload();
                             });
                             $('#summary-subtotal').text('৳' + res.cartTotal.toLocaleString());
-                            $('#summary-total').text('৳' + (res.cartTotal + {{ $ws->shipping_charge ?? 0 }}).toLocaleString());
+                            $('#summary-total').text('৳' + (res.cartTotal + res.shippingCharge).toLocaleString());
                             $('.cartCount').text(res.cartCount);
                             showCartNotification('পণ্যটি সরানো হয়েছে');
                         }

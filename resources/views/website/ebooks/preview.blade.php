@@ -20,9 +20,9 @@
         </div>
 
         <div class="mt-5 text-center">
-            <button class="btn btn-primary btn-lg px-5 py-3" style="border-radius: 50px; font-weight: 700;">
+            <a href="{{ route('ebooks.buy', $ebook->id) }}" class="btn btn-primary btn-lg px-5 py-3" style="border-radius: 50px; font-weight: 700;">
                 <i class="fa-solid fa-cart-shopping mr-2"></i> সম্পূর্ণ বইটি এখনই কিনুন
-            </button>
+            </a>
         </div>
     </div>
 </section>
