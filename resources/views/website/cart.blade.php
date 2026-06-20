@@ -240,9 +240,18 @@
                                 <input type="radio" name="payment_method" value="online">
                                 <div>
                                     <div class="fw-bold text-dark" style="font-size: 14px;">Online Payment</div>
-                                    <div class="text-muted small">বিকাশ, নগদ বা কার্ড পেমেন্ট</div>
+                                    <div class="text-muted small">বিকাশ, নগদ, রকেট অথবা কার্ড পেমেন্ট</div>
                                 </div>
                             </label>
+
+                            <div id="online_payment_details" class="mt-3 mb-3" style="display: none;">
+                                <div class="alert alert-light" style="border-radius: 16px; padding: 16px; border: 1px solid #e2e8f0;">
+                                    <p class="mb-2 fw-bold">Online payment instruction</p>
+                                    <p class="mb-1">পেমেন্ট পাঠান <strong>01349494295</strong> (bKash / Nagad / Rocket).</p>
+                                    <label class="custom-label">Transaction ID (TXN ID) *</label>
+                                    <input type="text" name="transaction_id" id="transaction_id" class="form-control custom-input" placeholder="পেমেন্টের টিআরএন আইডি দিন">
+                                </div>
+                            </div>
 
                             <div class="form-check mt-3 mb-3">
                                 <input class="form-check-input" type="checkbox" id="termsCheck" required checked>
@@ -277,19 +286,45 @@
         const codRoute = "{{ route('codOrderStore') }}";
         const onlineRoute = "{{ route('onlineOrderStore') }}";
 
+        // Pre-fill form fields from localStorage (if coming from homepage enroll form)
+        const enrollName = localStorage.getItem('enroll_name');
+        const enrollPhone = localStorage.getItem('enroll_phone');
+        const enrollEmail = localStorage.getItem('enroll_email');
+
+        if (enrollName) {
+            $('input[name="name"]').val(enrollName);
+            localStorage.removeItem('enroll_name'); // Clear after use
+        }
+        if (enrollPhone) {
+            $('input[name="mobile"]').val(enrollPhone);
+            localStorage.removeItem('enroll_phone');
+        }
+        if (enrollEmail) {
+            $('input[name="email"]').val(enrollEmail);
+            localStorage.removeItem('enroll_email');
+        }
+
         $('.pay-card').click(function() {
             $('.pay-card').removeClass('active');
             $(this).addClass('active');
             const val = $(this).find('input').val();
             $(this).find('input').prop('checked', true);
             
-            // Update form action based on payment method
             $('#checkoutForm').attr('action', val === 'cod' ? codRoute : onlineRoute);
+            updateOnlinePaymentFields(val === 'online');
         });
+
+        function updateOnlinePaymentFields(isOnline) {
+            const details = $('#online_payment_details');
+            const txnInput = $('#transaction_id');
+            details.toggle(isOnline);
+            txnInput.prop('required', isOnline);
+        }
 
         // Initialize form action
         const initialVal = $('input[name="payment_method"]:checked').val();
         $('#checkoutForm').attr('action', initialVal === 'cod' ? codRoute : onlineRoute);
+        updateOnlinePaymentFields(initialVal === 'online');
     });
 
     function updateCartQty(cartId, change) {

@@ -75,6 +75,20 @@ class Product extends Model
         return $this->selling_price <= 0;
     }
 
+    public function getDiscountedPriceAttribute()
+    {
+        return max(0, ($this->selling_price ?? 0) - ($this->discount ?? 0));
+    }
+
+    public function getDisplayPriceAttribute()
+    {
+        return $this->discount > 0 ? $this->discounted_price : ($this->selling_price ?? 0);
+    }
+
+    public function getRegularPriceAttribute()
+    {
+        return $this->selling_price ?? 0;
+    }
 
     public function fi()
     {

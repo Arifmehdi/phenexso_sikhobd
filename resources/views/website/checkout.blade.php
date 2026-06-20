@@ -110,35 +110,52 @@
                 <div class="col-lg-6">
                     <div class="ltn__checkout-payment-method mt-50">
                         <h4 class="title-2">Payment Method</h4>
-                        <div id="checkout_accordion_1">
-                            <!-- card -->
-                            <div class="card">
-                                <h5 class="ltn__card-title" data-bs-toggle="collapse" data-bs-target="#faq-item-2-2" aria-expanded="true"> 
-                                    Cash on delivery  <img src="{{ asset('frontend/img/icons/cash.png') }}" alt="#">
-                                </h5>
-                                <div id="faq-item-2-2" class="collapse show" data-parent="#checkout_accordion_1">
-                                    <div class="card-body">
-                                        <p>Pay with cash upon delivery.</p>
+                        <form action="#" id="checkout-payment-form">
+                            <div id="checkout_accordion_1">
+                                <!-- card -->
+                                <div class="card">
+                                    <h5 class="ltn__card-title" data-bs-toggle="collapse" data-bs-target="#faq-item-2-2" aria-expanded="true"> 
+                                        <label class="d-flex align-items-center mb-0">
+                                            <input class="form-check-input me-2" type="radio" name="payment_method" id="payment_method_cod" value="cod" checked>
+                                            Cash on delivery
+                                        </label>
+                                        <img src="{{ asset('frontend/img/icons/cash.png') }}" alt="#">
+                                    </h5>
+                                    <div id="faq-item-2-2" class="collapse show" data-parent="#checkout_accordion_1">
+                                        <div class="card-body">
+                                            <p>Pay with cash upon delivery.</p>
+                                        </div>
                                     </div>
-                                </div>
-                            </div>                             
+                                </div>                             
 
-                            <!-- card -->
-                            <div class="card">
-                                <h5 class="collapsed ltn__card-title" data-bs-toggle="collapse" data-bs-target="#faq-item-2-4" aria-expanded="false" >
-                                    Online Payment <img src="{{ asset('frontend/img/icons/payment-3.png') }}" alt="#">
-                                </h5>
-                                <div id="faq-item-2-4" class="collapse" data-parent="#checkout_accordion_1">
-                                    <div class="card-body">
-                                        <p>Pay via Online; you can pay with your credit card if you don’t have a PayPal account.</p>
+                                <!-- card -->
+                                <div class="card">
+                                    <h5 class="collapsed ltn__card-title" data-bs-toggle="collapse" data-bs-target="#faq-item-2-4" aria-expanded="false" >
+                                        <label class="d-flex align-items-center mb-0">
+                                            <input class="form-check-input me-2" type="radio" name="payment_method" id="payment_method_online" value="online">
+                                            Online Payment
+                                        </label>
+                                        <img src="{{ asset('frontend/img/icons/payment-3.png') }}" alt="#">
+                                    </h5>
+                                    <div id="faq-item-2-4" class="collapse" data-parent="#checkout_accordion_1">
+                                        <div class="card-body">
+                                            <p>Pay using bKash, Nagad, or Rocket to <strong>01349494295</strong>. After sending payment, enter your transaction ID below.</p>
+                                            <div id="online_payment_details" class="mt-3" style="display: none;">
+                                                <div class="input-item input-item-name ltn__custom-icon">
+                                                    <label for="transaction_id">Transaction ID</label>
+                                                    <input type="text" class="form-control" id="transaction_id" name="transaction_id" placeholder="Enter transaction ID">
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="ltn__payment-note mt-30 mb-30">
-                            <p>Your personal data will be used to process your order, support your experience throughout this website, and for other purposes described in our privacy policy.</p>
-                        </div>
-                        <button class="btn theme-btn-1 btn-effect-1 text-uppercase" type="submit">Place order</button>
+
+                            <div class="ltn__payment-note mt-30 mb-30">
+                                <p>Your personal data will be used to process your order, support your experience throughout this website, and for other purposes described in our privacy policy.</p>
+                            </div>
+                            <button class="btn theme-btn-1 btn-effect-1 text-uppercase" type="submit">Place order</button>
+                        </form>
                     </div>
                 </div>
                 <div class="col-lg-6">
@@ -182,4 +199,32 @@
     <!-- FEATURE AREA START ( Feature - 3) -->
     <x-footer-feature />
     <!-- FEATURE AREA END -->
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const onlineRadio = document.getElementById('payment_method_online');
+            const codRadio = document.getElementById('payment_method_cod');
+            const onlineDetails = document.getElementById('online_payment_details');
+            const transactionInput = document.getElementById('transaction_id');
+            const paymentForm = document.getElementById('checkout-payment-form');
+
+            function updateOnlinePaymentFields() {
+                const onlineSelected = onlineRadio.checked;
+                onlineDetails.style.display = onlineSelected ? 'block' : 'none';
+                transactionInput.required = onlineSelected;
+            }
+
+            onlineRadio.addEventListener('change', updateOnlinePaymentFields);
+            codRadio.addEventListener('change', updateOnlinePaymentFields);
+            updateOnlinePaymentFields();
+
+            paymentForm.addEventListener('submit', function (event) {
+                if (onlineRadio.checked && !transactionInput.value.trim()) {
+                    event.preventDefault();
+                    alert('Please enter your transaction ID for online payment.');
+                    transactionInput.focus();
+                }
+            });
+        });
+    </script>
 @endsection

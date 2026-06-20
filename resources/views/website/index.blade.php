@@ -378,11 +378,16 @@
                                 </div>
                                 <div class="col-12 mb-4">
                                     <label class="form-label">{{ app()->getLocale() == 'bn' ? 'কোর্স নির্বাচন করুন' : 'Select Course' }}</label>
-                                    <select name="product" class="form-select" required>
+                                    <select name="product" class="form-select" id="course-select-dropdown" required>
                                         <option value="" selected disabled>{{ app()->getLocale() == 'bn' ? 'আপনার কোর্সটি বেছে নিন' : 'Choose your course' }}</option>
                                         @foreach($feature_products as $product)
-                                            <option value="{{ $product->id }}">
-                                                {{ app()->getLocale() == 'bn' ? ($product->name_bn ?? $product->name_en) : ($product->name_en ?? $product->name_bn) }}
+                                            <option value="{{ $product->id }}"
+                                                    data-slug="{{ $product->slug }}"
+                                                    data-name="{{ app()->getLocale() == 'bn' ? ($product->name_bn ?? $product->name_en) : ($product->name_en ?? $product->name_bn) }}"
+                                                    data-price="{{ $product->selling_price }}"
+                                                    data-image="{{ $product->featured_image ? route('imagecache', ['template' => 'medium', 'filename' => $product->featured_image]) : '' }}"
+                                                    data-feature="{{ $product->feature ? 'true' : 'false' }}">
+                                                {{ app()->getLocale() == 'bn' ? ($product->name_bn ?? $product->name_en) : ($product->name_en ?? $product->name_bn) }} - ৳ {{ number_format($product->selling_price) }}
                                             </option>
                                         @endforeach
                                     </select>
@@ -680,7 +685,7 @@
   }
 
   .enrollment-section {
-    padding: 40px 0;
+    padding: 60px 0;
     background: var(--bg-soft);
   }
   .enroll-card {
@@ -691,46 +696,51 @@
     border: 1px solid var(--border);
     overflow: hidden;
   }
-  .enroll-form-wrap .form-label {
-    font-weight: 600;
-    color: var(--primary);
-    margin-bottom: 8px;
-    display: block;
-    font-size: 14px;
+  .course-selector-wrap {
+    margin-top: 20px;
   }
-  .enroll-form-wrap .form-control, .enroll-form-wrap .form-select {
+  .course-selector-wrap .form-select {
     border-radius: 12px;
-    padding: 14px 18px;
-    border: 1px solid var(--border);
-    transition: all 0.3s;
+    padding: 16px 20px;
+    font-size: 16px;
+    border: 2px solid var(--border);
     background: var(--bg-soft);
-    font-size: 15px;
+    transition: all 0.3s;
   }
-  .enroll-form-wrap .form-control:focus, .enroll-form-wrap .form-select:focus {
+  .course-selector-wrap .form-select:focus {
     border-color: var(--accent);
     background: #fff;
     box-shadow: 0 0 0 4px rgba(255, 40, 79, 0.1);
     outline: none;
   }
-  .enroll-image {
-    text-align: center;
-    position: relative;
+  #courses-grid-selection {
+    margin-top: 30px;
   }
-  .enroll-image img {
-    border-radius: var(--radius-lg);
-    width: 100%;
-    max-width: 420px;
-    height: auto;
-    filter: drop-shadow(0 20px 40px rgba(0,0,0,0.1));
-    animation: floating 6s ease-in-out infinite;
+  #courses-grid-selection .course-card {
+    cursor: pointer;
+    transition: all 0.3s;
   }
-  @keyframes floating {
-    0% { transform: translateY(0px); }
-    50% { transform: translateY(-20px); }
-    100% { transform: translateY(0px); }
+  #courses-grid-selection .course-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-md);
+  }
+
+  /* Selected Course Card Styles */
+  #selected-course-card .selected-course-card {
+    background: #fff;
+    border: 1px solid var(--border);
+  }
+  #selected-course-card .course-image-preview {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 3px solid var(--bg-soft);
+  }
+  #selected-course-card .course-meta span {
+    color: var(--text-soft);
+    font-size: 14px;
   }
   @media (max-width: 992px) {
-    .enroll-card { padding: 40px 20px; }
+    .enroll-card { padding: 30px 20px; }
   }
 </style>
 @endpush
@@ -738,22 +748,27 @@
 @push('js')
 <script>
 $(document).ready(function() {
-  // Enrollment Form AJAX
+  // Enrollment Form AJAX - Submit to cart and redirect to cart page
   $(document).on('submit', '#home-enroll-form', function(e) {
       e.preventDefault();
       const form = $(this);
       const btn = form.find('button[type="submit"]');
       const originalHtml = btn.html();
-      
-      btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Processing...');
+
+      btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> {{ app()->getLocale() == 'bn' ? 'প্রক্রিয়াধীন...' : 'Processing...' }}');
+
+      // Store form data in localStorage for pre-filling checkout form
+      localStorage.setItem('enroll_name', form.find('input[name="name"]').val());
+      localStorage.setItem('enroll_phone', form.find('input[name="phone"]').val());
+      localStorage.setItem('enroll_email', form.find('input[name="email"]').val());
 
       $.ajax({
           url: form.attr('action'),
           type: "POST",
           data: form.serialize(),
           success: function(response) {
-              if (response.success) {
-                  showCartNotification(response.message, 'success');
+              if (response.status || response.success) {
+                  showCartNotification(response.message || 'Course added to cart!', 'success');
                   setTimeout(() => {
                       window.location.href = "{{ route('cart') }}";
                   }, 1000);

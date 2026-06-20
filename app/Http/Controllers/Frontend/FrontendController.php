@@ -204,11 +204,20 @@ class FrontendController extends Controller
             ->limit(6)
             ->get();
 
+        // Get cart product IDs for current user
+        $cartProductIds = [];
+        if(auth()->check()) {
+            $cartProductIds = Cart::where('user_id', auth()->id())
+                ->pluck('product_id')
+                ->toArray();
+        }
+
         return view("website.shop", compact(
             'products', 
             'total_products', 
             'allRootCategories',
-            'topClickedProducts'
+            'topClickedProducts',
+            'cartProductIds'
         ));
 
     }
