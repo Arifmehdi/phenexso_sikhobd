@@ -287,10 +287,16 @@
                 <span class="price">৳ {{ number_format($product->selling_price, 0) }}</span>
             @endif
           </div>
-          @if($product->discount > 0)
+          @if($product->discount > 0 && ($product->price > 0 || ($product->selling_price + $product->discount) > 0))
+            @php
+                $originalPrice = $product->price ?: ($product->selling_price + $product->discount);
+                $discountPercent = $originalPrice > 0 ? round(($product->discount / $originalPrice) * 100) : 0;
+            @endphp
+            @if($discountPercent > 0)
             <div style="margin-top:6px; color:var(--accent); font-size:13px; font-weight:600;">
-                {{ round(($product->discount / ($product->price ?: ($product->selling_price + $product->discount))) * 100) }}% OFF — limited time
+                {{ $discountPercent }}% OFF — limited time
             </div>
+            @endif
           @endif
 
           @if($isEnrolled)

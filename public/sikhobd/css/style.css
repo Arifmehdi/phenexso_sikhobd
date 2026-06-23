@@ -619,3 +619,7 @@ main { padding-top: 76px; }
   .auth-card { padding: 28px; }
   .lang-switch button { padding: 5px 9px; font-size: 11px; }
 }
+
+/* Ensure Quick View Modals are always above sticky header */
+#quickViewModal, #ebookQuickViewModal { z-index: 9999 !important; }
+.modal-backdrop.show { z-index: 9990 !important; }

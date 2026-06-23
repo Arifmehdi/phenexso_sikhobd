@@ -204,10 +204,16 @@ class FrontendController extends Controller
             ->limit(6)
             ->get();
 
-        // Get cart product IDs for current user
+        // Get cart product IDs for current user or guest session
         $cartProductIds = [];
         if(auth()->check()) {
             $cartProductIds = Cart::where('user_id', auth()->id())
+                ->whereNull('ebook_id')
+                ->pluck('product_id')
+                ->toArray();
+        } elseif(session('session_id')) {
+            $cartProductIds = Cart::where('session_id', session('session_id'))
+                ->whereNull('ebook_id')
                 ->pluck('product_id')
                 ->toArray();
         }

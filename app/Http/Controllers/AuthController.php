@@ -379,7 +379,7 @@ class AuthController extends Controller
             'email'      => $request->email,
             'password'   => Hash::make($request->password),
             'role'       => $request->role ?? 'buyer',
-            'is_approve' => 0,
+            'is_approve' => 1,
         ]);
 
         // Merge session cart
@@ -387,7 +387,7 @@ class AuthController extends Controller
 
         // Redirect
         return redirect()->route('login')
-                        ->with('success', 'Registration successful! Your account is pending approval from the administrator.');
+                        ->with('success', 'Registration successful! ');
     }
 
 

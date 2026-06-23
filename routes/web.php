@@ -753,10 +753,12 @@ Route::middleware(['userRole:admin','auth'])->prefix('admin')->group(function(){
 
 Route::get('ebooks', [\App\Http\Controllers\Frontend\EbookController::class, 'index'])->name('ebooks.index');
 Route::get('ebooks/show/{id}', [\App\Http\Controllers\Frontend\EbookController::class, 'show'])->name('ebooks.show');
-Route::get('ebooks/preview/{id}', [\App\Http\Controllers\Frontend\EbookController::class, 'preview'])->name('ebooks.preview');
+Route::get('ebooks/preview', [\App\Http\Controllers\Frontend\EbookController::class, 'preview'])->name('ebooks.preview');
+Route::get('ebooks/quick-view', [\App\Http\Controllers\Frontend\EbookController::class, 'quickView'])->name('ebooks.quick.view');
+
+Route::get('ebooks/buy/{id}', [\App\Http\Controllers\Frontend\EbookController::class, 'buy'])->name('ebooks.buy');
 
 Route::middleware(['auth', 'web'])->group(function() {
-    Route::get('ebooks/buy/{id}', [\App\Http\Controllers\Frontend\EbookController::class, 'buy'])->name('ebooks.buy');
     Route::get('ebooks/read/{id}', [\App\Http\Controllers\Frontend\EbookController::class, 'read'])->name('ebooks.read');
 });
 

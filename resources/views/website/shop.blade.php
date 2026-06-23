@@ -131,6 +131,75 @@
         transform: none;
         box-shadow: none;
     }
+    .in-cart-badge {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: #28a745;
+        color: #fff;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 20px;
+        z-index: 5;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .in-cart-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.08);
+        pointer-events: none;
+        z-index: 1;
+    }
+    .course-card.in-cart-card {
+        border-color: #28a745;
+        box-shadow: 0 0 0 1px #28a745, var(--shadow-md);
+    }
+    .course-card.in-cart-card .shop-product-thumb {
+        background: #f0fff4;
+    }
+    .go-to-cart-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        padding: 6px 12px;
+        background: #28a745;
+        color: #fff;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s;
+        flex: 1;
+    }
+    .go-to-cart-link:hover {
+        background: #218838;
+        color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    }
+    .shop-cart-btn.in-cart-state,
+    .shop-buy-btn.in-cart-state {
+        background: #e8f5e9;
+        color: #28a745;
+        border-color: #28a745;
+        cursor: default;
+    }
+    .shop-action-btn.in-cart-state {
+        background: #28a745;
+        color: #fff;
+        border-color: #28a745;
+        cursor: default;
+    }
     .shop-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
@@ -276,49 +345,67 @@
             </form>
           </div>
 
-          <div class="shop-grid">
-            @forelse($products as $product)
-            <article class="course-card">
-              <div class="shop-product-thumb">
-                @if($product->discount > 0)
-                <span class="course-tag">{{ $product->discount }}% OFF</span>
-                @elseif($product->feature)
-                <span class="course-tag">HOT</span>
-                @endif
-                
-                <img src="{{ route('imagecache', ['template' => 'pnimd', 'filename' => $product->fi()]) }}" alt="{{ $product->name_en }}">
-                
-                <div class="shop-actions">
-                    <button class="shop-action-btn quick-view-btn" data-id="{{ $product->id }}" title="View Details"><i class="fa-regular fa-eye"></i></button>
-                    <button class="shop-action-btn addToCart" data-url="{{ route('addToCart') }}" data-product="{{ $product->id }}" title="Add to Cart"><i class="fa-solid fa-cart-shopping"></i></button>
-                    <button class="shop-action-btn buyNow" data-url="{{ route('addToCart') }}" data-product="{{ $product->id }}" title="Buy Now"><i class="fa-solid fa-bolt"></i></button>
-                </div>
-              </div>
-              <div class="course-body">
-                <span style="font-size: 11px; color: var(--accent); font-weight: 700; text-transform: uppercase;">{{ $product->categories->first()->name_en ?? 'Product' }}</span>
-                <h3 style="margin-top: 5px;"><a href="{{ route('productDetails', $product->slug) }}" style="text-decoration: none; color: inherit;">{{ Str::limit($product->name_en, 40) }}</a></h3>
-                
-                <div class="course-foot" style="border: none; padding-top: 10px; display: flex; flex-direction: column; gap: 6px;">
-                  <div class="shop-price-box">
-                    <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Price :</span>
-                    @if($product->discount > 0)
-                      <span class="price">৳{{ number_format($product->discounted_price) }}</span>
-                      <span class="old-price-sm">৳{{ number_format($product->regular_price) }}</span>
-                    @else
-                      <span class="price">৳{{ number_format($product->regular_price) }}</span>
-                    @endif
-                  </div>
-                  <div style="display: flex; flex-direction: row; gap: 8px; width: 100%;">
-                    <button class="shop-cart-btn addToCart" data-url="{{ route('addToCart') }}" data-product="{{ $product->id }}" title="Add to Cart">
-                      Add To Cart
-                    </button>
-                    <button class="shop-buy-btn buyNow" data-url="{{ route('addToCart') }}" data-product="{{ $product->id }}" title="Buy Now">
-                      Buy Now
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </article>
+           <div class="shop-grid">
+             @forelse($products as $product)
+             @php $isInCart = in_array($product->id, $cartProductIds ?? []); @endphp
+             <article class="course-card {{ $isInCart ? 'in-cart-card' : '' }}" data-pid="{{ $product->id }}">
+               <div class="shop-product-thumb">
+                 @if($isInCart)
+                 <span class="in-cart-badge"><i class="fa-solid fa-check-circle"></i> In Cart</span>
+                 @elseif($product->discount > 0)
+                 <span class="course-tag">{{ $product->discount }}% OFF</span>
+                 @elseif($product->feature)
+                 <span class="course-tag">HOT</span>
+                 @endif
+
+                 @if($isInCart)<div class="in-cart-overlay"></div>@endif
+
+                 <img src="{{ route('imagecache', ['template' => 'pnimd', 'filename' => $product->fi()]) }}" alt="{{ $product->name_en }}">
+
+                 <div class="shop-actions">
+                     <button class="shop-action-btn quick-view-btn" data-id="{{ $product->id }}" title="View Details"><i class="fa-regular fa-eye"></i></button>
+                     @if($isInCart)
+                     <button class="shop-action-btn in-cart-state" title="Already in Cart"><i class="fa-solid fa-check"></i></button>
+                     @else
+                     <button class="shop-action-btn addToCart" data-url="{{ route('addToCart') }}" data-product="{{ $product->id }}" title="Add to Cart"><i class="fa-solid fa-cart-shopping"></i></button>
+                     @endif
+                     <button class="shop-action-btn {{ $isInCart ? 'in-cart-state' : 'buyNow' }}" data-url="{{ route('addToCart') }}" data-product="{{ $product->id }}" title="{{ $isInCart ? 'Already in Cart' : 'Buy Now' }}"><i class="fa-solid {{ $isInCart ? 'fa-check' : 'fa-bolt' }}"></i></button>
+                 </div>
+               </div>
+               <div class="course-body">
+                 <span style="font-size: 11px; color: var(--accent); font-weight: 700; text-transform: uppercase;">{{ $product->categories->first()->name_en ?? 'Product' }}</span>
+                 <h3 style="margin-top: 5px;"><a href="{{ route('productDetails', $product->slug) }}" style="text-decoration: none; color: inherit;">{{ Str::limit($product->name_en, 40) }}</a></h3>
+
+                 <div class="course-foot" style="border: none; padding-top: 10px; display: flex; flex-direction: column; gap: 6px;">
+                   <div class="shop-price-box">
+                     <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Price :</span>
+                     @if($product->discount > 0)
+                       <span class="price">৳{{ number_format($product->discounted_price) }}</span>
+                       <span class="old-price-sm">৳{{ number_format($product->regular_price) }}</span>
+                     @else
+                       <span class="price">৳{{ number_format($product->regular_price) }}</span>
+                     @endif
+                   </div>
+                   <div style="display: flex; flex-direction: row; gap: 8px; width: 100%;">
+                     @if($isInCart)
+                     <a href="{{ route('cart') }}" class="go-to-cart-link">
+                       <i class="fa-solid fa-cart-shopping"></i> Go to Cart
+                     </a>
+                     <button class="shop-buy-btn in-cart-state" disabled>
+                       <i class="fa-solid fa-check"></i> In Cart
+                     </button>
+                     @else
+                     <button class="shop-cart-btn addToCart" data-url="{{ route('addToCart') }}" data-product="{{ $product->id }}" title="Add to Cart">
+                       Add To Cart
+                     </button>
+                     <button class="shop-buy-btn buyNow" data-url="{{ route('addToCart') }}" data-product="{{ $product->id }}" title="Buy Now">
+                       Buy Now
+                     </button>
+                     @endif
+                   </div>
+                 </div>
+               </div>
+             </article>
             @empty
             <div style="grid-column: 1/-1; text-align: center; padding: 60px; background: var(--bg-soft); border-radius: var(--radius-lg);">
                 <i class="fa-solid fa-box-open" style="font-size: 48px; color: var(--text-muted); margin-bottom: 20px;"></i>
@@ -338,12 +425,11 @@
     </div>
   </section>
 
-<!-- Quick View Modal (Simplified) -->
+<!-- Quick View Modal -->
 <div class="modal fade" id="quickViewModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content" style="border-radius: var(--radius-lg); border: none; overflow: hidden;">
-            <div class="modal-body p-0" id="quickViewContent">
-                <!-- Content loaded via AJAX -->
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 920px; margin: 20px auto;">
+        <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 20px 60px rgba(0,0,0,0.15); overflow: hidden;">
+            <div class="modal-body p-0 position-relative" id="quickViewContent">
             </div>
         </div>
     </div>
@@ -353,42 +439,66 @@
 @push('js')
 <script>
     $(document).ready(function() {
-        // Cart product IDs from backend
-        let cartProductIds = {!! json_encode($cartProductIds ?? []) !!};
-        
-        // Check each Add to Cart and Buy Now button and disable if product is already in cart
-        $('.shop-cart-btn.addToCart, .shop-buy-btn.buyNow').each(function() {
-            let productId = $(this).data('product');
-            let btn = $(this);
-            
-            if(cartProductIds.includes(productId)) {
-                // Product is in cart, disable button
-                btn.attr('disabled', true).addClass('disabled');
-                if(btn.hasClass('addToCart')) {
-                    btn.text('Added to Cart');
-                } else if(btn.hasClass('buyNow')) {
-                    btn.text('In Cart');
-                }
-            }
-        });
-
         // Quick View AJAX
         $('.quick-view-btn').click(function() {
             let id = $(this).data('id');
             $('#quickViewModal').modal('show');
             $('#quickViewContent').html('<div class="p-5 text-center"><i class="fa-solid fa-spinner fa-spin fa-2x" style="color: var(--accent);"></i></div>');
-            
+
             $.get("{{ route('quick.view') }}", {id: id}, function(res) {
                 $('#quickViewContent').html(res.html);
             });
         });
 
+        // Transform a product card to "in-cart" state after AJAX add
+        function markProductInCart(productId) {
+            let $card = $('article.course-card[data-pid="' + productId + '"]');
+            $card.addClass('in-cart-card');
+
+            // Add badge + overlay to product thumb if not already present
+            let $thumb = $card.find('.shop-product-thumb');
+            if (!$thumb.find('.in-cart-badge').length) {
+                $thumb.find('.course-tag').remove();
+                $thumb.prepend('<span class="in-cart-badge"><i class="fa-solid fa-check-circle"></i> In Cart</span>');
+                if (!$thumb.find('.in-cart-overlay').length) {
+                    $thumb.append('<div class="in-cart-overlay"></div>');
+                }
+            }
+
+            // Icon buttons
+            $card.find('.shop-action-btn.addToCart, .shop-action-btn.buyNow').each(function() {
+                let $btn = $(this);
+                $btn.removeClass('addToCart buyNow').addClass('in-cart-state')
+                    .attr('title', 'Already in Cart')
+                    .html('<i class="fa-solid fa-check"></i>');
+            });
+
+            // Text buttons — replace Add To Cart with "Go to Cart" link, disable Buy Now
+            $card.find('.shop-cart-btn.addToCart').replaceWith(
+                '<a href="{{ route('cart') }}" class="go-to-cart-link"><i class="fa-solid fa-cart-shopping"></i> Go to Cart</a>'
+            );
+            $card.find('.shop-buy-btn.buyNow').addClass('in-cart-state')
+                .attr('disabled', true)
+                .html('<i class="fa-solid fa-check"></i> In Cart');
+        }
+
         // Add to Cart AJAX
-        $(document).on('click', '.shop-cart-btn.addToCart', function(e) {
+        $(document).on('click', '.shop-cart-btn.addToCart, .shop-action-btn.addToCart', function(e) {
             e.preventDefault();
             let btn = $(this);
             let product_id = btn.data('product');
             let url = btn.data('url');
+
+            if(btn.prop('disabled')) return;
+
+            let originalContent = btn.html();
+            btn.prop('disabled', true).addClass('disabled');
+
+            if(btn.hasClass('shop-action-btn')) {
+                btn.html('<i class="fa-solid fa-spinner fa-spin"></i>');
+            } else {
+                btn.text('Adding...');
+            }
 
             $.ajax({
                 url: url,
@@ -402,21 +512,36 @@
                     if(res.status) {
                         showCartNotification(res.message);
                         $('.cartCount').text(res.cartCount);
-                        
-                        // Disable only this Add to Cart button
-                        btn.attr('disabled', true).addClass('disabled');
-                        btn.text('Added to Cart');
+                        markProductInCart(product_id);
+                    } else {
+                        btn.html(originalContent);
+                        btn.prop('disabled', false).removeClass('disabled');
                     }
+                },
+                error: function() {
+                    btn.html(originalContent);
+                    btn.prop('disabled', false).removeClass('disabled');
                 }
             });
         });
 
         // Buy Now - Add to cart and redirect to checkout
-        $(document).on('click', '.shop-buy-btn.buyNow', function(e) {
+        $(document).on('click', '.shop-buy-btn.buyNow, .shop-action-btn.buyNow', function(e) {
             e.preventDefault();
             let btn = $(this);
             let product_id = btn.data('product');
             let url = btn.data('url');
+
+            if(btn.prop('disabled')) return;
+
+            let originalContent = btn.html();
+            btn.prop('disabled', true).addClass('disabled');
+
+            if(btn.hasClass('shop-action-btn')) {
+                btn.html('<i class="fa-solid fa-spinner fa-spin"></i>');
+            } else {
+                btn.text('Processing...');
+            }
 
             $.ajax({
                 url: url,
@@ -428,9 +553,15 @@
                 },
                 success: function(res) {
                     if(res.status) {
-                        // Redirect to checkout page instantly
                         window.location.href = "{{ route('new.checkout') }}";
+                    } else {
+                        btn.html(originalContent);
+                        btn.prop('disabled', false).removeClass('disabled');
                     }
+                },
+                error: function() {
+                    btn.html(originalContent);
+                    btn.prop('disabled', false).removeClass('disabled');
                 }
             });
         });

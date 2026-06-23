@@ -25,8 +25,22 @@ class EbookController extends Controller
 
         $ebooks = $query->latest()->paginate(12);
         $categories = ProductCategory::where('type', 'ebook')->where('active', 1)->get();
-        
-        return view('website.ebooks.index', compact('ebooks', 'categories'));
+
+        // Get ebook cart IDs for current user or guest session
+        $cartEbookIds = [];
+        if(Auth::check()) {
+            $cartEbookIds = Cart::where('user_id', Auth::id())
+                ->whereNull('product_id')
+                ->pluck('ebook_id')
+                ->toArray();
+        } elseif(session('session_id')) {
+            $cartEbookIds = Cart::where('session_id', session('session_id'))
+                ->whereNull('product_id')
+                ->pluck('ebook_id')
+                ->toArray();
+        }
+
+        return view('website.ebooks.index', compact('ebooks', 'categories', 'cartEbookIds'));
     }
 
     public function show($id)
@@ -48,16 +62,26 @@ class EbookController extends Controller
     public function buy($id)
     {
         $ebook = Ebook::findOrFail($id);
-        
+
+        if (!Auth::check()) {
+            if (request()->ajax()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'কার্টে যোগ করতে প্রথমে লগইন করুন।',
+                    'login_required' => true,
+                ], 401);
+            }
+            return redirect()->route('login')->with('warning', 'কার্টে যোগ করতে প্রথমে লগইন করুন।');
+        }
+
         $session_id = Session::get('session_id', function () {
             $id = Session::getId();
             Session::put('session_id', $id);
             return $id;
         });
 
-        $user_id = Auth::id() ?? 0;
+        $user_id = Auth::id();
 
-        // Check if already in cart
         $cart = Cart::firstOrNew([
             'ebook_id'   => $ebook->id,
             'session_id' => $session_id,
@@ -67,6 +91,13 @@ class EbookController extends Controller
         $cart->quantity   = 1;
         $cart->addedby_id = $user_id;
         $cart->save();
+
+        if (request()->ajax()) {
+            return response()->json([
+                'status' => true,
+                'message' => 'ই-বুকটি কার্টে যোগ করা হয়েছে।',
+            ]);
+        }
 
         return redirect()->route('new.checkout')->with('success', 'ই-বুকটি কার্টে যোগ করা হয়েছে।');
     }
@@ -144,12 +175,21 @@ class EbookController extends Controller
         return redirect()->route('ebooks.index')->with('success', 'eBook uploaded successfully and waiting for admin approval.');
     }
 
-    public function preview($id)
+    public function preview(Request $request)
     {
-        $ebook = Ebook::findOrFail($id);
+        $ebook = Ebook::findOrFail($request->id);
         if (!$ebook->preview_path) {
-            return back()->with('error', 'Preview not available for this eBook.');
+            return response()->json(['error' => 'Preview not available for this eBook.'], 404);
         }
-        return view('website.ebooks.preview', compact('ebook'));
+        return response()->json([
+            'pdf_url' => asset('storage/ebook_previews/' . $ebook->preview_path),
+        ]);
+    }
+
+    public function quickView(Request $request)
+    {
+        $ebook = Ebook::with('category')->findOrFail($request->id);
+        $html = view('website.partials.ebook_quick_view', compact('ebook'))->render();
+        return response()->json(['html' => $html]);
     }
 }
