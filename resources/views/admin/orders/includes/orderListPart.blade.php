@@ -13,6 +13,7 @@ use Illuminate\Support\Str;
         <th>Name</th>
         <th>Email</th>
         <th>Phone</th>
+        <th>Payment Type</th>
         <th>Transaction ID</th>
         <th>Date</th>
         <th>Order Status</th>
@@ -48,8 +49,13 @@ use Illuminate\Support\Str;
         <td>{{$order->name}}</td>
         <td>{{$order->email}}</td>
         <td>{{$order->mobile}}</td>
+        <td>
+            <span class="badge {{ $order->payment_method == 'online' ? 'badge-info' : 'badge-secondary' }}">
+                {{ $order->payment_method == 'online' ? 'Online' : strtoupper($order->payment_method ?? 'COD') }}
+            </span>
+        </td>
         <td title="{{ $order->payment_trx_id }}">
-            {{ Str::limit($order->payment_trx_id, 20) }}
+            {{ $order->payment_trx_id ? Str::limit($order->payment_trx_id, 20) : '—' }}
         </td>
         
         <td>{{$order->created_at->format('d/m/Y')}}</td>
@@ -63,7 +69,7 @@ use Illuminate\Support\Str;
         </tr>  
         @endforeach
         <tr> 
-            <th colspan="11" class="text-right w3-medium">Grand Total Amount</th>
+            <th colspan="12" class="text-right w3-medium">Grand Total Amount</th>
             <th class="w3-medium text-center" colspan="4">{{ '৳' .number_format($orders->sum('grand_total'), 2,)}}</th>
         </tr>
     </tbody>

@@ -16,6 +16,8 @@
                 @php
                     $isNewUser = session('is_new_user', false);
                     $tempPassword = session('temp_password');
+                    $tempEmail = session('temp_email');
+                    $isBn = app()->getLocale() == 'bn';
                     $hasCourses = $order && ($order->has_course || $order->orderItems->contains(fn($item) => $item->product && $item->product->type === 'course'));
                     $hasProducts = $order && $order->orderItems->contains(fn($item) => $item->product && $item->product->type !== 'course');
                 @endphp
@@ -28,29 +30,35 @@
                     @endif
                 </h1>
 
-                <p style="color: #64748b; font-size: 16px; line-height: 1.6; max-width: 600px; margin: 0 auto 30px;">
+                <p style="color: #64748b; font-size: 16px; line-height: 1.6; max-width: 600px; margin: 0 auto 20px;">
                     @if($isNewUser)
-                        @if(app()->getLocale() == 'bn')
-                            আপনার অ্যাকাউন্টটি সফলভাবে তৈরি করা হয়েছে। অর্ডার ট্র্যাকিং এবং কোর্স অ্যাক্সেস করার জন্য আপনার অস্থায়ী পাসওয়ার্ড নিচে দেওয়া হলো:
-                            <br>
-                            <strong style="color: var(--primary); font-size: 18px; display: block; margin-top: 10px;">
-                                পাসওয়ার্ড: {{ $tempPassword }}
-                            </strong>
-                        @else
-                            Your account has been successfully created. Please find your temporary password below for order tracking and course access:
-                            <br>
-                            <strong style="color: var(--primary); font-size: 18px; display: block; margin-top: 10px;">
-                                Password: {{ $tempPassword }}
-                            </strong>
-                        @endif
+                        {{ $isBn ? 'আপনার অ্যাকাউন্টটি সফলভাবে তৈরি করা হয়েছে। নিচের তথ্য দিয়ে লগইন করুন:' : 'Your account has been successfully created. Use the credentials below to log in:' }}
                     @else
-                        @if(app()->getLocale() == 'bn')
-                            আপনার বিদ্যমান অ্যাকাউন্টের মাধ্যমে অর্ডারটি সম্পন্ন করা হয়েছে। আপনি ড্যাশবোর্ড থেকে অর্ডারের বিস্তারিত দেখতে পারবেন।
-                        @else
-                            The order has been completed using your existing account. You can view order details from your dashboard.
-                        @endif
+                        {{ $isBn ? 'আপনার বিদ্যমান অ্যাকাউন্টের মাধ্যমে অর্ডারটি সম্পন্ন হয়েছে। ড্যাশবোর্ড থেকে বিস্তারিত দেখুন।' : 'The order has been completed using your existing account. View details from your dashboard.' }}
                     @endif
                 </p>
+
+                @if($isNewUser && $tempPassword)
+                <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 14px; padding: 20px 28px; max-width: 420px; margin: 0 auto 28px; text-align: left;">
+                    <p style="margin: 0 0 12px; font-size: 12px; font-weight: 700; color: #0369a1; text-transform: uppercase; letter-spacing: 0.5px;">
+                        {{ $isBn ? 'লগইন তথ্য' : 'Login Credentials' }}
+                    </p>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="min-width: 90px; color: #64748b; font-size: 14px; font-weight: 600;">{{ $isBn ? 'লগইন  ইমেইল:' : 'Login Email:' }}</span>
+                            <code style="background:#fff; border:1px solid #e0f2fe; border-radius:6px; padding:4px 12px; font-size:15px; color:#0c4a6e; font-weight:700;">{{ $tempEmail }}</code>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="min-width: 90px; color: #64748b; font-size: 14px; font-weight: 600;">{{ $isBn ? 'লগইন পাসওয়ার্ড:' : 'Login Password:' }}</span>
+                            <code style="background:#fff; border:1px solid #e0f2fe; border-radius:6px; padding:4px 12px; font-size:15px; color:#0c4a6e; font-weight:700;">{{ $tempPassword }}</code>
+                        </div>
+                    </div>
+                    <p style="margin: 12px 0 0; font-size: 12px; color: #0369a1;">
+                        <i class="fa-solid fa-circle-info mr-1"></i>
+                        {{ $isBn ? 'লগইনের পর পাসওয়ার্ড পরিবর্তন করুন।' : 'Please change your password after logging in.' }}
+                    </p>
+                </div>
+                @endif
 
                 @if($hasCourses)
                 <div style="background: #f0fdf4; border: 1px dashed #22c55e; padding: 15px; border-radius: 12px; margin-bottom: 30px;">
@@ -76,7 +84,7 @@
             <div style="background: #fff; padding: 30px; border-radius: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); border: 1px solid #e2e8f0;">
                 <h3 style="font-size: 18px; font-weight: 800; color: #1e293b; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
                     <i class="fa-solid fa-file-invoice" style="color: var(--primary);"></i>
-                    এনরোলমেন্ট ইনভয়েস: #{{ $order->id }}
+                    {{ $hasCourses ? 'এনরোলমেন্ট ইনভয়েস' : 'অর্ডার ইনভয়েস' }}: #{{ $order->id }}
                 </h3>
 
                 <div style="border-bottom: 1px solid #f1f5f9; padding-bottom: 15px; margin-bottom: 15px; display: flex; justify-content: space-between; font-size: 14px;">
@@ -96,7 +104,7 @@
                     <table style="width: 100%; border-collapse: collapse;">
                         <thead>
                             <tr style="text-align: left; border-bottom: 2px solid #f1f5f9;">
-                                <th style="padding: 10px 0; color: #64748b; font-size: 13px;">কোর্সের নাম</th>
+                                <th style="padding: 10px 0; color: #64748b; font-size: 13px;">{{ $hasCourses ? 'কোর্সের নাম' : 'পণ্যের নাম' }}</th>
                                 <th style="padding: 10px 0; color: #64748b; font-size: 13px; text-align: right;">মূল্য</th>
                             </tr>
                         </thead>
@@ -134,7 +142,7 @@
                 <div style="background: #f8fafc; padding: 20px; border-radius: 12px; font-size: 14px;">
                     <div style="display: flex; gap: 20px;">
                         <div style="flex: 1;">
-                            <span style="color: #94a3b8; display: block; font-weight: 600; text-transform: uppercase; font-size: 11px; margin-bottom: 5px;">প্রশিক্ষক তথ্য</span>
+                            <span style="color: #94a3b8; display: block; font-weight: 600; text-transform: uppercase; font-size: 11px; margin-bottom: 5px;">{{ $hasCourses ? 'শিক্ষার্থীর তথ্য' : 'গ্রাহকের তথ্য' }}</span>
                             <strong style="color: #334155;">{{ $order->name }}</strong><br>
                             <span style="color: #64748b;">{{ $order->mobile }}</span><br>
                             <span style="color: #64748b;">{{ $order->email }}</span>

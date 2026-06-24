@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\CategoriesController;
 use App\Http\Controllers\Admin\FrontSliderController;
 use App\Http\Controllers\Admin\GalleryController;
 use App\Http\Controllers\Admin\HomeController;
+use App\Http\Controllers\Admin\VisitorController;
 use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\MediaController;
 use App\Http\Controllers\Admin\PostController;
@@ -26,6 +27,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\Frontend\FrontendController;
+use App\Http\Controllers\Frontend\CertificateController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
 use App\Http\Controllers\SslCommerzPaymentController;
@@ -169,6 +171,9 @@ Route::get('diagnostic',[FrontendController::class,'diagnostic'])->name('diagnos
 Route::get('hopital/details/{id}',[FrontendController::class,'hospitalDetails'])->name('hospitalDetails');
 
 Route::get('checkout',[FrontendController::class, 'new_checkout'])->name('new.checkout');
+// Dependent location dropdowns (Division -> District -> Upazila)
+Route::get('locations/districts/{division}',[FrontendController::class, 'getDistricts'])->name('locations.districts');
+Route::get('locations/upazilas/{district}',[FrontendController::class, 'getUpazilas'])->name('locations.upazilas');
 Route::post('cod/order/store',[FrontendController::class, 'codOrderStore'])->name('codOrderStore');
 Route::post('course/order/store',[FrontendController::class, 'courseOrderStore'])->name('courseOrderStore');
 Route::post('product/order/store',[FrontendController::class, 'productOrderStore'])->name('productOrderStore');
@@ -315,7 +320,11 @@ Route::group(['middleware' => ['web', 'auth'], 'prefix' => 'mypanel'], function 
     Route::post('change/my/information',[AuthController::class,'changeMyInformation'])->name('user.changeMyInformation');
     Route::post('profile-image/upload',[AuthController::class,'uploadProfileImage'])->name('user.uploadProfileImage');
     Route::get('orders/type/{type}',[AuthController::class,'orders'])->name('user.orders');
-    
+
+    // Course completion certificates
+    Route::get('certificates',[CertificateController::class, 'index'])->name('user.certificates');
+    Route::get('certificate/{product}',[CertificateController::class, 'generate'])->name('user.certificate');
+
     Route::get('checkout',[FrontendController::class, 'checkout'])->name('checkout');
     // Route::get('new/checkout',[FrontendController::class, 'new_checkout'])->name('new.checkout');
     // Route::post('cod/order/store',[FrontendController::class, 'codOrderStore'])->name('codOrderStore');
@@ -371,6 +380,11 @@ Route::middleware(['userRole:admin','auth'])->prefix('admin')->group(function(){
 
     //admin
     Route::get('dashboard',[HomeController::class,'index'])->name('admin.dashboard');
+
+    // Visitor Tracking
+    Route::get('visitors', [VisitorController::class, 'index'])->name('admin.visitors.index');
+    Route::get('visitors/ip/{ip}', [VisitorController::class, 'ipDetail'])->name('admin.visitors.ip');
+    Route::post('visitors/clear', [VisitorController::class, 'clearOld'])->name('admin.visitors.clear');
     Route::get('select/tags/',[HomeController::class,'selectTagsOrAddNew'])->name('admin.tags');
     Route::get('select/authors/',[HomeController::class,'selectAuthorsOrAddNew'])->name('admin.authors');
    

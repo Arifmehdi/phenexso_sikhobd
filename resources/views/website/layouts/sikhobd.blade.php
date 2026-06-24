@@ -35,16 +35,20 @@
         }
 
         main {
-            padding: 30px 0 60px;
+            padding: 0 0 60px;
         }
 
         .site-header {
             position: sticky;
             top: 0;
             z-index: 1100;
-            background: #ffffff;
-            border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: saturate(180%) blur(14px);
+            -webkit-backdrop-filter: saturate(180%) blur(14px);
             box-shadow: 0 18px 50px rgba(15, 23, 42, 0.06);
+            margin: 0;
+            padding: 0;
+            width: 100%;
         }
 
         .header-inner {
@@ -52,7 +56,17 @@
             align-items: center;
             justify-content: space-between;
             gap: 16px;
-            padding: 18px 0;
+            padding: 12px 0;
+        }
+
+        .header-bottom {
+            padding: 8px 0;
+            border-top: 1px solid rgba(148, 163, 184, 0.10);
+        }
+
+        .nav-center {
+            display: flex;
+            justify-content: flex-start;
         }
 
         .logo img {

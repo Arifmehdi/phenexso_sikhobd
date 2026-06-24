@@ -34,10 +34,24 @@
                                 </div>
 
                                 <div class="form-group ">
-                                    <label for="google_search_console" class="control-label">
-                                        Shipping Charge
+                                    <label for="shipping_cahrge" class="control-label">
+                                        Shipping Charge (Default / Fallback)
                                     </label>
                                   <input type="text" name="shipping_cahrge" class="form-control" value="{{ old('shipping_cahrge') ?: $websiteParameter->shipping_charge ?? '' }}" id="shipping_cahrge" placeholder="Shipping Charge" autocomplete="off">
+                                </div>
+
+                                <div class="form-group ">
+                                    <label for="shipping_inside_dhaka" class="control-label">
+                                        Shipping Charge (Inside Dhaka / ঢাকার ভিতরে)
+                                    </label>
+                                    <input type="number" step="0.01" min="0" name="shipping_inside_dhaka" class="form-control" value="{{ old('shipping_inside_dhaka') ?: $websiteParameter->shipping_inside_dhaka ?? '' }}" id="shipping_inside_dhaka" placeholder="e.g. 60" autocomplete="off">
+                                </div>
+
+                                <div class="form-group ">
+                                    <label for="shipping_outside_dhaka" class="control-label">
+                                        Shipping Charge (Outside Dhaka / ঢাকার বাইরে)
+                                    </label>
+                                    <input type="number" step="0.01" min="0" name="shipping_outside_dhaka" class="form-control" value="{{ old('shipping_outside_dhaka') ?: $websiteParameter->shipping_outside_dhaka ?? '' }}" id="shipping_outside_dhaka" placeholder="e.g. 120" autocomplete="off">
                                 </div>
 
                                 <div class="form-group ">

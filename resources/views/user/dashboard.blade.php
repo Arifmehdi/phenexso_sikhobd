@@ -223,18 +223,39 @@
                             {{ substr($enrollment->product->name_en ?? 'C', 0, 1) }}
                         @endif
                     </a>
+                    @php
+                        $progress = $courseProgress[$enrollment->product_id] ?? 0;
+                        $hasCertificate = isset($userCertificates[$enrollment->product_id]);
+                        $isCompleted = $progress >= 100;
+                    @endphp
                     <div class="body">
                         <h4><a href="{{ route('courseDetail', $enrollment->product->slug) }}" style="text-decoration: none; color: inherit;">{{ $enrollment->product->name_en ?? 'Course' }}</a></h4>
+                        @if($enrollment->product->instructor)
+                        <div class="meta" style="display:flex; align-items:center; gap:8px; margin-top:4px;">
+                            <span style="width:24px; height:24px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; background:#6c5ce7; color:#fff; font-size:10px; font-weight:700; overflow:hidden; background-size:cover; background-position:center; {{ $enrollment->product->instructor->image ? "background-image:url('".asset('storage/users/'.$enrollment->product->instructor->image)."');" : '' }}">
+                                @if(!$enrollment->product->instructor->image){{ strtoupper(substr($enrollment->product->instructor->name, 0, 1)) }}@endif
+                            </span>
+                            <span>ইনস্ট্রাকটর: {{ $enrollment->product->instructor->name }}</span>
+                        </div>
+                        @endif
                         <div class="meta">
                             @if($enrollment->enrolled_at)
                                 Enrolled: {{ $enrollment->enrolled_at->format('d M, Y') }}
                             @else
                                 Enrolled: Pending
                             @endif
-                            &middot; Status: {{ ucfirst($enrollment->status) }}
+                            &middot; Status: {{ $isCompleted ? 'Completed' : ucfirst($enrollment->status) }}
                         </div>
+                        <div style="margin-top:8px; background:#eef2f7; border-radius:20px; height:8px; width:100%; max-width:260px; overflow:hidden;">
+                            <div style="height:8px; width:{{ $progress }}%; background:{{ $isCompleted ? '#16a34a' : '#6c5ce7' }};"></div>
+                        </div>
+                        <div class="meta" style="margin-top:4px;">অগ্রগতি (Progress): {{ $progress }}%</div>
                     </div>
-                    @if($enrollment->status == 'active')
+                    @if($isCompleted)
+                        <a href="{{ route('user.certificate', $enrollment->product_id) }}" target="_blank" class="btn btn-success btn-sm">
+                            <i class="fa-solid fa-certificate"></i> {{ $hasCertificate ? 'Download Certificate' : 'Get Certificate' }}
+                        </a>
+                    @elseif($enrollment->status == 'active')
                         <a href="{{ route('courseDetail', $enrollment->product->slug) }}" class="btn btn-primary btn-sm">Continue Learning</a>
                     @else
                         <span class="status-pill status-pending">{{ ucfirst($enrollment->status) }}</span>

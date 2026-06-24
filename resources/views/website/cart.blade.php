@@ -115,8 +115,8 @@
                                         </select>
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="custom-label">সর্বশেষ পড়াশোনা (Last Study) *</label>
-                                        <select name="last_academic_status" class="form-control custom-input" required>
+                                        <label class="custom-label">সর্বশেষ পড়াশোনা (Last Study)</label>
+                                        <select name="last_academic_status" class="form-control custom-input">
                                             <option value="">নির্বাচন করুন</option>
                                             <option value="PSC/Ebtedayee">PSC/ইবতেদায়ী</option>
                                             <option value="JSC/JDC">JSC/জেডিসি</option>
@@ -131,9 +131,37 @@
                                 @endif
 
                                 @if($hasProduct)
+                                <div class="col-md-4">
+                                    <label class="custom-label">বিভাগ (Division) *</label>
+                                    <select name="division_id" id="division_id" class="form-control custom-input" required>
+                                        <option value="">বিভাগ নির্বাচন করুন</option>
+                                        @foreach($divisions as $division)
+                                            <option value="{{ $division->id }}" data-name="{{ $division->name }}">{{ $division->bn_name ?? $division->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="custom-label">জেলা (District) *</label>
+                                    <select name="district_id" id="district_id" class="form-control custom-input" required disabled>
+                                        <option value="">আগে বিভাগ নির্বাচন করুন</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="custom-label">উপজেলা / থানা (Upazila) *</label>
+                                    <select name="upazila_id" id="upazila_id" class="form-control custom-input" required disabled>
+                                        <option value="">আগে জেলা নির্বাচন করুন</option>
+                                    </select>
+                                </div>
                                 <div class="col-12">
-                                    <label class="custom-label">বিস্তারিত ঠিকানা (বাসা, রোড, এলাকা ও জেলা) *</label>
-                                    <textarea name="billing_address" class="form-control custom-input" rows="4" placeholder="আপনার বিস্তারিত ঠিকানা লিখুন" required>{{ auth()->check() && auth()->user()->locations()->first() ? auth()->user()->locations()->first()->address_title : '' }}</textarea>
+                                    <input type="hidden" name="delivery_area" id="delivery_area" value="inside">
+                                    <div id="delivery-zone-info" class="alert alert-light mb-0" style="border-radius:12px; border:1px dashed #cbd5e1; display:none; font-size:14px;">
+                                        <i class="fa-solid fa-truck-fast mr-2" style="color:var(--primary);"></i>
+                                        <span id="delivery-zone-text"></span>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <label class="custom-label">বিস্তারিত ঠিকানা (বাসা, রোড, এলাকা) *</label>
+                                    <textarea name="billing_address" class="form-control custom-input" rows="3" placeholder="বাসা/হোল্ডিং নম্বর, রোড, এলাকা" required>{{ auth()->check() && auth()->user()->locations()->first() ? auth()->user()->locations()->first()->address_title : '' }}</textarea>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="custom-label">অফিসের ঠিকানা (ঐচ্ছিক)</label>
@@ -170,11 +198,11 @@
                             </div>
                             <div class="summary-line">
                                 <span>ডেলিভারি চার্জ</span>
-                                <span class="fw-bold text-dark">৳{{ number_format($shippingCharge) }}</span>
+                                <span id="summary-delivery" class="fw-bold text-dark" data-charge="{{ $shippingCharge }}">৳{{ number_format($shippingCharge) }}</span>
                             </div>
                             <div class="summary-line grand-total">
                                 <span>সর্বমোট</span>
-                                <span id="summary-total">৳{{ number_format($cartSubtotal + $shippingCharge) }}</span>
+                                <span id="summary-total" data-subtotal="{{ $cartSubtotal }}">৳{{ number_format($cartSubtotal + $shippingCharge) }}</span>
                             </div>
                         </div>
                     </div>
@@ -284,7 +312,8 @@
 <script>
     $(document).ready(function() {
         const codRoute = "{{ route('codOrderStore') }}";
-        const onlineRoute = "{{ route('onlineOrderStore') }}";
+        // Online payment now collects a TXN ID and stores the order directly (no gateway)
+        const onlineRoute = "{{ route('codOrderStore') }}";
 
         // Pre-fill form fields from localStorage (if coming from homepage enroll form)
         const enrollName = localStorage.getItem('enroll_name');
@@ -325,7 +354,57 @@
         const initialVal = $('input[name="payment_method"]:checked').val();
         $('#checkoutForm').attr('action', initialVal === 'cod' ? codRoute : onlineRoute);
         updateOnlinePaymentFields(initialVal === 'online');
+
+        // ---- Dependent Division -> District -> Upazila + Dhaka-based shipping ----
+        const SHIP_INSIDE = {{ (float) ($shippingInside ?? 0) }};
+        const SHIP_OUTSIDE = {{ (float) ($shippingOutside ?? 0) }};
+        const districtsBase = "{{ url('locations/districts') }}";
+        const upazilasBase = "{{ url('locations/upazilas') }}";
+
+        function setDeliveryZone(isDhaka) {
+            const charge = isDhaka ? SHIP_INSIDE : SHIP_OUTSIDE;
+            $('#delivery_area').val(isDhaka ? 'inside' : 'outside');
+            $('#summary-delivery').data('charge', charge);
+            recalcTotal();
+            $('#delivery-zone-text').text((isDhaka ? 'ঢাকার ভিতরে' : 'ঢাকার বাইরে') + ' — ডেলিভারি চার্জ ৳' + charge.toLocaleString());
+            $('#delivery-zone-info').show();
+        }
+
+        $('#division_id').on('change', function() {
+            const divId = $(this).val();
+            const $district = $('#district_id'), $upazila = $('#upazila_id');
+            $upazila.prop('disabled', true).html('<option value="">আগে জেলা নির্বাচন করুন</option>');
+            $('#delivery-zone-info').hide();
+            if (!divId) { $district.prop('disabled', true).html('<option value="">আগে বিভাগ নির্বাচন করুন</option>'); return; }
+            $district.prop('disabled', true).html('<option value="">লোড হচ্ছে...</option>');
+            $.getJSON(districtsBase + '/' + divId, function(data) {
+                let opts = '<option value="">জেলা নির্বাচন করুন</option>';
+                data.forEach(function(d) { opts += '<option value="' + d.id + '" data-name="' + d.name + '">' + (d.bn_name || d.name) + '</option>'; });
+                $district.html(opts).prop('disabled', false);
+            });
+        });
+
+        $('#district_id').on('change', function() {
+            const distId = $(this).val();
+            const distName = ($(this).find('option:selected').data('name') || '').toString().toLowerCase();
+            const $upazila = $('#upazila_id');
+            if (!distId) { $upazila.prop('disabled', true).html('<option value="">আগে জেলা নির্বাচন করুন</option>'); $('#delivery-zone-info').hide(); return; }
+            setDeliveryZone(distName === 'dhaka');
+            $upazila.prop('disabled', true).html('<option value="">লোড হচ্ছে...</option>');
+            $.getJSON(upazilasBase + '/' + distId, function(data) {
+                let opts = '<option value="">উপজেলা / থানা নির্বাচন করুন</option>';
+                data.forEach(function(u) { opts += '<option value="' + u.id + '">' + (u.bn_name || u.name) + '</option>'; });
+                $upazila.html(opts).prop('disabled', false);
+            });
+        });
     });
+
+    function recalcTotal() {
+        const subtotal = parseFloat($('#summary-total').data('subtotal')) || 0;
+        const charge = parseFloat($('#summary-delivery').data('charge')) || 0;
+        $('#summary-delivery').text('৳' + charge.toLocaleString());
+        $('#summary-total').text('৳' + (subtotal + charge).toLocaleString());
+    }
 
     function updateCartQty(cartId, change) {
         let input = $(`#qty-input-${cartId}`);
@@ -370,7 +449,7 @@
                                 if($('.item-row').length == 0) location.reload();
                             });
                             $('#summary-subtotal').text('৳' + res.cartTotal.toLocaleString());
-                            $('#summary-total').text('৳' + (res.cartTotal + res.shippingCharge).toLocaleString());
+                            $('#summary-total').data('subtotal', res.cartTotal); recalcTotal();
                             $('.cartCount').text(res.cartCount);
                             showCartNotification('পণ্যটি সরানো হয়েছে');
                         }

@@ -70,6 +70,33 @@ class Product extends Model
         return $this->type === 'course';
     }
 
+    /**
+     * Percentage of this course's active lessons completed by the given user.
+     */
+    public function completionPercentForUser($userId)
+    {
+        $lessonIds = $this->lessons()->where('active', 1)->pluck('id');
+        $total = $lessonIds->count();
+
+        if ($total === 0) {
+            return 0;
+        }
+
+        $done = \App\Models\LessonCompletion::where('user_id', $userId)
+            ->whereIn('course_lesson_id', $lessonIds)
+            ->count();
+
+        return (int) round(($done / $total) * 100);
+    }
+
+    /**
+     * Whether the given user has fully completed this course.
+     */
+    public function isCompletedByUser($userId)
+    {
+        return $this->completionPercentForUser($userId) >= 100;
+    }
+
     public function isFree()
     {
         return $this->selling_price <= 0;

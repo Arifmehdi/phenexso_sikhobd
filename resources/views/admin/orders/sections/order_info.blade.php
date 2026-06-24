@@ -29,9 +29,24 @@
             @endif 
 
             @if($order->email)
-            Email: 
+            Email:
             {{ $order->email ?? optional($order->user)->email }}<br>
             @endif
+
+            <div class="mt-3 pt-2 border-top">
+                <strong class="text-primary"><i class="fas fa-credit-card"></i> Payment Info</strong><br>
+                Payment Type:
+                <span class="badge {{ $order->payment_method == 'online' ? 'bg-info' : 'bg-secondary' }}">
+                    {{ $order->payment_method == 'online' ? 'Online' : strtoupper($order->payment_method ?? 'COD') }}
+                </span><br>
+                @if($order->payment_trx_id)
+                    Transaction ID: <strong>{{ $order->payment_trx_id }}</strong><br>
+                @endif
+                Payment Status:
+                <span class="badge {{ $order->payment_status == 'paid' ? 'bg-success' : ($order->payment_status == 'pending' ? 'bg-warning' : 'bg-danger') }}">
+                    {{ ucfirst($order->payment_status) }}
+                </span>
+            </div>
 
             @if($order->has_course)
                 <div class="mt-3 pt-2 border-top">

@@ -17,9 +17,22 @@
                             </div>
                         </div>
 
-                        <form action="{{ route('admin.instructors.update', $instructor->id) }}" method="post">
+                        <form action="{{ route('admin.instructors.update', $instructor->id) }}" method="post" enctype="multipart/form-data">
                             @csrf
                             <div class="card-body">
+                                <div class="form-group text-center">
+                                    <label class="d-block">Instructor Photo</label>
+                                    <img id="image-preview"
+                                         src="{{ $instructor->image ? asset('storage/users/' . $instructor->image) : asset('admin/images/avatar.jpg') }}"
+                                         alt="Preview"
+                                         style="width:110px; height:110px; object-fit:cover; border-radius:50%; border:2px solid #e2e8f0; margin-bottom:10px;">
+                                    <input type="file" name="image" id="image" class="form-control" accept="image/*"
+                                           onchange="document.getElementById('image-preview').src = window.URL.createObjectURL(this.files[0])">
+                                    @error('image')
+                                        <span class="text-danger">{{ $message }}</span>
+                                    @enderror
+                                </div>
+
                                 <div class="form-group">
                                     <label for="name">Full Name <span class="text-danger">*</span></label>
                                     <input type="text" name="name" id="name" class="form-control"

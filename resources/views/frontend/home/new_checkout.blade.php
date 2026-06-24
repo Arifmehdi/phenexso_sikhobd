@@ -1,4 +1,4 @@
-@extends('website.layouts.mncofee')
+﻿@extends('website.layouts.mncofee')
 
 @section('title', 'Checkout - ' . ($ws->name ?? env('APP_NAME')))
 
@@ -151,8 +151,8 @@
                                             <input type="text" class="form-control" id="occupation" name="occupation" placeholder="e.g. Student" required>
                                         </div>
                                         <div class="col-12 mb-3">
-                                            <label class="form-label">Last Study <span class="text-danger">*</span></label>
-                                            <input type="text" class="form-control" id="last_academic_status" name="last_academic_status" placeholder="e.g. GPA 5.00" required>
+                                            <label class="form-label">Last Study</label>
+                                            <input type="text" class="form-control" id="last_academic_status" name="last_academic_status" placeholder="e.g. GPA 5.00">
                                         </div>
                                     @endif
 

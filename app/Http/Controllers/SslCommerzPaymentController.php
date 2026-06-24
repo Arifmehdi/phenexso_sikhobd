@@ -115,7 +115,12 @@ class SslCommerzPaymentController extends Controller
 
         $subtotal = $this->calculateSubtotal($cartItems);
 
-        $deliveryCost = $hasProduct ? ($ws->shipping_charge ?? $request->shipping_price) : 0;
+        $deliveryArea = $request->input('delivery_area', 'inside');
+        $insideCharge  = (float) ($ws->shipping_inside_dhaka ?? $ws->shipping_charge ?? 0);
+        $outsideCharge = (float) ($ws->shipping_outside_dhaka ?? $ws->shipping_charge ?? 0);
+        $areaCharge = $deliveryArea === 'outside' ? $outsideCharge : $insideCharge;
+
+        $deliveryCost = $hasProduct ? $areaCharge : 0;
         $grandTotal = $subtotal + $deliveryCost;
 
         $orderNote = $request->order_note ?? null;
@@ -124,6 +129,10 @@ class SslCommerzPaymentController extends Controller
             if ($request->office_address) $extraNote .= "Office Address: " . $request->office_address . "\n";
             if ($request->office_time) $extraNote .= "Office Time: " . $request->office_time . "\n";
             $orderNote = $extraNote . ($orderNote ? "Note: " . $orderNote : "");
+        }
+        if ($hasProduct && $request->filled('delivery_area')) {
+            $areaLabel = $deliveryArea === 'outside' ? 'ঢাকার বাইরে' : 'ঢাকার ভিতরে';
+            $orderNote = "ডেলিভারি এরিয়া: " . $areaLabel . "\n" . ($orderNote ?? '');
         }
 
         DB::beginTransaction();

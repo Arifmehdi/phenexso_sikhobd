@@ -212,8 +212,21 @@
 
     <!-- Sidebar Curriculum -->
     <aside class="player-sidebar">
+        @if($product->instructor)
+        <div style="display:flex; align-items:center; gap:12px; background:var(--bg-soft,#f8f9fa); border:1px solid var(--border,#e2e8f0); border-radius:12px; padding:12px 14px; margin-bottom:20px;">
+            <div style="width:48px; height:48px; border-radius:50%; flex-shrink:0; background:var(--primary); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; overflow:hidden; background-size:cover; background-position:center; {{ $product->instructor->image ? "background-image:url('".asset('storage/users/'.$product->instructor->image)."');" : '' }}">
+                @if(!$product->instructor->image){{ strtoupper(substr($product->instructor->name, 0, 2)) }}@endif
+            </div>
+            <div style="min-width:0;">
+                <div style="font-size:11px; color:var(--text-muted,#94a3b8); text-transform:uppercase; letter-spacing:0.5px;">ইনস্ট্রাকটর</div>
+                <div style="font-weight:700; color:var(--primary); font-size:14px;">{{ $product->instructor->name }}</div>
+                <div style="font-size:12px; color:var(--text-soft,#64748b);">{{ $product->instructor->designation ?? 'Professional Instructor' }}</div>
+            </div>
+        </div>
+        @endif
+
         <h3 style="font-size: 18px; margin-bottom: 20px;"><i class="fa-solid fa-list-ul"></i> Course Curriculum</h3>
-        
+
         @forelse($sections as $section)
             <div class="section-group">
                 <div class="section-title">{{ lp($section, 'title') }}</div>

@@ -22,6 +22,8 @@ class WebsiteParameterController extends Controller
 
         $wp->website_title = $request->website_title;
         $wp->shipping_charge = $request->shipping_cahrge;
+        $wp->shipping_inside_dhaka = $request->shipping_inside_dhaka;
+        $wp->shipping_outside_dhaka = $request->shipping_outside_dhaka;
         $wp->google_search_console = $request->google_search_console;
         $wp->google_analytics_code = $request->google_analytics_code;
         $wp->facebook_pixel_code = $request->facebook_pixel_code;

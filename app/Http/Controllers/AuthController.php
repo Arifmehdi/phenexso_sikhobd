@@ -416,7 +416,16 @@ class AuthController extends Controller
         $featured_products = \App\Models\Product::where('feature', 1)->where('active',1)->latest()->paginate(12);
         $stockRequests = \App\Models\ProductStockRequest::where('user_id', Auth::id())->latest()->paginate(20); // Initialize
         $products = \App\Models\Product::all(); // Add this line
-        $enrollments = \App\Models\Enrollment::where('user_id', $user->id)->with('product')->latest()->get();
+        $enrollments = \App\Models\Enrollment::where('user_id', $user->id)->with('product.instructor')->latest()->get();
+
+        // Course completion progress + existing certificates (product_id => certificate id)
+        $courseProgress = [];
+        foreach ($enrollments as $e) {
+            if ($e->product && $e->product->type === 'course') {
+                $courseProgress[$e->product_id] = $e->product->completionPercentForUser($user->id);
+            }
+        }
+        $userCertificates = \App\Models\Certificate::where('user_id', $user->id)->pluck('id', 'product_id');
 
         $now = \Carbon\Carbon::now();
         $user_id = Auth::id();
@@ -453,7 +462,7 @@ class AuthController extends Controller
             $teacher_exams_count = \App\Models\Exam::where('created_by', $user->id)->count();
         }
 
-        return view('user.dashboard', compact('user', 'todayOrdersCount', 'cancelOrdersCount', 'orders', 'activeTab','featured_products', 'stockRequests', 'products', 'enrollments', 'exams', 'completed_exams', 'teacher_questions_count', 'teacher_exams_count', 'teacher_questions', 'teacher_exams'));
+        return view('user.dashboard', compact('user', 'todayOrdersCount', 'cancelOrdersCount', 'orders', 'activeTab','featured_products', 'stockRequests', 'products', 'enrollments', 'courseProgress', 'userCertificates', 'exams', 'completed_exams', 'teacher_questions_count', 'teacher_exams_count', 'teacher_questions', 'teacher_exams'));
     }
 
     public function orders(Request $request)

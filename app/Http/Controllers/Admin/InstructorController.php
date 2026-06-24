@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 class InstructorController extends Controller
@@ -68,6 +69,7 @@ class InstructorController extends Controller
             'mobile'   => 'nullable|string|max:20',
             'password' => 'required|min:6',
             'is_approve' => 'nullable|in:0,1',
+            'image'    => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048',
         ]);
 
         $user = new User;
@@ -77,6 +79,14 @@ class InstructorController extends Controller
         $user->role       = 'instructor';
         $user->is_approve = $request->is_approve ?? 0;
         $user->password   = Hash::make($request->password);
+
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $imageName = time() . '.' . $file->getClientOriginalExtension();
+            $file->storeAs('users', $imageName, 'public');
+            $user->image = $imageName;
+        }
+
         $user->save();
 
         return redirect()->route('admin.instructors.index')
@@ -108,6 +118,7 @@ class InstructorController extends Controller
             'email'      => Rule::unique('users', 'email')->ignore($id),
             'mobile'     => 'nullable|string|max:20',
             'is_approve' => 'nullable|in:0,1',
+            'image'      => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048',
         ]);
 
         $instructor->name       = $request->name;
@@ -118,6 +129,17 @@ class InstructorController extends Controller
         if ($request->filled('password')) {
             $this->validate($request, ['password' => 'min:6']);
             $instructor->password = Hash::make($request->password);
+        }
+
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $imageName = time() . '.' . $file->getClientOriginalExtension();
+            $file->storeAs('users', $imageName, 'public');
+
+            if ($instructor->image && Storage::disk('public')->exists('users/' . $instructor->image)) {
+                Storage::disk('public')->delete('users/' . $instructor->image);
+            }
+            $instructor->image = $imageName;
         }
 
         $instructor->save();

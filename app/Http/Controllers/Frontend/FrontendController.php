@@ -14,6 +14,7 @@ use App\Models\OrderItem;
 use App\Models\Page;
 use App\Models\Product;
 use App\Models\District;
+use App\Models\Division;
 use App\Models\ProductCategory;
 use App\Models\ProductReview;
 use App\Models\shippingMethod;
@@ -367,7 +368,7 @@ class FrontendController extends Controller
     {
         $product = Product::where('slug', $slug)
             ->where('active', true)
-            ->with(['sections.lessons'])
+            ->with(['sections.lessons', 'instructor'])
             ->firstOrFail();
 
         // Security: Check if user is enrolled
@@ -1186,10 +1187,19 @@ class FrontendController extends Controller
         $hasProduct = $cartItems->contains(fn($item) => $item->product && $item->product->type !== 'course');
 
         $ws = WebsiteParameter::first();
-        $shippingCharge = $hasProduct ? ($ws->shipping_charge ?? 0) : 0;
+
+        // Dhaka-based shipping charges (fallback to generic shipping_charge if not set)
+        $shippingInside  = (float) ($ws->shipping_inside_dhaka ?? $ws->shipping_charge ?? 0);
+        $shippingOutside = (float) ($ws->shipping_outside_dhaka ?? $ws->shipping_charge ?? 0);
+
+        // Default selected charge = inside Dhaka
+        $shippingCharge = $hasProduct ? $shippingInside : 0;
+
+        // Divisions for dependent address dropdowns
+        $divisions = Division::orderBy('name')->get(['id', 'name', 'bn_name']);
 
         // We'll use website.cart as the unified checkout page
-        return view('website.cart', compact('cartItems', 'cartSubtotal', 'hasCourse', 'hasEbook', 'hasProduct', 'shippingCharge', 'ws'));
+        return view('website.cart', compact('cartItems', 'cartSubtotal', 'hasCourse', 'hasEbook', 'hasProduct', 'shippingCharge', 'shippingInside', 'shippingOutside', 'divisions', 'ws'));
     }
 
         public function updateQuantity(Request $request, $cartId)
@@ -1615,17 +1625,36 @@ public function quickAdd(Request $request)
         $hasEbook = $cartItems->contains(fn($item) => $item->ebook_id !== null);
         $hasProduct = $cartItems->contains(fn($item) => $item->product && $item->product->type !== 'course');
 
+        // Delivery area is derived from the selected district (Dhaka => inside)
+        $deliveryArea = $this->deliveryAreaFromDistrict($request->input('district_id'));
+        // Full address from detail + upazila/district/division names
+        $billingAddress = $this->buildFullAddress($request);
+
         $subtotal = $this->calculateSubtotal($cartItems);
-        $deliveryCost = $hasProduct ? ($ws->shipping_charge ?? $request->shipping_price) : 0;
+        $deliveryCost = $hasProduct ? $this->resolveDeliveryCost($ws, $deliveryArea) : 0;
         $grandTotal = $subtotal + $deliveryCost;
         $paymentMethod = $request->input('payment_method');
-        
+        $transactionId = $request->input('transaction_id');
+
+        // Online payment requires a transaction id (TXN ID)
+        if ($paymentMethod === 'online' && empty($transactionId)) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', app()->getLocale() == 'bn'
+                    ? 'অনলাইন পেমেন্টের জন্য ট্রানজেকশন আইডি (TXN ID) দিন।'
+                    : 'Please provide the Transaction ID (TXN ID) for online payment.');
+        }
+
         $orderNote = $request->order_note ?? null;
         if ($request->office_address || $request->office_time) {
             $extraNote = "";
             if ($request->office_address) $extraNote .= "Office Address: " . $request->office_address . "\n";
             if ($request->office_time) $extraNote .= "Office Time: " . $request->office_time . "\n";
             $orderNote = $extraNote . ($orderNote ? "Note: " . $orderNote : "");
+        }
+        if ($hasProduct) {
+            $areaLabel = $deliveryArea === 'outside' ? 'ঢাকার বাইরে' : 'ঢাকার ভিতরে';
+            $orderNote = "ডেলিভারি এরিয়া: " . $areaLabel . "\n" . ($orderNote ?? '');
         }
 
         $registrationFields = [];
@@ -1645,7 +1674,7 @@ public function quickAdd(Request $request)
                 DeliveryLocation::updateOrCreate(
                     ['user_id' => $user->id],
                     [
-                        'address_title' => $request->input('billing_address'),
+                        'address_title' => $billingAddress,
                         'name' => $request->input('name'),
                         'mobile' => $request->input('mobile'),
                         'email' => $request->input('email'),
@@ -1654,16 +1683,16 @@ public function quickAdd(Request $request)
             }
 
             $location = $this->getUserLocation($user);
-            
+
             if (!$location) {
                 $location = new \stdClass();
                 $location->name = $request->input('name') ?? $user->name;
                 $location->email = $request->input('email') ?? $user->email;
                 $location->mobile = $request->input('mobile') ?? $user->mobile;
-                $location->address_title = $request->input('billing_address') ?? (($hasCourse || $hasEbook) ? 'Registration' : 'Order');
+                $location->address_title = ($billingAddress ?: null) ?? (($hasCourse || $hasEbook) ? 'Registration' : 'Order');
             }
 
-            $order = $this->createOrder($user, $location, $deliveryCost, $paymentMethod, $subtotal, $deliveryCost, $grandTotal, $orderNote, $registrationFields);
+            $order = $this->createOrder($user, $location, $deliveryCost, $paymentMethod, $subtotal, $deliveryCost, $grandTotal, $orderNote, $registrationFields, $transactionId);
 
             $this->storeOrderItems($order, $cartItems, $user->id);
             Cart::where('user_id', $user->id)->delete();
@@ -1678,10 +1707,13 @@ public function quickAdd(Request $request)
             ];
             if ($hasProduct) {
                 $rules['billing_address'] = 'required|string|max:1000';
+                $rules['division_id'] = 'required|integer|exists:divisions,id';
+                $rules['district_id'] = 'required|integer|exists:districts,id';
+                $rules['upazila_id'] = 'required|integer|exists:upazilas,id';
             }
             if ($hasCourse || $hasEbook) {
                 $rules['occupation'] = 'required|string|max:255';
-                $rules['last_academic_status'] = 'required|string|max:255';
+                $rules['last_academic_status'] = 'nullable|string|max:255';
             }
             $request->validate($rules);
 
@@ -1707,6 +1739,7 @@ public function quickAdd(Request $request)
                     } catch (\Exception $e) {}
                 }
                 session(['temp_password' => $password]);
+                session(['temp_email' => $user->email]);
             }
 
             session(['is_new_user' => $isNewUser]);
@@ -1715,9 +1748,9 @@ public function quickAdd(Request $request)
             $location->name = $request->input('name');
             $location->email = $request->input('email');
             $location->mobile = $request->input('mobile');
-            $location->address_title = $request->input('billing_address') ?? (($hasCourse || $hasEbook) ? 'Registration' : 'Order');
+            $location->address_title = ($billingAddress ?: null) ?? (($hasCourse || $hasEbook) ? 'Registration' : 'Order');
 
-            $order = $this->createOrder($user, $location, $deliveryCost, $paymentMethod, $subtotal, $deliveryCost, $grandTotal, $orderNote, $registrationFields);
+            $order = $this->createOrder($user, $location, $deliveryCost, $paymentMethod, $subtotal, $deliveryCost, $grandTotal, $orderNote, $registrationFields, $transactionId);
 
             $this->storeOrderItems($order, $cartItems, $user->id);
             Cart::where('session_id', session('session_id'))->delete();
@@ -1781,13 +1814,12 @@ public function quickAdd(Request $request)
                 'mobile' => 'required|string|max:20',
                 'email' => 'nullable|email|max:255',
                 'occupation' => 'required|string|max:255',
-                'last_academic_status' => 'required|string|max:255',
+                'last_academic_status' => 'nullable|string|max:255',
             ];
             $messages = [
                 'name.required' => $isBn ? 'আপনার নাম লিখুন' : 'Please enter your name',
                 'mobile.required' => $isBn ? 'আপনার মোবাইল নম্বর লিখুন' : 'Please enter your mobile number',
                 'occupation.required' => $isBn ? 'পেশা নির্বাচন করুন' : 'Please select your occupation',
-                'last_academic_status.required' => $isBn ? 'সর্বশেষ পড়াশোনার অবস্থা নির্বাচন করুন' : 'Please select your last academic status',
             ];
             $request->validate($rules, $messages);
 
@@ -1818,6 +1850,7 @@ public function quickAdd(Request $request)
                     } catch (\Exception $e) {}
                 }
                 session(['temp_password' => $password]);
+                session(['temp_email' => $user->email]);
                 session(['is_new_user' => true]);
             } else {
                 session(['is_new_user' => false]);
@@ -1853,16 +1886,20 @@ public function quickAdd(Request $request)
         }
 
         $subtotal = $this->calculateSubtotal($cartItems);
-        $deliveryCost = $ws->shipping_charge ?? 0;
+        $deliveryCost = $this->resolveDeliveryCost($ws, $request->input('delivery_area'));
         $grandTotal = $subtotal + $deliveryCost;
         $paymentMethod = $request->input('payment_method');
-        
+
         $orderNote = $request->order_note ?? null;
         if ($request->office_address || $request->office_time) {
             $extraNote = "";
             if ($request->office_address) $extraNote .= "Office Address: " . $request->office_address . "\n";
             if ($request->office_time) $extraNote .= "Office Time: " . $request->office_time . "\n";
             $orderNote = $extraNote . ($orderNote ? "Note: " . $orderNote : "");
+        }
+        if ($request->filled('delivery_area')) {
+            $areaLabel = $request->input('delivery_area') === 'outside' ? 'ঢাকার বাইরে' : 'ঢাকার ভিতরে';
+            $orderNote = "ডেলিভারি এরিয়া: " . $areaLabel . "\n" . ($orderNote ?? '');
         }
 
         $isBn = app()->getLocale() == 'bn';
@@ -1935,6 +1972,7 @@ public function quickAdd(Request $request)
                     } catch (\Exception $e) {}
                 }
                 session(['temp_password' => $password]);
+                session(['temp_email' => $user->email]);
                 session(['is_new_user' => true]);
             } else {
                 session(['is_new_user' => false]);
@@ -1993,8 +2031,79 @@ public function quickAdd(Request $request)
         });
     }
 
-    private function createOrder($user, $location, $area, $paymentMethod, $subtotal, $deliveryCost, $grandTotal, $orderNote, $registrationFields = [])
+    /**
+     * Resolve delivery charge based on selected Dhaka area.
+     * Falls back to generic shipping_charge when area-specific value is not set.
+     */
+    private function resolveDeliveryCost($ws, $deliveryArea = 'inside')
     {
+        $inside  = (float) ($ws->shipping_inside_dhaka ?? $ws->shipping_charge ?? 0);
+        $outside = (float) ($ws->shipping_outside_dhaka ?? $ws->shipping_charge ?? 0);
+
+        return $deliveryArea === 'outside' ? $outside : $inside;
+    }
+
+    /**
+     * AJAX: districts for a division.
+     */
+    public function getDistricts($divisionId)
+    {
+        return District::where('division_id', $divisionId)
+            ->orderBy('name')
+            ->get(['id', 'name', 'bn_name']);
+    }
+
+    /**
+     * AJAX: upazilas for a district.
+     */
+    public function getUpazilas($districtId)
+    {
+        return Upazila::where('district_id', $districtId)
+            ->orderBy('name')
+            ->get(['id', 'name', 'bn_name']);
+    }
+
+    /**
+     * Determine delivery area ('inside' / 'outside') from selected district.
+     * Dhaka district => inside, everything else => outside.
+     */
+    private function deliveryAreaFromDistrict($districtId)
+    {
+        if (!$districtId) {
+            return 'inside';
+        }
+        $district = District::find($districtId);
+
+        return ($district && strtolower($district->name) === 'dhaka') ? 'inside' : 'outside';
+    }
+
+    /**
+     * Build a full address string from the detail textarea + division/district/upazila names.
+     */
+    private function buildFullAddress($request)
+    {
+        $parts = [];
+        if ($request->filled('billing_address')) {
+            $parts[] = trim($request->input('billing_address'));
+        }
+        if ($request->filled('upazila_id') && ($u = Upazila::find($request->input('upazila_id')))) {
+            $parts[] = $u->name;
+        }
+        if ($request->filled('district_id') && ($d = District::find($request->input('district_id')))) {
+            $parts[] = $d->name;
+        }
+        if ($request->filled('division_id') && ($dv = Division::find($request->input('division_id')))) {
+            $parts[] = $dv->name;
+        }
+
+        return implode(', ', $parts);
+    }
+
+    private function createOrder($user, $location, $area, $paymentMethod, $subtotal, $deliveryCost, $grandTotal, $orderNote, $registrationFields = [], $transactionId = null)
+    {
+        // Online (TXN ID submitted) => awaiting admin verification; COD => unpaid
+        $paymentStatus = ($paymentMethod === 'online' && !empty($transactionId)) ? 'pending' : 'unpaid';
+
         return Order::create(array_merge([
             'user_id'        => $user ? $user->id : null,
             'name'           => $location->name,
@@ -2004,8 +2113,9 @@ public function quickAdd(Request $request)
             'subtotal'       => $subtotal,
             'grand_total'    => $grandTotal,
             'payment_method' => $paymentMethod,
-            'payment_status' => 'unpaid',
+            'payment_status' => $paymentStatus,
             'payment_gateway'=> $paymentMethod,
+            'payment_trx_id' => $transactionId,
             'delivery_cost'  => $deliveryCost,
             'pending_at'     => now(),
             'addedby_id'     => $user ? $user->id : null,

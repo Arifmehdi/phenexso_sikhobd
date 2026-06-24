@@ -134,6 +134,13 @@
                         </a>
                     </li>
 
+                    <li class="nav-item {{ session('lsbm') == 'visitorsM' ? 'menu-open active' : '' }}">
+                        <a href="{{ route('admin.visitors.index') }}" class="nav-link {{ session('lsbm') == 'visitorsM' ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-eye"></i>
+                            <p>Visitor Tracking</p>
+                        </a>
+                    </li>
+
 
 
                     {{--<li class="nav-item {{ session('lsbm') == 'roles'? ' menu-open ' : ''}}">
