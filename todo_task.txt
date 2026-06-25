@@ -1,0 +1,35 @@
+Qalam Hr 
+=========
+20-Jun-2026
+1. Order process & Add to card simillar to Rokomari - (21-June-2026)   --done (except course enrollment)
+2. SMS Gateway setup (need api)
+3. Main banner need to edit. (21-June-2026) (already implemented)
+4. Main menu will be separate row from header. (22-June-2026)  (complete but customer want may be rokomari search)
+5. Certificate for each student according to exam and course. (22-June-2026)
+6. For each product/course - there will be two button. Add to Card and Details (21-June-2026)
+5. Add the instructor picture. (22-June-2026)
+6. eBook only print but no download. Without enroll not view all page. just show the max 3(or customise by admin) Pages. (23-June-2026)
+7. forget password not working. (23-June-2026)
+8. After registration or enroll auto approval. (22-June-2026)
+9. Order summery after and order product list before. Product list will be check option not delete or cancel option. (22-June-2026)
+10. Delevery charge Dhaka n out of dhaka different rate (23-June-2026)
+11. Invoice - Date will be Order Date. Note will be - Delivery will be within 72 hrs. (23-June-2026)
+12. Serial no. 6 digit will be show. (23-June-2026)
+13. Need the link into the dashboard 
+14. Order list (For student and admin both) - Invoice list showing. But more need the product wise list. (23-June-2026)
+15. All address will be breakdown (23-June-2026)
+16. Exam list not showing after login (23-June-2026)
+17. Last study no need mendatory (22-June-2026)
+18. Course list need to show for student (Course name, Instructor name, Lesson qty)
+ - Teacher profile (No contact info will show) from course list (link from Instrutor)  (23-June-2026)
+19. Q will add according to course n class.
+ - Need to adjust specific topic wise Q paper (23-June-2026)
+20. Visitor quantity tracking. (23-June-2026)
+21. eBook menu will be Free eBook - Free file can be download or print. (23-June-2026)
+22. Price - regular price, discount price (21-June-2026)
+Note - Shop and free eBook first priority
+Priority
+1. Address panel (23-June-2026)
+2. Auto login (21-June-2026)
+3. Product wise enroll, add to card, view details (Student - Enroll, Add to card, view details | Customer - Add to card, Buy Now, Details ) (21-June-2026)
+4. Price - regular price, discount price (21-June-2026)

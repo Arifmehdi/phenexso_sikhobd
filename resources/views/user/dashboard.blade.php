@@ -235,9 +235,14 @@
                             <span style="width:24px; height:24px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; background:#6c5ce7; color:#fff; font-size:10px; font-weight:700; overflow:hidden; background-size:cover; background-position:center; {{ $enrollment->product->instructor->image ? "background-image:url('".asset('storage/users/'.$enrollment->product->instructor->image)."');" : '' }}">
                                 @if(!$enrollment->product->instructor->image){{ strtoupper(substr($enrollment->product->instructor->name, 0, 1)) }}@endif
                             </span>
-                            <span>ইনস্ট্রাকটর: {{ $enrollment->product->instructor->name }}</span>
+                            <span>ইনস্ট্রাকটর:
+                                <a href="{{ route('instructor.profile', $enrollment->product->instructor->id) }}" style="color:#6c5ce7; font-weight:600; text-decoration:none;">{{ $enrollment->product->instructor->name }}</a>
+                            </span>
                         </div>
                         @endif
+                        <div class="meta">
+                            <i class="fa-solid fa-book-open"></i> {{ $enrollment->product->lessons_count ?? 0 }} {{ app()->getLocale()=='bn' ? 'টি লেসন' : 'Lessons' }}
+                        </div>
                         <div class="meta">
                             @if($enrollment->enrolled_at)
                                 Enrolled: {{ $enrollment->enrolled_at->format('d M, Y') }}
@@ -537,7 +542,13 @@
                 <div class="panel-head">
                     <h3><i class="fa-solid fa-file-pen"></i> উপলব্ধ পরীক্ষাসমূহ</h3>
                 </div>
+                @php $completedExamIds = $completed_exams->pluck('exam_id')->all(); @endphp
                 @forelse($exams as $exam)
+                @php
+                    $isCompleted = in_array($exam->id, $completedExamIds);
+                    $isUpcoming  = $exam->start_time && $exam->start_time->isFuture();
+                    $isEnded     = $exam->end_time && $exam->end_time->isPast();
+                @endphp
                 <div class="course-row">
                     <div class="thumb" style="--c1:#6c5ce7;--c2:#a29bfe;">
                         E
@@ -545,11 +556,23 @@
                     <div class="body">
                         <h4>{{ $exam->title }}</h4>
                         <div class="meta">
-                            <i class="far fa-clock"></i> {{ $exam->duration }} মিনিট &middot; 
-                            <i class="far fa-calendar-alt"></i> শেষ সময়: {{ $exam->end_time->format('M d, h:i A') }}
+                            <i class="far fa-clock"></i> {{ $exam->duration }} মিনিট &middot;
+                            <i class="far fa-calendar-alt"></i> শেষ সময়: {{ $exam->end_time->format('M d, h:i A') }}
                         </div>
                     </div>
-                    <a href="{{ route('exams.start', $exam->id) }}" class="btn btn-primary btn-sm">অংশগ্রহণ করুন</a>
+                    @if($isCompleted)
+                        @if($exam->status == 'finished')
+                            <a href="{{ route('exams.result', $exam->id) }}" class="btn btn-success btn-sm">ফলাফল দেখুন</a>
+                        @else
+                            <span class="status-pill status-approved">সম্পন্ন</span>
+                        @endif
+                    @elseif($isUpcoming)
+                        <span class="status-pill status-pending">আসন্ন</span>
+                    @elseif($isEnded)
+                        <span class="status-pill status-pending">শেষ হয়েছে</span>
+                    @else
+                        <a href="{{ route('exams.start', $exam->id) }}" class="btn btn-primary btn-sm">অংশগ্রহণ করুন</a>
+                    @endif
                 </div>
                 @empty
                 <div class="empty-state">
@@ -588,6 +611,11 @@
                                 </td>
                                 <td>
                                     <a href="{{ route('exams.result', $attempt->exam->id) }}" class="btn btn-primary btn-sm">বিস্তারিত</a>
+                                    @if($attempt->exam->status == 'finished')
+                                        <a href="{{ route('user.exam_certificate', $attempt->exam->id) }}" target="_blank" class="btn btn-success btn-sm">
+                                            <i class="fa-solid fa-certificate"></i> সার্টিফিকেট
+                                        </a>
+                                    @endif
                                 </td>
                             </tr>
                             @empty

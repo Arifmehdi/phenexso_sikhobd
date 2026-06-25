@@ -10,6 +10,8 @@ class Certificate extends Model
         'certificate_number',
         'user_id',
         'product_id',
+        'exam_id',
+        'type',
         'enrollment_id',
         'final_score',
         'issued_at',
@@ -27,6 +29,11 @@ class Certificate extends Model
     public function course()
     {
         return $this->belongsTo(Product::class, 'product_id');
+    }
+
+    public function exam()
+    {
+        return $this->belongsTo(Exam::class);
     }
 
     public function enrollment()

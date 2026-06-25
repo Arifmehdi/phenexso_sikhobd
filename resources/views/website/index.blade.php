@@ -10,6 +10,71 @@
 <meta property="og:type" content="website">
 @endsection
 
+@push('css')
+<style>
+    /* ---- Enrollment-style e-learning card (matches /courses) ---- */
+    .elearn-card {
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        transition: transform .3s ease, box-shadow .3s ease;
+    }
+    .elearn-card:hover { transform: translateY(-6px); box-shadow: 0 16px 34px rgba(0,0,0,0.10); border-color: transparent; }
+
+    .elearn-thumb { aspect-ratio: 14 / 15; background: #eef2f7; position: relative; overflow: hidden; display: block; }
+    .elearn-thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform .35s ease; }
+    .elearn-card:hover .elearn-thumb img { transform: scale(1.06); }
+
+    .elearn-tag {
+        position: absolute; top: 12px; left: 12px;
+        background: var(--primary); color: #fff;
+        font-size: 10px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase;
+        padding: 4px 10px; border-radius: 20px; z-index: 5;
+        max-width: 65%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .elearn-tag.featured { background: var(--accent); }
+
+    .elearn-actions {
+        position: absolute; top: 12px; right: 12px;
+        display: flex; flex-direction: column; gap: 8px; z-index: 6;
+        opacity: 0; transform: translateX(8px); transition: all .3s ease;
+    }
+    .elearn-card:hover .elearn-actions { opacity: 1; transform: translateX(0); }
+    .elearn-icon-btn {
+        width: 36px; height: 36px; border-radius: 50%;
+        background: #fff; color: var(--primary); border: 1px solid var(--border);
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,.08); transition: all .2s ease;
+        text-decoration: none;
+    }
+    .elearn-icon-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+    .elearn-body { padding: 16px; display: flex; flex-direction: column; flex: 1; }
+    .elearn-cat { font-size: 11px; color: var(--accent); font-weight: 700; text-transform: uppercase; letter-spacing: .5px; }
+    .elearn-body h3 { margin: 6px 0 8px; font-size: 15px; font-weight: 700; line-height: 1.4; }
+    .elearn-body h3 a { color: inherit; text-decoration: none; }
+    .elearn-body h3 a:hover { color: var(--accent); }
+    .elearn-meta { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12px; color: var(--text-muted); margin-bottom: 10px; }
+    .elearn-meta i { color: var(--accent); margin-right: 3px; }
+
+    .elearn-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: auto; padding-top: 12px; border-top: 1px solid var(--border); }
+    .elearn-price { font-size: 19px; font-weight: 800; color: var(--accent); }
+    .elearn-price.free { color: #16a34a; }
+    .elearn-price .old-price { font-size: 13px; color: var(--text-muted); text-decoration: line-through; margin-left: 6px; font-weight: 600; }
+    .elearn-enroll-btn {
+        height: 38px; padding: 0 16px; border: none; border-radius: 9px;
+        background: var(--accent); color: #fff; font-weight: 700; font-size: 13px;
+        display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+        cursor: pointer; text-decoration: none; white-space: nowrap; transition: all .25s ease;
+    }
+    .elearn-enroll-btn:hover { background: var(--primary); color: #fff; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,.15); }
+</style>
+@endpush
+
 @section('content')
   <section class="hero">
     <div class="container">
@@ -157,37 +222,66 @@
       </div>
       <div class="courses-grid">
         @foreach($feature_products->take(6) as $product)
-        <article class="course-card">
-          <a href="{{ route('courseDetail', $product->slug) }}" class="course-thumb" style="--c1:#6c5ce7; --c2:#a29bfe; display: block; overflow: hidden;">
+        @php $courseCat = optional($product->categories->first()); @endphp
+        <article class="elearn-card">
+          <div class="elearn-thumb">
             @if($product->feature)
-            <span class="course-tag">FEATURED</span>
+              <span class="elearn-tag featured">FEATURED</span>
+            @elseif($courseCat->id)
+              <span class="elearn-tag">{{ lp($courseCat, 'name') }}</span>
             @endif
-            @if($product->featured_image)
-            <img src="{{ route('imagecache', ['template' => 'medium', 'filename' => $product->featured_image]) }}" alt="{{ app()->getLocale() == 'bn' ? $product->name_bn : $product->name_en }}" style="width:100%; height:100%; object-fit:cover; transition: transform 0.5s;">
-            @else
-            <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:var(--bg-soft); color:var(--primary); font-weight:700;">{{ app()->getLocale() == 'bn' ? $product->name_bn : $product->name_en }}</div>
-            @endif
-          </a>
-          <div class="course-body">
-            <h3><a href="{{ route('courseDetail', $product->slug) }}" style="color: inherit; text-decoration: none;">{{ app()->getLocale() == 'bn' ? $product->name_bn : $product->name_en }}</a></h3>
-            <div class="course-meta">
-              <span><i class="fa-solid fa-star"></i> 4.9</span>
-              <span><i class="fa-solid fa-users"></i> {{ $product->click_count ?? '0' }}</span>
-              <span><i class="fa-solid fa-clock"></i> 200h</span>
+
+            <div class="elearn-actions">
+              <button class="elearn-icon-btn add-to-wishlist-ajax" data-id="{{ $product->id }}" title="{{ app()->getLocale() == 'bn' ? 'উইশলিস্টে যোগ করুন' : 'Add to Wishlist' }}">
+                <i class="fa-regular fa-heart"></i>
+              </button>
+              <a href="{{ route('courseDetail', $product->slug) }}" class="elearn-icon-btn" title="{{ app()->getLocale() == 'bn' ? 'বিস্তারিত দেখুন' : 'View Details' }}">
+                <i class="fa-regular fa-eye"></i>
+              </a>
             </div>
-            <div class="course-foot">
-              <div>
-                  <span class="price">৳ {{ number_format($product->selling_price, 0) }}</span>
-                  @if($product->price > $product->selling_price)
-                  <span class="old-price">৳ {{ number_format($product->price, 0) }}</span>
-                  @endif
-              </div>
-              <div style="display: flex; gap: 8px;">
-                <button class="btn btn-outline btn-sm add-to-wishlist-ajax" data-id="{{ $product->id }}" title="Add to Wishlist">
-                    <i class="fa-regular fa-heart"></i>
-                </button>
-                <a href="{{ route('courseDetail', $product->slug) }}" class="btn btn-accent">{{ app()->getLocale() == 'bn' ? 'এনরোল' : 'Enroll' }}</a>
-              </div>
+
+            @if($product->featured_image)
+              <a href="{{ route('courseDetail', $product->slug) }}" style="display:block; width:100%; height:100%;">
+                <img src="{{ route('imagecache', ['template' => 'medium', 'filename' => $product->featured_image]) }}" alt="{{ app()->getLocale() == 'bn' ? $product->name_bn : $product->name_en }}">
+              </a>
+            @else
+              <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:var(--bg-soft); color:var(--primary); font-weight:700;">{{ app()->getLocale() == 'bn' ? $product->name_bn : $product->name_en }}</div>
+            @endif
+          </div>
+
+          <div class="elearn-body">
+            @if($courseCat->id)
+              <span class="elearn-cat">{{ lp($courseCat, 'name') }}</span>
+            @endif
+            <h3><a href="{{ route('courseDetail', $product->slug) }}">{{ app()->getLocale() == 'bn' ? ($product->name_bn ?? $product->name_en) : $product->name_en }}</a></h3>
+            <div class="elearn-meta">
+              <span><i class="fa-solid fa-star"></i> {{ number_format($product->averageRating(), 1) }}</span>
+              <span><i class="fa-solid fa-users"></i> {{ $product->click_count ?? '0' }}</span>
+              @if($product->instructor)
+                <span><i class="fa-solid fa-chalkboard-user"></i> {{ Str::limit($product->instructor->name, 14) }}</span>
+              @elseif($product->duration)
+                <span><i class="fa-regular fa-clock"></i> {{ $product->duration }}</span>
+              @endif
+            </div>
+            <div class="elearn-foot">
+              @if($product->isFree())
+                <span class="elearn-price free">Free</span>
+              @else
+                <span class="elearn-price">৳ {{ number_format($product->selling_price, 0) }}@if($product->price > $product->selling_price)<span class="old-price">৳ {{ number_format($product->price, 0) }}</span>@endif</span>
+              @endif
+              @if(in_array($product->id, $enrolledCourseIds ?? []))
+                <a href="{{ route('course.play', $product->slug) }}" class="elearn-enroll-btn" style="background:#16a34a;">
+                  <i class="fa-solid fa-play"></i> {{ app()->getLocale() == 'bn' ? 'কোর্স শুরু করুন' : 'Start Course' }}
+                </a>
+              @elseif(in_array($product->id, $cartCourseIds ?? []))
+                <a href="{{ route('cart') }}" class="elearn-enroll-btn" style="background:#0ea5e9;">
+                  <i class="fa-solid fa-cart-shopping"></i> {{ app()->getLocale() == 'bn' ? 'কার্টে আছে' : 'In Cart' }}
+                </a>
+              @else
+                <a href="#" class="elearn-enroll-btn enroll-now-btn" data-id="{{ $product->id }}">
+                  <i class="fa-solid fa-graduation-cap"></i> {{ app()->getLocale() == 'bn' ? 'এনরোল করুন' : 'Enroll' }}
+                </a>
+              @endif
             </div>
           </div>
         </article>
@@ -330,7 +424,9 @@
         @foreach($newses as $news)
         <article class="blog-card">
           <div class="blog-thumb">
-            <img src="{{ route('imagecache', ['template'=>'original','filename' => $news->fi() ?? 'default.png']) }}" alt="{{ $news->title }}">
+            <a href="{{ route('singleNews', $news->id) }}" style="display:block; width:100%; height:100%;">
+              <img src="{{ route('imagecache', ['template'=>'original','filename' => $news->fi() ?? 'default.png']) }}" alt="{{ $news->title }}">
+            </a>
           </div>
           <div class="blog-body">
             <span class="blog-cat">{{ $news->category->name ?? (app()->getLocale() == 'bn' ? 'নিউজ' : 'News') }}</span>
@@ -780,6 +876,36 @@ $(document).ready(function() {
           error: function() {
               btn.prop('disabled', false).html(originalHtml);
               showCartNotification('Failed to add to cart.', 'error');
+          }
+      });
+  });
+
+  // Enroll Now (course cards) — add to cart and go to checkout (same flow as the enroll form)
+  $(document).on('click', '.enroll-now-btn', function(e) {
+      e.preventDefault();
+      var btn = $(this);
+      var id = btn.data('id');
+      if (btn.hasClass('disabled')) return;
+      var original = btn.html();
+      btn.addClass('disabled').html('<i class="fa-solid fa-spinner fa-spin"></i>');
+
+      $.ajax({
+          url: "{{ route('addToCart') }}",
+          type: "POST",
+          data: { product: id, qty: 1, _token: "{{ csrf_token() }}" },
+          success: function(res) {
+              if (res && (res.status || res.success)) {
+                  if (typeof res.cartCount !== 'undefined') $('.cartCount').text(res.cartCount);
+                  showCartNotification(res.message || 'Course added to cart!', 'success');
+                  setTimeout(function(){ window.location.href = "{{ route('cart') }}"; }, 700);
+              } else {
+                  btn.removeClass('disabled').html(original);
+                  showCartNotification((res && res.message) || 'Something went wrong.', 'error');
+              }
+          },
+          error: function() {
+              btn.removeClass('disabled').html(original);
+              showCartNotification('Failed to enroll. Please try again.', 'error');
           }
       });
   });

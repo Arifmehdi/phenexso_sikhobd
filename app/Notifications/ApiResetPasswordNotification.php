@@ -43,33 +43,23 @@ class ApiResetPasswordNotification extends Notification
      */
     public function toMail($notifiable)
     {
-        if (static::$createUrlCallback) {
-            $url = call_user_func(static::$createUrlCallback, $notifiable, $this->token);
-        } else {
-            $url = url(route('password.reset', [
-                'token' => $this->token,
-                'email' => $notifiable->getEmailForPasswordReset(),
-            ], false)); // Use false for relative URL for API, if needed, or adjust
-        }
+        // Build the reset link from the current request's base URL (dynamic host/scheme),
+        // pointing to our web reset form route: /reset-password/{token}?email=...
+        $request = request();
+        $base = ($request && $request->getHttpHost())
+            ? $request->getSchemeAndHttpHost()      // e.g. https://sikhobd.com
+            : rtrim(config('app.url'), '/');         // fallback for queue/CLI
 
-        // For API, we might just want to send the token and email directly,
-        // or a URL that the client app can parse.
-        // Let's assume the client app expects a URL like:
-        // YOUR_APP_FRONTEND_URL/reset-password?token=XXX&email=YYY
-        // Or simply provide the token and email in the mail body.
-
-        $frontendResetUrl = env('FRONTEND_URL') . '/reset-password?token=' . $this->token . '&email=' . $notifiable->getEmailForPasswordReset();
-
+        $resetUrl = $base . '/reset-password/' . $this->token
+            . '?email=' . urlencode($notifiable->getEmailForPasswordReset());
 
         return (new MailMessage)
                     ->subject('Reset Password Notification')
+                    ->greeting('Hello!')
                     ->line('You are receiving this email because we received a password reset request for your account.')
-                    ->action('Reset Password', $frontendResetUrl)
+                    ->action('Reset Password', $resetUrl)
                     ->line('This password reset link will expire in ' . config('auth.passwords.users.expire') . ' minutes.')
-                    ->line('If you did not request a password reset, no further action is required.')
-                    ->line('Alternatively, you can use the following token and email in your application to reset your password:')
-                    ->line('Token: ' . $this->token)
-                    ->line('Email: ' . $notifiable->getEmailForPasswordReset());
+                    ->line('If you did not request a password reset, no further action is required.');
     }
 
     /**

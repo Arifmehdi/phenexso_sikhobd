@@ -3,6 +3,7 @@
     <tr>
         <th width="20">SL</th>
         <th width="100">Action</th>
+        <th width="60">Photo</th>
         <th>Name</th>
         <th>Email</th>
         <th>Phone</th>
@@ -41,6 +42,16 @@
                     </div>
                 </div>
             </td>
+            <td>
+                @if($instructor->image)
+                    <img src="{{ asset('storage/users/' . $instructor->image) }}" alt="{{ $instructor->name }}"
+                         style="width:40px; height:40px; object-fit:cover; border-radius:50%; border:1px solid #e2e8f0;">
+                @else
+                    <span style="width:40px; height:40px; display:inline-flex; align-items:center; justify-content:center; border-radius:50%; background:#6c5ce7; color:#fff; font-size:13px; font-weight:700;">
+                        {{ strtoupper(substr($instructor->name, 0, 2)) }}
+                    </span>
+                @endif
+            </td>
             <td>{{ $instructor->name }}</td>
             <td>{{ $instructor->email }}</td>
             <td>{{ $instructor->mobile ?? 'N/A' }}</td>
@@ -71,7 +82,7 @@
         </tr>
         @empty
         <tr>
-            <td colspan="8" class="text-danger h5 text-center">No Instructors Found</td>
+            <td colspan="9" class="text-danger h5 text-center">No Instructors Found</td>
         </tr>
         @endforelse
     </tbody>

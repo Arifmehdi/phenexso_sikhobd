@@ -62,6 +62,8 @@ class EbookController extends Controller
         $ebook = new Ebook($request->all());
         $ebook->user_id = Auth::id(); // Admin is the uploader
         $ebook->status = 'approved'; // Admin uploads are auto-approved
+        $ebook->is_free = $request->boolean('is_free');
+        $ebook->preview_pages = max(1, (int) ($request->preview_pages ?: 3));
         $ebook->save();
 
         if ($request->hasFile('cover_image')) {
@@ -105,17 +107,41 @@ class EbookController extends Controller
         ]);
 
         $ebook->update($request->all());
+        $ebook->is_free = $request->boolean('is_free');
+        $ebook->preview_pages = max(1, (int) ($request->preview_pages ?: 3));
+        $ebook->save();
 
         if ($request->hasFile('cover_image')) {
             if ($ebook->cover_image) {
                 Storage::disk('public')->delete('ebook_covers/' . $ebook->cover_image);
             }
             $file = $request->file('cover_image');
-            $name = time() . '_' . $file->getClientOriginalName();
+            $name = $ebook->id . '_cover_' . time() . '.' . $file->getClientOriginalExtension();
             Storage::disk('public')->put('ebook_covers/' . $name, File::get($file));
             $ebook->cover_image = $name;
-            $ebook->save();
         }
+
+        if ($request->hasFile('file')) {
+            if ($ebook->file_path) {
+                Storage::disk('public')->delete('ebook_files/' . $ebook->file_path);
+            }
+            $file = $request->file('file');
+            $name = $ebook->id . '_full_' . time() . '.' . $file->getClientOriginalExtension();
+            Storage::disk('public')->put('ebook_files/' . $name, File::get($file));
+            $ebook->file_path = $name;
+        }
+
+        if ($request->hasFile('preview_file')) {
+            if ($ebook->preview_path) {
+                Storage::disk('public')->delete('ebook_previews/' . $ebook->preview_path);
+            }
+            $file = $request->file('preview_file');
+            $name = $ebook->id . '_preview_' . time() . '.' . $file->getClientOriginalExtension();
+            Storage::disk('public')->put('ebook_previews/' . $name, File::get($file));
+            $ebook->preview_path = $name;
+        }
+
+        $ebook->save();
 
         return redirect()->route('admin.ebooks.index')->with('success', 'Ebook updated successfully.');
     }

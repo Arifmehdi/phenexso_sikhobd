@@ -106,8 +106,21 @@
       </div>
       <div class="nav-item">
         <a href="{{ route('ebooks.index') }}" class="nav-link">
-          {{ app()->getLocale() == 'bn' ? 'ই-বুক' : 'E-book' }}
+          <span>{{ app()->getLocale() == 'bn' ? 'ই-বুক' : 'E-book' }}</span>
+          <svg class="caret" viewBox="0 0 10 10" fill="currentColor"><path d="M1 3l4 4 4-4z"/></svg>
         </a>
+        <ul class="dropdown">
+          <li class="dropdown-item">
+            <a href="{{ route('ebooks.index') }}" class="dropdown-link">
+              <span>{{ app()->getLocale() == 'bn' ? 'সব ই-বুক' : 'All E-books' }}</span>
+            </a>
+          </li>
+          <li class="dropdown-item">
+            <a href="{{ route('free.ebooks') }}" class="dropdown-link">
+              <span> {{ app()->getLocale() == 'bn' ? 'ফ্রি ই-বুক' : 'Free E-book' }}</span>
+            </a>
+          </li>
+        </ul>
       </div>
       <div class="nav-item">
         <a href="{{ route('shop') }}" class="nav-link">
@@ -238,6 +251,7 @@
         </li>
       @endforeach
       <li class="m-item"><a href="{{ route('ebooks.index') }}" class="m-link">ই-বুক</a></li>
+      <li class="m-item"><a href="{{ route('free.ebooks') }}" class="m-link">ফ্রি ই-বুক</a></li>
       <li class="m-item"><a href="{{ route('shop') }}" class="m-link" data-i18n="nav.shop">Shop</a></li>
       <li class="m-item"><a href="{{ route('about') }}" class="m-link" data-i18n="nav.about">আমাদের সম্পর্কে</a></li>
       <li class="m-item"><a href="{{ route('contact') }}" class="m-link" data-i18n="nav.contact">যোগাযোগ</a></li>

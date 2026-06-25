@@ -80,13 +80,10 @@ class AuthController extends Controller
 
     public function index(){
         if(Auth::check()){
-            if(Auth::user()->hasRole('admin')){
-                return redirect('admin/dashboard');
+            if(Auth::user()->hasRole('admin') || Auth::user()->role === 'admin'){
+                return redirect()->route('admin.dashboard');
             }
-            if(Auth::user()->hasRole('retailer')){
-                return redirect('retailer/dashboard');
-            }
-            return redirect('/');
+            return redirect()->route('user.dashboard');
         }
         return view('auth.login');
     }
@@ -128,12 +125,9 @@ class AuthController extends Controller
             // Merge session cart to user cart
             $this->cartSessionToUser();
 
-            // Redirect based on role
-            if ($user->hasRole('admin')) {
+            // Redirect based on role: admin -> admin dashboard, everyone else -> user dashboard
+            if ($user->hasRole('admin') || $user->role === 'admin') {
                 return redirect()->route('admin.dashboard')->with('success', 'Signed in successfully');
-            }
-            if ($user->hasRole('retailer')) {
-                return redirect()->route('retailer.dashboard')->with('success', 'Signed in successfully');
             }
 
             return redirect()->route('user.dashboard')->with('success', 'Signed in successfully');
@@ -416,7 +410,13 @@ class AuthController extends Controller
         $featured_products = \App\Models\Product::where('feature', 1)->where('active',1)->latest()->paginate(12);
         $stockRequests = \App\Models\ProductStockRequest::where('user_id', Auth::id())->latest()->paginate(20); // Initialize
         $products = \App\Models\Product::all(); // Add this line
-        $enrollments = \App\Models\Enrollment::where('user_id', $user->id)->with('product.instructor')->latest()->get();
+        $enrollments = \App\Models\Enrollment::where('user_id', $user->id)
+            ->with(['product' => function ($q) {
+                $q->with('instructor')->withCount(['lessons' => function ($lq) {
+                    $lq->where('active', 1);
+                }]);
+            }])
+            ->latest()->get();
 
         // Course completion progress + existing certificates (product_id => certificate id)
         $courseProgress = [];
@@ -433,13 +433,13 @@ class AuthController extends Controller
         $examsQuery = \App\Models\Exam::where('status', '!=', 'draft');
         
         if (!$user->hasRole('admin') && $user->role !== 'admin') {
-            $examsQuery->where('start_time', '<=', $now)
-                ->where('end_time', '>=', $now)
-                ->where(function($query) use ($user_id) {
-                    $query->whereHas('students', function($q) use ($user_id) {
-                        $q->where('users.id', $user_id);
-                    })->orWhereDoesntHave('students');
-                });
+            // Show all assigned/public exams (available, upcoming, ended) — the view
+            // decides the button state. Time window is no longer filtered here.
+            $examsQuery->where(function($query) use ($user_id) {
+                $query->whereHas('students', function($q) use ($user_id) {
+                    $q->where('users.id', $user_id);
+                })->orWhereDoesntHave('students');
+            });
         }
         
         $exams = $examsQuery->latest()->get();

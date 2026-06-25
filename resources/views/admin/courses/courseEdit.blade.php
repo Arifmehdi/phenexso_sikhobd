@@ -169,8 +169,12 @@
                             <div class="card-body text-center">
                                 <div class="form-group row text-left">
                                     <label for="feature_image" class="col-sm-4 col-form-label">Featured Image</label>
-                                    <div class="col-sm-6">
-                                        <input type="file" class="form-control-file" id="feature_image" name="featured_image">
+                                    <div class="col-sm-8">
+                                        <input type="file" class="form-control-file" id="feature_image" name="featured_image" accept="image/*">
+                                        <small class="form-text text-muted">
+                                            <i class="fas fa-info-circle"></i> Recommended: <strong>560 × 600 px</strong> (14:15 ratio · use the same shape as 280 × 300).
+                                            JPG / PNG / WEBP, max 2 MB.
+                                        </small>
                                     </div>
                                 </div>
                                 <img src="{{ route('imagecache', ['template' => 'ppsm', 'filename' => $course->fi()]) }}" alt="Featured Image" class="mt-2 img-thumbnail" style="max-height: 200px;">

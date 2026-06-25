@@ -70,6 +70,7 @@ class FrontendController extends Controller
         $data['feature_products'] = Product::whereActive(true)
             ->where('type', 'course')
             ->where('feature', true)
+            ->with(['categories', 'instructor'])
             ->limit(20)
             ->get();
 
@@ -121,7 +122,20 @@ class FrontendController extends Controller
 
         $data['content'] = \App\Models\PageContent::where('page_slug', 'home')->first();
 
-        return view('website.index', $data);  
+        // Courses the logged-in user is already actively enrolled in
+        $data['enrolledCourseIds'] = [];
+        if (Auth::check()) {
+            $data['enrolledCourseIds'] = Enrollment::where('user_id', Auth::id())
+                ->where('status', 'active')
+                ->pluck('product_id')
+                ->filter()
+                ->toArray();
+        }
+
+        // Courses already in the user's / guest's cart
+        $data['cartCourseIds'] = $this->cartCourseIds();
+
+        return view('website.index', $data);
     }
 
     // For lazy loading products via AJAX
@@ -273,7 +287,7 @@ class FrontendController extends Controller
 
     public function courses(Request $request)
     {
-        $query = Product::whereActive(true)->where('type', 'course');
+        $query = Product::whereActive(true)->where('type', 'course')->with(['categories', 'instructor']);
 
         // Category Filter
         if ($request->has('category')) {
@@ -307,7 +321,66 @@ class FrontendController extends Controller
 
         $content = \App\Models\PageContent::where('page_slug', 'courses')->first();
 
-        return view('website.courses', compact('courses', 'categories', 'content'));
+        // Courses the logged-in user is already actively enrolled in
+        $enrolledCourseIds = [];
+        if (Auth::check()) {
+            $enrolledCourseIds = Enrollment::where('user_id', Auth::id())
+                ->where('status', 'active')
+                ->pluck('product_id')
+                ->filter()
+                ->toArray();
+        }
+
+        // Courses already in the user's / guest's cart
+        $cartCourseIds = $this->cartCourseIds();
+
+        return view('website.courses', compact('courses', 'categories', 'content', 'enrolledCourseIds', 'cartCourseIds'));
+    }
+
+    /**
+     * Product IDs of courses/products currently in the user's (or guest's) cart.
+     */
+    private function cartCourseIds()
+    {
+        if (Auth::check()) {
+            return Cart::where('user_id', Auth::id())
+                ->whereNotNull('product_id')
+                ->pluck('product_id')
+                ->toArray();
+        }
+
+        if (session('session_id')) {
+            return Cart::where('session_id', session('session_id'))
+                ->whereNotNull('product_id')
+                ->pluck('product_id')
+                ->toArray();
+        }
+
+        return [];
+    }
+
+    public function instructorProfile($id)
+    {
+        $instructor = User::findOrFail($id);
+
+        $courses = Product::where('type', 'course')
+            ->where('active', true)
+            ->where('instructor_id', $instructor->id)
+            ->withCount(['lessons' => function ($q) {
+                $q->where('active', 1);
+            }])
+            ->latest()
+            ->get();
+
+        // Only expose genuine instructors (by role or by having courses)
+        $isInstructor = in_array($instructor->role, ['instructor', 'teacher'])
+            || $instructor->hasRole('instructor')
+            || $instructor->hasRole('teacher')
+            || $courses->count() > 0;
+
+        abort_unless($isInstructor, 404);
+
+        return view('website.instructor_profile', compact('instructor', 'courses'));
     }
 
     public function courseDetail($slug)
@@ -361,7 +434,10 @@ class FrontendController extends Controller
                 ->toArray();
         }
 
-        return view('website.course_detail', compact('product', 'relatedCourses', 'relatedProducts', 'lessons', 'sections', 'completions'));
+        // Is this course already in the cart?
+        $inCart = in_array($product->id, $this->cartCourseIds());
+
+        return view('website.course_detail', compact('product', 'relatedCourses', 'relatedProducts', 'lessons', 'sections', 'completions', 'inCart'));
     }
 
     public function coursePlay($slug)

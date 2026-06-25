@@ -19,6 +19,8 @@ class Ebook extends Model
         'description_bn',
         'price',
         'discount',
+        'is_free',
+        'preview_pages',
         'cover_image',
         'file_path',
         'preview_path',
@@ -26,6 +28,15 @@ class Ebook extends Model
         'active',
         'view_count',
     ];
+
+    protected $casts = [
+        'is_free' => 'boolean',
+    ];
+
+    public function isFree()
+    {
+        return (bool) $this->is_free;
+    }
 
     public function user()
     {

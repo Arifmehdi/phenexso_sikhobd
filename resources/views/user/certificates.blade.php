@@ -16,10 +16,22 @@
             </div>
 
             @forelse($certificates as $certificate)
+            @php
+                $isExam = $certificate->type === 'exam';
+                $certName = $isExam
+                    ? (optional($certificate->exam)->title ?? 'Exam')
+                    : (optional($certificate->course)->name_en ?? optional($certificate->course)->name_bn ?? 'Course');
+                $downloadUrl = $isExam
+                    ? route('user.exam_certificate', $certificate->exam_id)
+                    : route('user.certificate', $certificate->product_id);
+            @endphp
             <div style="background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:20px 24px; margin-bottom:14px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
                 <div>
                     <h4 style="margin:0; font-weight:800; color:#1e3a8a;">
-                        {{ optional($certificate->course)->name_en ?? optional($certificate->course)->name_bn ?? 'Course' }}
+                        {{ $certName }}
+                        <span style="font-size:11px; font-weight:700; padding:2px 8px; border-radius:10px; vertical-align:middle; {{ $isExam ? 'background:#fef3c7; color:#92400e;' : 'background:#e0e7ff; color:#3730a3;' }}">
+                            {{ $isExam ? 'EXAM' : 'COURSE' }}
+                        </span>
                     </h4>
                     <div style="color:#64748b; font-size:13px; margin-top:4px;">
                         Certificate No: <strong>{{ $certificate->certificate_number }}</strong>
@@ -29,7 +41,7 @@
                         @endif
                     </div>
                 </div>
-                <a href="{{ route('user.certificate', $certificate->product_id) }}" target="_blank" class="btn btn-success btn-sm">
+                <a href="{{ $downloadUrl }}" target="_blank" class="btn btn-success btn-sm">
                     <i class="fa-solid fa-download"></i> Download
                 </a>
             </div>

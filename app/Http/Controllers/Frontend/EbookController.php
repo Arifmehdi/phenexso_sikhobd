@@ -17,8 +17,9 @@ class EbookController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Ebook::where('active', 1)->where('status', 'approved');
-        
+        // Paid eBooks only (free ones live under the "Free eBook" menu)
+        $query = Ebook::where('active', 1)->where('status', 'approved')->where('is_free', 0);
+
         if ($request->category) {
             $query->where('category_id', $request->category);
         }
@@ -105,7 +106,13 @@ class EbookController extends Controller
     public function read($id)
     {
         $ebook = Ebook::findOrFail($id);
-        
+
+        if (!$ebook->file_path) {
+            return back()->with('error', 'বইটির ফাইল পাওয়া যায়নি।');
+        }
+
+        $isFree = $ebook->isFree();
+
         $isEnrolled = false;
         if (Auth::check()) {
             $isEnrolled = Enrollment::where('user_id', Auth::id())
@@ -114,15 +121,57 @@ class EbookController extends Controller
                 ->exists();
         }
 
-        if (!$isEnrolled) {
-            return redirect()->route('ebooks.show', $id)->with('error', 'সম্পূর্ণ বইটি পড়তে প্রথমে এটি কিনুন।');
+        // Full access = free ebook OR purchased (enrolled). Otherwise it is a limited preview.
+        $hasFullAccess = $isFree || $isEnrolled;
+
+        $pdfUrl      = asset('storage/ebook_files/' . $ebook->file_path);
+        $isPreview   = !$hasFullAccess;
+        $maxPages    = $hasFullAccess ? null : max(1, (int) ($ebook->preview_pages ?: 3));
+        $canDownload = $isFree;                                   // free -> download + print; paid -> print only
+        $downloadUrl = $isFree ? route('ebooks.download', $ebook->id) : null;
+
+        $ebook->increment('view_count');
+
+        return view('website.ebooks.reader', compact(
+            'ebook', 'pdfUrl', 'maxPages', 'isPreview', 'canDownload', 'downloadUrl'
+        ));
+    }
+
+    /**
+     * Download — allowed only for FREE eBooks (paid books are print-only).
+     */
+    public function download($id)
+    {
+        $ebook = Ebook::findOrFail($id);
+
+        if (!$ebook->isFree()) {
+            abort(403, 'This eBook is not available for download.');
         }
 
-        if (!$ebook->file_path) {
-            return back()->with('error', 'বইটির ফাইল পাওয়া যায়নি।');
+        if (!$ebook->file_path || !Storage::disk('public')->exists('ebook_files/' . $ebook->file_path)) {
+            abort(404, 'File not found.');
         }
 
-        return view('website.ebooks.read', compact('ebook'));
+        $filename = ($ebook->title_en ?: 'ebook') . '.pdf';
+
+        return Storage::disk('public')->download('ebook_files/' . $ebook->file_path, $filename);
+    }
+
+    /**
+     * Free eBook listing.
+     */
+    public function freeIndex(Request $request)
+    {
+        $query = Ebook::where('active', 1)->where('status', 'approved')->where('is_free', 1);
+
+        if ($request->category) {
+            $query->where('category_id', $request->category);
+        }
+
+        $ebooks = $query->latest()->paginate(12);
+        $categories = ProductCategory::where('type', 'ebook')->where('active', 1)->get();
+
+        return view('website.ebooks.free', compact('ebooks', 'categories'));
     }
 
     public function uploadForm()

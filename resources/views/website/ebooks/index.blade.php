@@ -17,7 +17,7 @@
     }
 
     .ebook-thumb {
-        aspect-ratio: 1 / 1;
+        aspect-ratio: 260 / 372;
         background: #f8fafc;
         position: relative;
         display: flex;
@@ -27,13 +27,13 @@
         border-bottom: 1px solid var(--border);
     }
     .ebook-thumb img {
-        max-width: 80%;
-        max-height: 80%;
-        object-fit: contain;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
         transition: transform 0.3s ease;
     }
     .ebook-card:hover .ebook-thumb img {
-        transform: scale(1.1);
+        transform: scale(1.05);
     }
     .ebook-preview-badge {
         position: absolute;
@@ -263,7 +263,9 @@
 
                             @if($isInCart)<div class="in-cart-overlay"></div>@endif
 
-                            <img src="{{ asset('storage/ebook_covers/' . $ebook->cover_image) }}" alt="{{ $ebook->title_en }}">
+                            <a href="{{ route('ebooks.show', $ebook->id) }}" style="display:block; width:100%; height:100%;">
+                                <img src="{{ asset('storage/ebook_covers/' . $ebook->cover_image) }}" alt="{{ $ebook->title_en }}">
+                            </a>
 
                             <span class="ebook-preview-badge"><i class="fa-solid fa-book-open-reader"></i> বইটি কিছু অংশ পড়ুন</span>
 
@@ -302,10 +304,10 @@
                                     </button>
                                     @else
                                     <button class="shop-cart-btn addToEbookCart" data-url="{{ route('ebooks.buy', $ebook->id) }}" data-ebook="{{ $ebook->id }}" title="Add to Cart">
-                                        Add To Cart
+                                        <i class="fa-solid fa-cart-plus"></i> Add To Cart
                                     </button>
-                                    <a href="{{ route('ebooks.show', $ebook->id) }}" class="shop-buy-btn" title="View Details" style="text-decoration: none;">
-                                        View Details
+                                    <a href="{{ route('ebooks.buy', $ebook->id) }}" class="shop-buy-btn" title="Buy Now" style="text-decoration: none;">
+                                        <i class="fa-solid fa-bolt"></i> Buy Now
                                     </a>
                                     @endif
                                 </div>

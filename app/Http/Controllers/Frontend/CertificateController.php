@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Frontend;
 use App\Http\Controllers\Controller;
 use App\Models\Certificate;
 use App\Models\Enrollment;
+use App\Models\Exam;
 use App\Models\ExamAttempt;
 use App\Models\Product;
 use App\Models\WebsiteParameter;
@@ -18,7 +19,7 @@ class CertificateController extends Controller
      */
     public function index()
     {
-        $certificates = Certificate::with('course')
+        $certificates = Certificate::with('course', 'exam')
             ->where('user_id', Auth::id())
             ->latest('issued_at')
             ->get();
@@ -77,7 +78,65 @@ class CertificateController extends Controller
         }
 
         $ws = WebsiteParameter::first();
-        $pdf = Pdf::loadView('user.certificate', compact('certificate', 'product', 'user', 'ws'))
+        $itemName = $product->name_en ?? $product->name_bn;
+        $completedLabel = 'for successfully completing the course';
+        $pdf = Pdf::loadView('user.certificate', compact('certificate', 'user', 'ws', 'itemName', 'completedLabel'))
+            ->setPaper('a4', 'landscape');
+
+        return $pdf->stream('certificate-' . $certificate->certificate_number . '.pdf');
+    }
+
+    /**
+     * Issue (if eligible) and download the certificate for a completed exam.
+     */
+    public function generateExam(Exam $exam)
+    {
+        $user = Auth::user();
+        $isBn = app()->getLocale() == 'bn';
+
+        // Must have a completed attempt for this exam
+        $attempt = ExamAttempt::where('exam_id', $exam->id)
+            ->where('user_id', $user->id)
+            ->where('status', 'completed')
+            ->latest('end_time')
+            ->first();
+
+        if (!$attempt) {
+            return redirect()->route('exams.index')
+                ->with('error', $isBn
+                    ? 'সার্টিফিকেট পেতে হলে আগে পরীক্ষাটি সম্পন্ন করুন।'
+                    : 'Please complete the exam to receive your certificate.');
+        }
+
+        // Results must be published by admin
+        if ($exam->status !== 'finished') {
+            return redirect()->route('exams.result', $exam->id)
+                ->with('error', $isBn
+                    ? 'ফলাফল প্রকাশের পর সার্টিফিকেট পাওয়া যাবে।'
+                    : 'The certificate will be available once results are published.');
+        }
+
+        $score = ($exam->question_count > 0)
+            ? round(($attempt->score / $exam->question_count) * 100, 2)
+            : null;
+
+        $certificate = Certificate::firstOrCreate(
+            ['user_id' => $user->id, 'exam_id' => $exam->id, 'type' => 'exam'],
+            [
+                'final_score' => $score,
+                'issued_at'   => now(),
+            ]
+        );
+
+        if (empty($certificate->certificate_number)) {
+            $certificate->certificate_number = 'SKB-EX-' . now()->format('Y') . '-' . str_pad($certificate->id, 5, '0', STR_PAD_LEFT);
+            $certificate->save();
+        }
+
+        $ws = WebsiteParameter::first();
+        $itemName = $exam->title;
+        $completedLabel = 'for successfully completing the examination';
+        $pdf = Pdf::loadView('user.certificate', compact('certificate', 'user', 'ws', 'itemName', 'completedLabel'))
             ->setPaper('a4', 'landscape');
 
         return $pdf->stream('certificate-' . $certificate->certificate_number . '.pdf');

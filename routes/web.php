@@ -129,6 +129,7 @@ Route::get('/testimonial',[FrontendController::class,'testimonial'])->name('test
 Route::get('/about',[FrontendController::class,'about'])->name('about');
 Route::get('/courses',[FrontendController::class,'courses'])->name('courses');
 Route::get('/course-detail/{slug}',[FrontendController::class,'courseDetail'])->name('courseDetail');
+Route::get('/instructor/{id}',[FrontendController::class,'instructorProfile'])->name('instructor.profile');
 Route::get('/enroll/{slug}', [FrontendController::class, 'enroll'])->name('enroll');
 Route::get('/shop',[FrontendController::class,'shop'])->name('shop');
 Route::get('/quick-view', [FrontendController::class, 'quickView'])->name('quick.view');
@@ -217,6 +218,12 @@ Route::get('galleries/video',[FrontendController::class,'videoGalleries'])->name
 //Authentication
 Route::get('/login',[AuthController::class,'index'])->name('login');
 Route::post('/login',[AuthController::class,'login'])->name('login');
+
+// Password Reset (forgot password by email) — unique names to avoid clashing with api routes
+Route::get('/forgot-password', [\App\Http\Controllers\Auth\PasswordResetController::class, 'showLinkRequestForm'])->name('password.request');
+Route::post('/forgot-password', [\App\Http\Controllers\Auth\PasswordResetController::class, 'sendResetLinkEmail'])->name('password.email.send');
+Route::get('/reset-password/{token}', [\App\Http\Controllers\Auth\PasswordResetController::class, 'showResetForm'])->name('password.reset.form');
+Route::post('/reset-password', [\App\Http\Controllers\Auth\PasswordResetController::class, 'reset'])->name('password.update.web');
 
 // Social Login
 Route::get('login/{provider}', [AuthController::class, 'redirectToProvider'])->name('social.login');
@@ -324,6 +331,7 @@ Route::group(['middleware' => ['web', 'auth'], 'prefix' => 'mypanel'], function 
     // Course completion certificates
     Route::get('certificates',[CertificateController::class, 'index'])->name('user.certificates');
     Route::get('certificate/{product}',[CertificateController::class, 'generate'])->name('user.certificate');
+    Route::get('certificate/exam/{exam}',[CertificateController::class, 'generateExam'])->name('user.exam_certificate');
 
     Route::get('checkout',[FrontendController::class, 'checkout'])->name('checkout');
     // Route::get('new/checkout',[FrontendController::class, 'new_checkout'])->name('new.checkout');
@@ -766,15 +774,16 @@ Route::middleware(['userRole:admin','auth'])->prefix('admin')->group(function(){
 });
 
 Route::get('ebooks', [\App\Http\Controllers\Frontend\EbookController::class, 'index'])->name('ebooks.index');
+Route::get('free-ebooks', [\App\Http\Controllers\Frontend\EbookController::class, 'freeIndex'])->name('free.ebooks');
 Route::get('ebooks/show/{id}', [\App\Http\Controllers\Frontend\EbookController::class, 'show'])->name('ebooks.show');
 Route::get('ebooks/preview', [\App\Http\Controllers\Frontend\EbookController::class, 'preview'])->name('ebooks.preview');
 Route::get('ebooks/quick-view', [\App\Http\Controllers\Frontend\EbookController::class, 'quickView'])->name('ebooks.quick.view');
 
 Route::get('ebooks/buy/{id}', [\App\Http\Controllers\Frontend\EbookController::class, 'buy'])->name('ebooks.buy');
 
-Route::middleware(['auth', 'web'])->group(function() {
-    Route::get('ebooks/read/{id}', [\App\Http\Controllers\Frontend\EbookController::class, 'read'])->name('ebooks.read');
-});
+// Reader (handles preview for non-buyers + full read for buyers/free) and free download
+Route::get('ebooks/read/{id}', [\App\Http\Controllers\Frontend\EbookController::class, 'read'])->name('ebooks.read');
+Route::get('ebooks/download/{id}', [\App\Http\Controllers\Frontend\EbookController::class, 'download'])->name('ebooks.download');
 
 Route::get('exams', [\App\Http\Controllers\ExamController::class, 'index'])->name('exams.index');
 

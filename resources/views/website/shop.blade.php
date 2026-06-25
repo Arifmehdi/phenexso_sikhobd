@@ -5,7 +5,7 @@
 @push('css')
 <style>
     .shop-product-thumb {
-        aspect-ratio: 1 / 1;
+        aspect-ratio: 246 / 400;
         background: #fff;
         position: relative;
         display: flex;
@@ -15,13 +15,13 @@
         border-bottom: 1px solid var(--border);
     }
     .shop-product-thumb img {
-        max-width: 80%;
-        max-height: 80%;
-        object-fit: contain;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
         transition: transform 0.3s ease;
     }
     .course-card:hover .shop-product-thumb img {
-        transform: scale(1.1);
+        transform: scale(1.05);
     }
     .shop-actions {
         position: absolute;
@@ -360,7 +360,9 @@
 
                  @if($isInCart)<div class="in-cart-overlay"></div>@endif
 
-                 <img src="{{ route('imagecache', ['template' => 'pnimd', 'filename' => $product->fi()]) }}" alt="{{ $product->name_en }}">
+                 <a href="{{ route('productDetails', $product->slug) }}" style="display:block; width:100%; height:100%;">
+                   <img src="{{ route('imagecache', ['template' => 'pnimd', 'filename' => $product->fi()]) }}" alt="{{ $product->name_en }}">
+                 </a>
 
                  <div class="shop-actions">
                      <button class="shop-action-btn quick-view-btn" data-id="{{ $product->id }}" title="View Details"><i class="fa-regular fa-eye"></i></button>

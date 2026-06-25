@@ -304,8 +304,12 @@
                 <p style="color: #166534; font-weight: 700; margin-bottom: 10px;"><i class="fa-solid fa-circle-check"></i> আপনি এই কোর্সে এনরোলড আছেন</p>
                 <a href="{{ route('course.play', $product->slug) }}" class="btn btn-primary btn-sm" style="width: 100%; justify-content: center;">পড়া শুরু করুন</a>
             </div>
+          @elseif(!empty($inCart))
+            <a href="{{ route('cart') }}" class="btn btn-accent" style="width:100%; justify-content:center; margin-top:20px; background:#0ea5e9;">
+              <i class="fa-solid fa-cart-shopping"></i> কার্টে যোগ হয়েছে — চেকআউট করুন
+            </a>
           @else
-            <a href="{{ route('enroll', $product->slug) }}" class="btn btn-accent" style="width:100%; justify-content:center; margin-top:20px;" data-i18n="enroll">এনরোল</a>
+            <a href="#" class="btn btn-accent enroll-now-btn" data-id="{{ $product->id }}" style="width:100%; justify-content:center; margin-top:20px;" data-i18n="enroll">এনরোল করুন</a>
           @endif
           
           <form id="add-to-wishlist-form">
@@ -606,6 +610,36 @@
                     showCartNotification(res.message);
                     $('.cartCount').text(res.cartCount);
                 }
+            }
+        });
+    });
+
+    // Enroll Now — add course to cart and go to checkout (same flow as the home enroll form)
+    $(document).on('click', '.enroll-now-btn', function(e) {
+        e.preventDefault();
+        var btn = $(this);
+        var id = btn.data('id');
+        if (btn.hasClass('disabled')) return;
+        var original = btn.html();
+        btn.addClass('disabled').html('<i class="fa-solid fa-spinner fa-spin"></i> ...');
+
+        $.ajax({
+            url: "{{ route('addToCart') }}",
+            type: "POST",
+            data: { product: id, qty: 1, _token: "{{ csrf_token() }}" },
+            success: function(res) {
+                if (res && (res.status || res.success)) {
+                    if (typeof res.cartCount !== 'undefined') $('.cartCount').text(res.cartCount);
+                    showCartNotification(res.message || 'Course added to cart!', 'success');
+                    setTimeout(function(){ window.location.href = "{{ route('cart') }}"; }, 700);
+                } else {
+                    btn.removeClass('disabled').html(original);
+                    showCartNotification((res && res.message) || 'Something went wrong.', 'error');
+                }
+            },
+            error: function() {
+                btn.removeClass('disabled').html(original);
+                showCartNotification('Failed to enroll. Please try again.', 'error');
             }
         });
     });

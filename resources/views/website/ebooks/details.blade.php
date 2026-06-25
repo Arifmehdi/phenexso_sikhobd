@@ -36,14 +36,24 @@
                              <i class="fa-solid fa-book-open mr-2"></i> বইটি কিছু অংশ পড়ুন
                          </button>
                         
-                         @if($isEnrolled)
+                         @if($ebook->isFree())
                              <a href="{{ route('ebooks.read', $ebook->id) }}" class="btn btn-success px-5 py-3" style="border-radius: 50px; font-weight: 700;">
-                                 <i class="fa-solid fa-book-reader mr-2"></i> সম্পূর্ণ বইটি পড়ুন
+                                 <i class="fa-solid fa-book-reader mr-2"></i> পড়ুন
+                             </a>
+                             <a href="{{ route('ebooks.download', $ebook->id) }}" class="btn btn-outline-success px-4 py-3" style="border-radius: 50px; font-weight: 700;">
+                                 <i class="fa-solid fa-download mr-2"></i> ডাউনলোড
+                             </a>
+                         @elseif($isEnrolled)
+                             <a href="{{ route('ebooks.read', $ebook->id) }}" class="btn btn-success px-5 py-3" style="border-radius: 50px; font-weight: 700;">
+                                 <i class="fa-solid fa-book-reader mr-2"></i> সম্পূর্ণ বইটি পড়ুন
                              </a>
                          @else
                              <button type="button" id="ebookMainBuyBtn" data-url="{{ route('ebooks.buy', $ebook->id) }}" class="btn btn-primary px-5 py-3" style="border-radius: 50px; font-weight: 700;">
                                  <i class="fa-solid fa-cart-shopping mr-2"></i> এখনই কিনুন
                              </button>
+                             <a href="{{ route('ebooks.read', $ebook->id) }}" class="btn btn-outline-primary px-4 py-3" style="border-radius: 50px; font-weight: 700;">
+                                 <i class="fa-solid fa-eye mr-2"></i> প্রিভিউ ({{ $ebook->preview_pages ?? 3 }} পৃষ্ঠা)
+                             </a>
                          @endif
                     </div>
 

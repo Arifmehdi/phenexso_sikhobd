@@ -64,6 +64,10 @@
             <h3>আপনার প্রাপ্ত মার্কস</h3>
             <div class="score-box">{{ $attempt->score }} / {{ $exam->question_count }}</div>
             <p class="text-muted">শতকরা হার: {{ number_format(($attempt->score / $exam->question_count) * 100, 2) }}%</p>
+
+            <a href="{{ route('user.exam_certificate', $exam->id) }}" target="_blank" class="btn btn-success mt-2">
+                <i class="fa-solid fa-certificate"></i> সার্টিফিকেট ডাউনলোড করুন
+            </a>
         </div>
 
         <h4 class="mb-4">উত্তরপত্র পর্যালোচনা:</h4>

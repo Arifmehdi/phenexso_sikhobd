@@ -85,7 +85,7 @@
                         <div class="form-group mb-3">
                             <label class="d-flex justify-content-between" for="passwordID">
                                 <span>Password</span>
-                                <a href="#" class="small">Forgot password?</a>
+                                <a href="{{ route('password.request') }}" class="small">Forgot password?</a>
                             </label>
                             <div class="position-relative">
                                 <input type="password" name="password" id="passwordID" class="form-control"

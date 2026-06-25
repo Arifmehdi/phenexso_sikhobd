@@ -43,13 +43,27 @@
                         </div>
 
                         <div class="row">
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-4 mb-3">
                                 <label>Price (৳)</label>
                                 <input type="number" name="price" class="form-control" step="0.01">
                             </div>
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-4 mb-3">
                                 <label>Discount (৳)</label>
                                 <input type="number" name="discount" class="form-control" step="0.01">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label>Free Preview Pages</label>
+                                <input type="number" name="preview_pages" class="form-control" min="1" value="3">
+                                <small class="form-text text-muted">Pages non-buyers can read (paid eBooks).</small>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="custom-control custom-switch">
+                                <input type="checkbox" class="custom-control-input" id="is_free" name="is_free" value="1">
+                                <label class="custom-control-label" for="is_free">
+                                    <strong>Free eBook</strong> — anyone can read, <u>download</u> &amp; print (no purchase needed).
+                                </label>
                             </div>
                         </div>
 
@@ -62,6 +76,10 @@
                             <div class="col-md-4 mb-3">
                                 <label>Cover Image *</label>
                                 <input type="file" name="cover_image" class="form-control" accept="image/*" required>
+                                <small class="form-text text-muted">
+                                    <i class="fas fa-info-circle"></i> Recommended: <strong>260 × 372 px</strong> (portrait book-cover ratio).
+                                    For sharpness use the same shape at 2× (520 × 744 px). JPG / PNG, max 2 MB.
+                                </small>
                             </div>
                             <div class="col-md-4 mb-3">
                                 <label>Full Ebook (PDF) *</label>
