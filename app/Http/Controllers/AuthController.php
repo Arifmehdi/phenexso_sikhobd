@@ -418,6 +418,9 @@ class AuthController extends Controller
             }])
             ->latest()->get();
 
+        // Product-wise items for the student's orders (for the "Product-wise" view)
+        $orderItems = \App\Models\OrderItem::where('user_id', $user->id)->with('order')->latest()->get();
+
         // Course completion progress + existing certificates (product_id => certificate id)
         $courseProgress = [];
         foreach ($enrollments as $e) {
@@ -433,13 +436,8 @@ class AuthController extends Controller
         $examsQuery = \App\Models\Exam::where('status', '!=', 'draft');
         
         if (!$user->hasRole('admin') && $user->role !== 'admin') {
-            // Show all assigned/public exams (available, upcoming, ended) — the view
-            // decides the button state. Time window is no longer filtered here.
-            $examsQuery->where(function($query) use ($user_id) {
-                $query->whereHas('students', function($q) use ($user_id) {
-                    $q->where('users.id', $user_id);
-                })->orWhereDoesntHave('students');
-            });
+            // Exams assigned directly, via an enrolled course, or fully public.
+            $examsQuery->visibleToStudent($user_id);
         }
         
         $exams = $examsQuery->latest()->get();
@@ -462,7 +460,7 @@ class AuthController extends Controller
             $teacher_exams_count = \App\Models\Exam::where('created_by', $user->id)->count();
         }
 
-        return view('user.dashboard', compact('user', 'todayOrdersCount', 'cancelOrdersCount', 'orders', 'activeTab','featured_products', 'stockRequests', 'products', 'enrollments', 'courseProgress', 'userCertificates', 'exams', 'completed_exams', 'teacher_questions_count', 'teacher_exams_count', 'teacher_questions', 'teacher_exams'));
+        return view('user.dashboard', compact('user', 'todayOrdersCount', 'cancelOrdersCount', 'orders', 'orderItems', 'activeTab','featured_products', 'stockRequests', 'products', 'enrollments', 'courseProgress', 'userCertificates', 'exams', 'completed_exams', 'teacher_questions_count', 'teacher_exams_count', 'teacher_questions', 'teacher_exams'));
     }
 
     public function orders(Request $request)

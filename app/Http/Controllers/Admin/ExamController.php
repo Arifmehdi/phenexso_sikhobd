@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Exam;
 use App\Models\Question;
 use App\Models\ExamAttempt;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -22,7 +23,8 @@ class ExamController extends Controller
     {
         menuSubmenu('academy', 'examsAll');
         $users = \App\Models\User::orderBy('name')->get();
-        return view('admin.exams.create', compact('users'));
+        $courses = Product::where('type', 'course')->where('active', 1)->orderBy('name_en')->get();
+        return view('admin.exams.create', compact('users', 'courses'));
     }
 
     public function store(Request $request)
@@ -34,14 +36,15 @@ class ExamController extends Controller
             'end_time' => 'required|date|after:start_time',
             'question_count' => 'required|integer',
             'student_ids' => 'nullable|array',
-            'student_ids.*' => 'exists:users,id'
+            'student_ids.*' => 'exists:users,id',
+            'course_ids' => 'nullable|array',
+            'course_ids.*' => 'exists:products,id',
         ]);
 
         $exam = Exam::create($request->all() + ['created_by' => Auth::id()]);
-        
-        if ($request->has('student_ids')) {
-            $exam->students()->sync($request->student_ids);
-        }
+
+        $exam->students()->sync($request->student_ids ?? []);
+        $exam->courses()->sync($request->course_ids ?? []);
 
         return redirect()->route('admin.exams.select-questions', $exam->id);
     }
@@ -50,8 +53,10 @@ class ExamController extends Controller
     {
         menuSubmenu('academy', 'examsAll');
         $users = \App\Models\User::orderBy('name')->get();
+        $courses = Product::where('type', 'course')->where('active', 1)->orderBy('name_en')->get();
         $selected_student_ids = $exam->students()->pluck('users.id')->toArray();
-        return view('admin.exams.edit', compact('exam', 'users', 'selected_student_ids'));
+        $selected_course_ids = $exam->courses()->pluck('products.id')->toArray();
+        return view('admin.exams.edit', compact('exam', 'users', 'selected_student_ids', 'courses', 'selected_course_ids'));
     }
 
     public function update(Request $request, Exam $exam)
@@ -63,16 +68,15 @@ class ExamController extends Controller
             'end_time' => 'required|date|after:start_time',
             'question_count' => 'required|integer',
             'student_ids' => 'nullable|array',
-            'student_ids.*' => 'exists:users,id'
+            'student_ids.*' => 'exists:users,id',
+            'course_ids' => 'nullable|array',
+            'course_ids.*' => 'exists:products,id',
         ]);
 
         $exam->update($request->all());
-        
-        if ($request->has('student_ids')) {
-            $exam->students()->sync($request->student_ids);
-        } else {
-            $exam->students()->detach();
-        }
+
+        $exam->students()->sync($request->student_ids ?? []);
+        $exam->courses()->sync($request->course_ids ?? []);
 
         return redirect()->route('admin.exams.index')->with('success', 'Exam updated successfully.');
     }

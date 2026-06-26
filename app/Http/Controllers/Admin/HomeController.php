@@ -38,6 +38,15 @@ class HomeController extends Controller
         $pendingOrders = Order::where('order_status', 'pending')->count();
         $totalRevenue = Order::where('payment_status', 'paid')->sum('grand_total');
         
+        // Exam Stats
+        $totalExams       = \App\Models\Exam::count();
+        $publishedExams   = \App\Models\Exam::where('status', 'published')->count();
+        $finishedExams    = \App\Models\Exam::where('status', 'finished')->count();
+        $draftExams       = \App\Models\Exam::where('status', 'draft')->count();
+        $totalQuestions   = \App\Models\Question::count();
+        $totalExamAttempts = \App\Models\ExamAttempt::where('status', 'completed')->count();
+        $recentExams      = \App\Models\Exam::withCount('attempts')->latest()->take(6)->get();
+
         $recentEnrollments = \App\Models\Enrollment::with(['user', 'product'])->latest()->take(6)->get();
         $recentCourses = Product::where('type', 'course')->latest()->take(6)->get();
         $recentOrders = Order::latest()->take(6)->get();
@@ -45,6 +54,7 @@ class HomeController extends Controller
         return view('admin.index', compact(
             'totalCourses', 'totalInstructors', 'totalEnrollments', 'pendingEnrollments',
             'productcount', 'todayOrders', 'pendingOrders', 'totalRevenue',
+            'totalExams', 'publishedExams', 'finishedExams', 'draftExams', 'totalQuestions', 'totalExamAttempts', 'recentExams',
             'recentEnrollments', 'recentCourses', 'recentOrders'
         ));
     }

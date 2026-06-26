@@ -687,6 +687,7 @@ Route::middleware(['userRole:admin','auth'])->prefix('admin')->group(function(){
 
 
     Route::get('order/list', [ProductController::class, 'orderList'])->name('admin.orderList');
+    Route::get('order/items', [ProductController::class, 'orderItemsList'])->name('admin.orderItems');
     Route::get('sales-report/ecommerce', [ProductController::class, 'productSalesReport'])->name('admin.productSalesReport');
     Route::get('sales-report/elearning', [ProductController::class, 'courseSalesReport'])->name('admin.courseSalesReport');
     Route::get('order/details/{order}', [ProductController::class, 'orderDeatils'])->name('admin.orderDeatils');

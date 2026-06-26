@@ -23,6 +23,7 @@ class Order extends Model
         'payment_status',
         'payment_gateway',
         'delivery_cost',
+        'delivery_area',
         'addedby_id',
         'editedby_id',
         'order_note',

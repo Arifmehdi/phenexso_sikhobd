@@ -19,6 +19,7 @@ use Illuminate\Support\Str;
         <th>Order Status</th>
         <th>Sub Total</th>
         <th>Delivery Cost</th>
+        <th>Area</th>
         <th>Total</th>
         <th>Payment Status</th>
         <th>Product Items</th>
@@ -62,6 +63,15 @@ use Illuminate\Support\Str;
         <td>{{$order->order_status}}</td>
         <td>{{ '৳' .$order->subtotal}}</td>
         <td>{{ '৳' .$order->delivery_cost}}</td>
+        <td>
+            @if($order->delivery_area == 'inside')
+                <span class="badge badge-success">Inside Dhaka</span>
+            @elseif($order->delivery_area == 'outside')
+                <span class="badge badge-warning">Outside Dhaka</span>
+            @else
+                <span class="text-muted">—</span>
+            @endif
+        </td>
         <td>{{ '৳' . number_format($order->subtotal + $order->delivery_cost, 2) }}</td>
         <td>{{$order->payment_status}}</td>
         <td>{{$order->orderItems()->count()}}</td>
@@ -69,7 +79,7 @@ use Illuminate\Support\Str;
         </tr>  
         @endforeach
         <tr> 
-            <th colspan="12" class="text-right w3-medium">Grand Total Amount</th>
+            <th colspan="13" class="text-right w3-medium">Grand Total Amount</th>
             <th class="w3-medium text-center" colspan="4">{{ '৳' .number_format($orders->sum('grand_total'), 2,)}}</th>
         </tr>
     </tbody>

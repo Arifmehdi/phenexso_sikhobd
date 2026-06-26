@@ -231,6 +231,7 @@ class SslCommerzPaymentController extends Controller
                 'address_title'   => $address,
                 'subtotal'        => $subtotal,
                 'delivery_cost'   => $deliveryCost,
+                'delivery_area'   => $hasProduct ? $deliveryArea : null,
                 'grand_total'     => $grandTotal,
                 'payment_method'  => $paymentMethod,
                 'payment_status'  => 'unpaid',

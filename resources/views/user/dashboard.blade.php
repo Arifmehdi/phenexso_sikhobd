@@ -24,6 +24,13 @@
     .empty-state h5 { color: var(--text-soft); margin-bottom: 12px; }
     .dash-main { min-height: calc(100vh - 76px); }
     .tab-pane .panel { margin-bottom: 0; }
+    /* Compact, modern stat cards */
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 22px; }
+    .stat-card { background:#fff; border:1px solid var(--border); display: flex; flex-wrap: wrap; align-items: center; column-gap: 11px; row-gap: 0; padding: 12px 14px; border-radius: 12px; transition: box-shadow .2s ease, transform .2s ease, border-color .2s ease; }
+    .stat-card:hover { box-shadow: 0 6px 16px rgba(0,0,0,.07); transform: translateY(-2px); border-color: transparent; }
+    .stat-card .icon { width: 38px; height: 38px; border-radius: 10px; margin-bottom: 0 !important; font-size: 15px; flex-shrink: 0; }
+    .stat-card .num { font-size: 20px; font-weight: 800; line-height: 1.1; }
+    .stat-card .label { flex-basis: 100%; margin-left: 49px; font-size: 11.5px; margin-top: 1px; }
     .panel + .panel { margin-top: 24px; }
     .dash-cols-custom { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
     .btn-circle { width: 34px; height: 34px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: var(--bg-muted); color: var(--primary); transition: all 0.2s; border: none; text-decoration: none; }
@@ -36,6 +43,23 @@
 @endpush
 
 @section('content')
+@php
+    // Safe defaults — some dashboard routes render this view with a subset of variables
+    $exams = $exams ?? collect();
+    $completed_exams = $completed_exams ?? collect();
+    $enrollments = $enrollments ?? collect();
+    $orderItems = $orderItems ?? collect();
+    $courseProgress = $courseProgress ?? [];
+    $userCertificates = $userCertificates ?? collect();
+    $teacher_questions = $teacher_questions ?? collect();
+    $teacher_exams = $teacher_exams ?? collect();
+    $teacher_questions_count = $teacher_questions_count ?? 0;
+    $teacher_exams_count = $teacher_exams_count ?? 0;
+    // Platform-wide totals (browse-able)
+    $totalCourses  = \App\Models\Product::where('type', 'course')->where('active', 1)->count();
+    $totalProducts = \App\Models\Product::where('type', 'product')->where('active', 1)->count();
+    $totalExams    = \App\Models\Exam::where('status', '!=', 'draft')->count();
+@endphp
 <div class="dash-wrap">
     <!-- Sidebar -->
     <aside class="dash-side">
@@ -98,27 +122,98 @@
                 <a href="{{ route('courses') }}" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Browse Courses</a>
             </div>
 
+            @php
+                $completedCoursesCount = collect($courseProgress)->filter(fn($p) => $p >= 100)->count();
+                $certificatesCount = is_countable($userCertificates) ? count($userCertificates) : $userCertificates->count();
+                $availableExamsCount = $exams->count();
+            @endphp
             <div class="stat-grid">
-                <div class="stat-card">
-                    <div class="icon"><i class="fa-solid fa-cart-shopping"></i></div>
-                    <div class="num">{{ $todayOrdersCount }}</div>
-                    <div class="label">আজকের অর্ডার</div>
-                </div>
-                <div class="stat-card success">
+                <a class="stat-card" href="{{ route('courses') }}" style="text-decoration:none; color:inherit; cursor:pointer;">
+                    <div class="icon"><i class="fa-solid fa-book"></i></div>
+                    <div class="num">{{ $totalCourses }}</div>
+                    <div class="label">মোট কোর্স</div>
+                </a>
+                <a class="stat-card accent" href="{{ route('shop') }}" style="text-decoration:none; color:inherit; cursor:pointer;">
+                    <div class="icon"><i class="fa-solid fa-bag-shopping"></i></div>
+                    <div class="num">{{ $totalProducts }}</div>
+                    <div class="label">মোট প্রোডাক্ট</div>
+                </a>
+                <a class="stat-card warning" href="{{ route('exams.index') }}" style="text-decoration:none; color:inherit; cursor:pointer;">
+                    <div class="icon"><i class="fa-solid fa-file-pen"></i></div>
+                    <div class="num">{{ $totalExams }}</div>
+                    <div class="label">মোট পরীক্ষা</div>
+                </a>
+                <a class="stat-card" href="#" onclick="switchTab('tab-courses'); return false;" style="text-decoration:none; color:inherit; cursor:pointer;">
                     <div class="icon"><i class="fa-solid fa-graduation-cap"></i></div>
                     <div class="num">{{ $enrollments->count() }}</div>
                     <div class="label">এনরোলড কোর্স</div>
-                </div>
-                <div class="stat-card warning">
-                    <div class="icon"><i class="fa-solid fa-ban"></i></div>
-                    <div class="num">{{ $cancelOrdersCount }}</div>
-                    <div class="label">বাতিল অর্ডার</div>
-                </div>
-                <div class="stat-card accent">
+                </a>
+                <a class="stat-card success" href="#" onclick="switchTab('tab-courses'); return false;" style="text-decoration:none; color:inherit; cursor:pointer;">
+                    <div class="icon"><i class="fa-solid fa-circle-check"></i></div>
+                    <div class="num">{{ $completedCoursesCount }}</div>
+                    <div class="label">সম্পন্ন কোর্স</div>
+                </a>
+                <a class="stat-card accent" href="#" onclick="switchTab('tab-exams'); return false;" style="text-decoration:none; color:inherit; cursor:pointer;">
+                    <div class="icon"><i class="fa-solid fa-file-pen"></i></div>
+                    <div class="num">{{ $completed_exams->count() }}</div>
+                    <div class="label">সম্পন্ন পরীক্ষা</div>
+                </a>
+                <a class="stat-card" href="{{ route('user.certificates') }}" style="text-decoration:none; color:inherit; cursor:pointer;">
+                    <div class="icon"><i class="fa-solid fa-certificate"></i></div>
+                    <div class="num">{{ $certificatesCount }}</div>
+                    <div class="label">সার্টিফিকেট</div>
+                </a>
+                <a class="stat-card warning" href="#" onclick="switchTab('tab-orders-inline'); return false;" style="text-decoration:none; color:inherit; cursor:pointer;">
                     <div class="icon"><i class="fa-solid fa-box"></i></div>
                     <div class="num">{{ $orders->total() }}</div>
                     <div class="label">সর্বমোট অর্ডার</div>
+                </a>
+                <a class="stat-card success" href="{{ route('exams.index') }}" style="text-decoration:none; color:inherit; cursor:pointer;">
+                    <div class="icon"><i class="fa-solid fa-clipboard-list"></i></div>
+                    <div class="num">{{ $availableExamsCount }}</div>
+                    <div class="label">উপলব্ধ পরীক্ষা</div>
+                </a>
+            </div>
+
+            <!-- Available Exams (overview summary) -->
+            <div class="panel mb-4">
+                <div class="panel-head">
+                    <h3><i class="fa-solid fa-file-pen"></i> উপলব্ধ পরীক্ষাসমূহ</h3>
+                    <a href="#" onclick="switchTab('tab-exams'); return false;">সব দেখুন</a>
                 </div>
+                @php $ovCompletedExamIds = $completed_exams->pluck('exam_id')->all(); @endphp
+                @forelse($exams->take(3) as $exam)
+                <div class="course-row">
+                    <div class="thumb" style="--c1:#6c5ce7;--c2:#a29bfe;">E</div>
+                    <div class="body">
+                        <h4>{{ $exam->title }}</h4>
+                        <div class="meta">
+                            <i class="far fa-clock"></i> {{ $exam->duration }} মিনিট
+                            @if($exam->end_time) &middot; <i class="far fa-calendar-alt"></i> শেষ: {{ $exam->end_time->format('M d, h:i A') }} @endif
+                        </div>
+                    </div>
+                    @php
+                        $exCompleted = in_array($exam->id, $ovCompletedExamIds);
+                        $exUpcoming = $exam->start_time && $exam->start_time->isFuture();
+                        $exEnded = $exam->end_time && $exam->end_time->isPast();
+                    @endphp
+                    @if($exCompleted)
+                        <span class="status-pill status-approved">সম্পন্ন</span>
+                    @elseif($exUpcoming)
+                        <span class="status-pill status-pending">আসন্ন</span>
+                    @elseif($exEnded)
+                        <span class="status-pill status-pending">শেষ হয়েছে</span>
+                    @else
+                        <a href="{{ route('exams.start', $exam->id) }}" class="btn btn-primary btn-sm">অংশগ্রহণ করুন</a>
+                    @endif
+                </div>
+                @empty
+                <div class="empty-state" style="padding:24px;">
+                    <i class="fa-solid fa-file-circle-question"></i>
+                    <h5>বর্তমানে আপনার জন্য কোনো পরীক্ষা উপলব্ধ নেই</h5>
+                    <p class="text-muted" style="font-size:13px; margin-top:6px;">নতুন পরীক্ষা যুক্ত হলে এখানে দেখা যাবে।</p>
+                </div>
+                @endforelse
             </div>
 
             @if($enrollments->count() > 0)
@@ -139,11 +234,12 @@
                     <div class="body">
                         <h4><a href="{{ route('courseDetail', $enrollment->product->slug) }}" style="text-decoration: none; color: inherit;">{{ $enrollment->product->name_en ?? 'Course' }}</a></h4>
                         <div class="meta">
-                            @if($enrollment->status == 'active')
-                                Enrolled: {{ $enrollment->enrolled_at ? $enrollment->enrolled_at->format('d M, Y') : 'Recently' }}
-                            @else
-                                Status: {{ ucfirst($enrollment->status) }}
+                            @if($enrollment->product->instructor)
+                                <i class="fa-solid fa-chalkboard-user"></i>
+                                <a href="{{ route('instructor.profile', $enrollment->product->instructor->id) }}" style="color:#6c5ce7; text-decoration:none; font-weight:600;">{{ $enrollment->product->instructor->name }}</a>
+                                &middot;
                             @endif
+                            <i class="fa-solid fa-book-open"></i> {{ $enrollment->product->lessons_count ?? 0 }} লেসন
                         </div>
                     </div>
                     @if($enrollment->status == 'active')
@@ -175,7 +271,7 @@
                         <tbody>
                             @forelse($orders->take(5) as $order)
                             <tr>
-                                <td class="order-id">#{{ $order->id }}</td>
+                                <td class="order-id">#{{ str_pad($order->id, 6, '0', STR_PAD_LEFT) }}</td>
                                 <td style="color: var(--text-soft);">{{ $order->created_at->format('M d, Y') }}</td>
                                 <td>
                                     @php
@@ -289,7 +385,12 @@
                     <a href="{{ route('user.orders', ['type' => 'cancelled']) }}" class="btn {{ isset($type) && $type == 'cancelled' ? 'btn-primary' : 'btn-outline' }} btn-sm">বাতিল</a>
                 </div>
             </div>
-            <div class="panel">
+            <div class="filter-tabs" style="margin-bottom:14px;">
+                <button type="button" class="btn btn-primary btn-sm" id="ordViewInvoiceBtn" onclick="switchOrderView('invoice')">ইনভয়েস অনুযায়ী</button>
+                <button type="button" class="btn btn-outline btn-sm" id="ordViewProductBtn" onclick="switchOrderView('product')">প্রোডাক্ট অনুযায়ী</button>
+            </div>
+
+            <div class="panel" id="orders-view-invoice">
                 <div style="overflow-x: auto;">
                     <table class="custom-table">
                         <thead>
@@ -304,7 +405,7 @@
                         <tbody>
                             @forelse($orders as $order)
                             <tr>
-                                <td class="order-id">#{{ $order->id }}</td>
+                                <td class="order-id">#{{ str_pad($order->id, 6, '0', STR_PAD_LEFT) }}</td>
                                 <td style="color: var(--text-soft);">{{ $order->created_at->format('M d, Y') }}</td>
                                 <td>
                                     @php
@@ -336,6 +437,50 @@
                     {{ $orders->links() }}
                 </div>
                 @endif
+            </div>
+
+            <!-- Product-wise view -->
+            <div class="panel" id="orders-view-product" style="display:none;">
+                <div style="overflow-x: auto;">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>প্রোডাক্ট</th>
+                                <th>অর্ডার আইডি</th>
+                                <th>তারিখ</th>
+                                <th>পরিমাণ</th>
+                                <th>দাম</th>
+                                <th>মোট</th>
+                                <th>অবস্থা</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse(($orderItems ?? collect()) as $item)
+                            <tr>
+                                <td>{{ $item->product_name }}</td>
+                                <td class="order-id">#{{ str_pad($item->order_id, 6, '0', STR_PAD_LEFT) }}</td>
+                                <td style="color: var(--text-soft);">{{ optional($item->order)->created_at ? $item->order->created_at->format('M d, Y') : '' }}</td>
+                                <td>{{ $item->quantity }}</td>
+                                <td>৳{{ number_format($item->product_price) }}</td>
+                                <td class="fw-bold">৳{{ number_format($item->total_cost) }}</td>
+                                <td>
+                                    @php $ps = strtolower(optional($item->order)->order_status ?? ''); @endphp
+                                    <span class="status-pill {{ str_contains($ps,'pending') ? 'status-pending' : (str_contains($ps,'cancel') ? 'status-rejected' : 'status-approved') }}">
+                                        {{ optional($item->order)->order_status }}
+                                    </span>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="7" class="empty-state">
+                                    <i class="fa-solid fa-box-open"></i>
+                                    <h5>কোনো প্রোডাক্ট নেই</h5>
+                                </td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
@@ -786,6 +931,24 @@
 
 <script>
     // Tab switching
+    function switchOrderView(view) {
+        var inv = document.getElementById('orders-view-invoice');
+        var prod = document.getElementById('orders-view-product');
+        var invBtn = document.getElementById('ordViewInvoiceBtn');
+        var prodBtn = document.getElementById('ordViewProductBtn');
+        if (view === 'product') {
+            if (inv) inv.style.display = 'none';
+            if (prod) prod.style.display = 'block';
+            if (prodBtn) { prodBtn.classList.add('btn-primary'); prodBtn.classList.remove('btn-outline'); }
+            if (invBtn) { invBtn.classList.add('btn-outline'); invBtn.classList.remove('btn-primary'); }
+        } else {
+            if (inv) inv.style.display = 'block';
+            if (prod) prod.style.display = 'none';
+            if (invBtn) { invBtn.classList.add('btn-primary'); invBtn.classList.remove('btn-outline'); }
+            if (prodBtn) { prodBtn.classList.add('btn-outline'); prodBtn.classList.remove('btn-primary'); }
+        }
+    }
+
     function switchTab(tabId) {
         // Hide all tabs
         document.querySelectorAll('.tab-content-item').forEach(function(el) {

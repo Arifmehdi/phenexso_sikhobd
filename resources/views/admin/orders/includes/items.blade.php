@@ -69,8 +69,9 @@
             @endforeach
 
             @php
-                $shippingCost = $order->shipping_cost ?? $ws->shipping_charge ?? 150;
-                $totalWithShipping = $order->subtotal + $shippingCost;
+                // Use the actual stored dynamic delivery cost (inside/outside Dhaka), not a default
+                $shippingCost = (float) ($order->delivery_cost ?? 0);
+                $totalWithShipping = (float) ($order->grand_total ?? ($order->subtotal + $shippingCost));
             @endphp
 
             {{-- Sub Total --}}

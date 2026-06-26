@@ -5,6 +5,21 @@
 @endsection
 
 @section('body')
+<style>
+    /* Compact, modern stat cards (scoped to dashboard) */
+    .col-lg-3.col-6 .card { border-radius: 12px !important; }
+    .col-lg-3.col-6 .card-body { padding: 13px 15px !important; }
+    .col-lg-3.col-6 .card-body .p-4 { padding: 0 !important; }
+    .col-lg-3.col-6 .symbol { width: 40px !important; height: 40px !important; flex-shrink: 0; }
+    .col-lg-3.col-6 .symbol-label { width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; border-radius: 10px; background: rgba(0,0,0,.04); }
+    .col-lg-3.col-6 .symbol.me-4 { margin-right: 12px !important; }
+    .col-lg-3.col-6 .fs-3 { font-size: 1rem !important; }
+    .col-lg-3.col-6 .fs-4 { font-size: 1.25rem !important; font-weight: 800 !important; }
+    .col-lg-3.col-6 .card-body .small { font-size: 11.5px !important; }
+    .col-lg-3.col-6 .card-footer { padding: 5px !important; font-size: 11.5px !important; }
+    .col-lg-3.col-6 .card.transition-hover { transition: box-shadow .2s ease, transform .2s ease; }
+    .col-lg-3.col-6 .card.transition-hover:hover { box-shadow: 0 6px 16px rgba(0,0,0,.08); transform: translateY(-2px); }
+</style>
 <div class="content-header">
     <div class="container-fluid">
         <div class="row mb-4 align-items-center">
@@ -105,6 +120,74 @@
             </div>
         </div>
 
+        {{-- Section Header: Exams --}}
+        <div class="d-flex align-items-center mb-3">
+            <h5 class="fw-bold mb-0 text-info"><i class="fas fa-file-pen me-2"></i> Exam Overview</h5>
+            <hr class="flex-grow-1 ms-3 opacity-25">
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-lg-3 col-6 mb-3">
+                <div class="card h-100 border-0 shadow-sm transition-hover rounded-4">
+                    <div class="card-body p-4 d-flex align-items-center">
+                        <div class="symbol symbol-50px symbol-light-info me-4">
+                            <span class="symbol-label"><i class="fas fa-file-pen text-info fs-3"></i></span>
+                        </div>
+                        <div class="p-4">
+                            <span class="text-muted fw-bold d-block small">Total Exams</span>
+                            <span class="text-dark fw-bolder fs-4">{{ $totalExams }}</span>
+                        </div>
+                    </div>
+                    <a href="{{ route('admin.exams.index') }}" class="card-footer bg-light py-2 text-center text-decoration-none small fw-bold">Manage <i class="fas fa-chevron-right ms-1"></i></a>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-6 mb-3">
+                <div class="card h-100 border-0 shadow-sm transition-hover rounded-4">
+                    <div class="card-body p-4 d-flex align-items-center">
+                        <div class="symbol symbol-50px symbol-light-success me-4">
+                            <span class="symbol-label"><i class="fas fa-circle-check text-success fs-3"></i></span>
+                        </div>
+                        <div class="p-4">
+                            <span class="text-muted fw-bold d-block small">Published Exams</span>
+                            <span class="text-dark fw-bolder fs-4">{{ $publishedExams }}</span>
+                        </div>
+                    </div>
+                    <a href="{{ route('admin.exams.index') }}" class="card-footer bg-light py-2 text-center text-decoration-none small fw-bold">View <i class="fas fa-chevron-right ms-1"></i></a>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-6 mb-3">
+                <div class="card h-100 border-0 shadow-sm transition-hover rounded-4">
+                    <div class="card-body p-4 d-flex align-items-center">
+                        <div class="symbol symbol-50px symbol-light-primary me-4">
+                            <span class="symbol-label"><i class="fas fa-user-check text-primary fs-3"></i></span>
+                        </div>
+                        <div class="p-4">
+                            <span class="text-muted fw-bold d-block small">Exam Attempts</span>
+                            <span class="text-dark fw-bolder fs-4">{{ $totalExamAttempts }}</span>
+                        </div>
+                    </div>
+                    <a href="{{ route('admin.exams.index') }}" class="card-footer bg-light py-2 text-center text-decoration-none small fw-bold">Results <i class="fas fa-chevron-right ms-1"></i></a>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-6 mb-3">
+                <div class="card h-100 border-0 shadow-sm transition-hover rounded-4">
+                    <div class="card-body p-4 d-flex align-items-center">
+                        <div class="symbol symbol-50px symbol-light-warning me-4">
+                            <span class="symbol-label"><i class="fas fa-circle-question text-warning fs-3"></i></span>
+                        </div>
+                        <div class="p-4">
+                            <span class="text-muted fw-bold d-block small">Question Bank</span>
+                            <span class="text-dark fw-bolder fs-4">{{ $totalQuestions }}</span>
+                        </div>
+                    </div>
+                    <a href="{{ route('admin.questions.index') }}" class="card-footer bg-light py-2 text-center text-decoration-none small fw-bold">Manage <i class="fas fa-chevron-right ms-1"></i></a>
+                </div>
+            </div>
+        </div>
+
         {{-- Section Header: E-Commerce --}}
         <div class="d-flex align-items-center mb-3">
             <h5 class="fw-bold mb-0 text-success"><i class="fas fa-shopping-bag me-2"></i> E-Commerce Overview</h5>
@@ -125,6 +208,7 @@
                             <span class="text-dark fw-bolder fs-4">{{ $todayOrders }}</span>
                         </div>
                     </div>
+                    <a href="{{ route('admin.orderList', ['date_from' => now()->toDateString(), 'date_to' => now()->toDateString()]) }}" class="card-footer bg-light py-2 text-center text-decoration-none small fw-bold">View <i class="fas fa-chevron-right ms-1"></i></a>
                 </div>
             </div>
 
@@ -141,6 +225,7 @@
                             <span class="text-dark fw-bolder fs-4">{{ $productcount }}</span>
                         </div>
                     </div>
+                    <a href="{{ route('admin.productsAll') }}?type=product" class="card-footer bg-light py-2 text-center text-decoration-none small fw-bold">Manage <i class="fas fa-chevron-right ms-1"></i></a>
                 </div>
             </div>
 
@@ -157,6 +242,7 @@
                             <span class="text-dark fw-bolder fs-4">{{ $pendingOrders }}</span>
                         </div>
                     </div>
+                    <a href="{{ route('admin.orderList', ['status' => 'pending']) }}" class="card-footer bg-light py-2 text-center text-decoration-none small fw-bold">Review <i class="fas fa-chevron-right ms-1"></i></a>
                 </div>
             </div>
 
@@ -173,10 +259,52 @@
                             <span class="text-white fw-bolder fs-4">{{ number_format($totalRevenue, 0) }} ৳</span>
                         </div>
                     </div>
+                    <a href="{{ route('admin.productSalesReport') }}" class="card-footer bg-dark bg-opacity-25 py-2 text-center text-decoration-none small fw-bold text-white">Sales Report <i class="fas fa-chevron-right ms-1"></i></a>
                 </div>
             </div>
         </div>
 
+        
+        {{-- Recent Exams --}}
+        <div class="card border-0 shadow-sm rounded-4 mb-5">
+            <div class="card-header bg-white border-0 d-flex align-items-center justify-content-between">
+                <h6 class="fw-bold mb-0"><i class="fas fa-clock-rotate-left text-info me-2"></i> Recent Exams</h6>
+                <a href="{{ route('admin.exams.index') }}" class="small fw-bold text-decoration-none">View All <i class="fas fa-chevron-right ms-1"></i></a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover mb-0">
+                        <thead class="thead-light">
+                            <tr>
+                                <th class="pl-3">Title</th>
+                                <th class="text-center">Questions</th>
+                                <th class="text-center">Duration</th>
+                                <th class="text-center">Attempts</th>
+                                <th>Status</th>
+                                <th>End Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($recentExams as $exam)
+                            <tr>
+                                <td class="pl-3 fw-bold">{{ $exam->title }}</td>
+                                <td class="text-center">{{ $exam->question_count }}</td>
+                                <td class="text-center">{{ $exam->duration }} min</td>
+                                <td class="text-center"><span class="badge badge-primary">{{ $exam->attempts_count }}</span></td>
+                                <td>
+                                    @php $st = $exam->status; $stClass = $st=='published' ? 'badge-success' : ($st=='finished' ? 'badge-info' : 'badge-secondary'); @endphp
+                                    <span class="badge {{ $stClass }}">{{ ucfirst($st) }}</span>
+                                </td>
+                                <td class="small text-muted">{{ optional($exam->end_time)->format('d M Y, h:i A') }}</td>
+                            </tr>
+                            @empty
+                            <tr><td colspan="6" class="text-center text-muted py-3">No exams created yet.</td></tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
         {{-- Detailed Data Section --}}
         <div class="row mt-4">
             {{-- Recent Enrollments --}}

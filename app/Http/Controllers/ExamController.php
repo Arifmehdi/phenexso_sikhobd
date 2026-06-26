@@ -19,20 +19,11 @@ class ExamController extends Controller
 
         $query = Exam::where('status', '!=', 'draft');
 
-        // If not admin, restrict by timing and assignment
+        // If not admin, restrict to exams visible to this student (assigned directly,
+        // enrolled in an assigned course, or fully public). The view shows the state
+        // (available / upcoming / expired / attended) so users understand easily.
         if (!$user || (!$user->hasRole('admin') && $user->role !== 'admin')) {
-            $query->where('start_time', '<=', $now)
-                  ->where('end_time', '>=', $now);
-            
-            if ($user_id) {
-                $query->where(function($q) use ($user_id) {
-                    $q->whereHas('students', function($sq) use ($user_id) {
-                        $sq->where('users.id', $user_id);
-                    })->orWhereDoesntHave('students');
-                });
-            } else {
-                $query->whereDoesntHave('students');
-            }
+            $query->visibleToStudent($user_id ?? 0);
         }
 
         $exams = $query->latest()->paginate(10);
@@ -47,6 +38,16 @@ class ExamController extends Controller
 
     public function start(Exam $exam)
     {
+        // Eligibility: only assigned / enrolled-course / public exams (admins exempt)
+        $user = Auth::user();
+        $isAdmin = $user && ($user->hasRole('admin') || $user->role === 'admin');
+        if (!$isAdmin) {
+            $eligible = Exam::where('id', $exam->id)->visibleToStudent($user->id)->exists();
+            if (!$eligible) {
+                return redirect()->route('exams.index')->with('error', 'You are not eligible to take this exam.');
+            }
+        }
+
         $now = Carbon::now();
         if ($now->lt($exam->start_time) || $now->gt($exam->end_time)) {
             return redirect()->route('exams.index')->with('error', 'Exam is not available at this time.');

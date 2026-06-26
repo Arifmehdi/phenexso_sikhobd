@@ -73,11 +73,17 @@ class AppServiceProvider extends ServiceProvider
                 ->get();
             View::share('hierarchicalCategories', $hierarchicalCategories);
 
-            $headerExams = \App\Models\Exam::where('status', 'published')
-                ->where('end_time', '>=', \Carbon\Carbon::now())
-                ->latest()
-                ->take(10)
-                ->get();
+            $headerExamsQuery = \App\Models\Exam::where('status', 'published')
+                ->where('end_time', '>=', \Carbon\Carbon::now());
+
+            // Only show exams this user is eligible for (assigned course / public).
+            $authUser = \Illuminate\Support\Facades\Auth::user();
+            $isAdmin = $authUser && ($authUser->hasRole('admin') || $authUser->role === 'admin');
+            if (!$isAdmin) {
+                $headerExamsQuery->visibleToStudent($authUser ? $authUser->id : 0);
+            }
+
+            $headerExams = $headerExamsQuery->latest()->take(10)->get();
             View::share('headerExams', $headerExams);
         });
 

@@ -12,7 +12,7 @@
                 <div class="card-header">
                     <h3 class="card-title">Create New Exam</h3>
                 </div>
-                <form action="{{ route('admin.exams.store') }}" method="POST">
+                <form action="{{ route('admin.exams.store') }}" method="POST" id="examForm">
                     @csrf
                     <div class="card-body">
                         <div class="form-group">
@@ -48,12 +48,17 @@
                             <input type="number" name="question_count" class="form-control" required>
                         </div>
                         <div class="form-group">
-                            <label>Select Students (Leave empty for all students)</label>
-                            <select name="student_ids[]" class="form-control select2" multiple="multiple" data-placeholder="Select Students" style="width: 100%;">
-                                @foreach($users as $user)
-                                    <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->email }})</option>
+                            <label>Assign to Courses
+                                <small class="text-muted">— only students enrolled in the selected course(s) will get this exam</small>
+                            </label>
+                            <select name="course_ids[]" id="courseSelect" class="form-control select2" multiple="multiple" data-placeholder="Select Courses" style="width: 100%;">
+                                @foreach($courses as $course)
+                                    <option value="{{ $course->id }}">{{ $course->name_en ?? $course->name_bn }}</option>
                                 @endforeach
                             </select>
+                            <small class="form-text text-muted">
+                                <i class="fas fa-info-circle"></i> If you leave this empty, the exam becomes <strong>public</strong> (available to everyone).
+                            </small>
                         </div>
                     </div>
                     <div class="card-footer">
@@ -70,6 +75,16 @@
     $(document).ready(function() {
         $('.select2').select2({
             theme: 'bootstrap4'
+        });
+
+        // Warn before submit if no course is selected (exam will be public)
+        $('#examForm').on('submit', function(e) {
+            var courses = $('#courseSelect').val();
+            if (!courses || courses.length === 0) {
+                if (!confirm('You have not selected any course.\n\nThis exam will be PUBLIC — available to EVERYONE.\n\nDo you want to continue?')) {
+                    e.preventDefault();
+                }
+            }
         });
     });
 </script>

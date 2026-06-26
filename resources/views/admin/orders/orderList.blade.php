@@ -11,6 +11,16 @@
     <div class="row">
         <div class="col-md-11 mx-auto">
 
+            <!-- Tabs -->
+            <ul class="nav nav-pills mb-3">
+                <li class="nav-item">
+                    <a class="nav-link active" href="{{ route('admin.orderList') }}"><i class="fas fa-file-invoice"></i> Invoice List</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('admin.orderItems') }}"><i class="fas fa-boxes"></i> Product List</a>
+                </li>
+            </ul>
+
             <!-- Filter Card -->
             <div class="card">
                 <div class="card-body">

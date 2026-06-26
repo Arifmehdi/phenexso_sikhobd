@@ -611,9 +611,41 @@ class ProductController extends Controller
 
         $orders = $ordersQuery->paginate($request->id ? 100 : 30);
 
-       
+
         // Show regular order list view
         return view('admin.orders.orderList', compact('orders'));
+    }
+
+    /**
+     * Product-wise order list — one row per ordered product/item across all orders.
+     */
+    public function orderItemsList(Request $request)
+    {
+        menuSubmenu('order', 'orderList');
+
+        $itemsQuery = OrderItem::with(['order', 'product', 'ebook'])
+            ->whereHas('order', function ($q) use ($request) {
+                if ($request->id) {
+                    $q->where('user_id', $request->id);
+                }
+                if ($request->filled(['date_from', 'date_to'])) {
+                    $q->whereBetween('created_at', [$request->date_from . ' 00:00:00', $request->date_to . ' 23:59:59']);
+                }
+                if ($request->status) {
+                    $q->where('order_status', 'like', '%' . $request->status . '%');
+                }
+                if ($request->mobile) {
+                    $q->where('mobile', 'like', '%' . $request->mobile . '%');
+                }
+            });
+
+        if ($request->product) {
+            $itemsQuery->where('product_name', 'like', '%' . $request->product . '%');
+        }
+
+        $items = $itemsQuery->latest()->paginate(50)->withQueryString();
+
+        return view('admin.orders.orderItemsList', compact('items'));
     }
 
     public function productSalesReport(Request $request)

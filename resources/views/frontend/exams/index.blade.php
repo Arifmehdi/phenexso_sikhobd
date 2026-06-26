@@ -11,6 +11,7 @@
     .status-pill { padding: 4px 12px; border-radius: 50px; font-size: 11px; font-weight: 700; text-transform: uppercase; display: inline-block; }
     .status-pending { background: #fff7ed; color: #c2410c; }
     .status-approved { background: #f0fdf4; color: #15803d; }
+    .status-rejected { background: #fef2f2; color: #b91c1c; }
     .dash-main { min-height: calc(100vh - 76px); }
     .avatar-sm { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; }
 </style>
@@ -71,7 +72,13 @@
             <div class="panel-head">
                 <h3><i class="fa-solid fa-file-pen"></i> {{ app()->getLocale() == 'bn' ? 'উপলব্ধ পরীক্ষাসমূহ' : 'Available Exams' }}</h3>
             </div>
+            @php $completedExamIds = $completed_exams->pluck('exam_id')->all(); @endphp
             @forelse($exams as $exam)
+            @php
+                $isCompleted = in_array($exam->id, $completedExamIds);
+                $isUpcoming  = $exam->start_time && $exam->start_time->isFuture();
+                $isEnded     = $exam->end_time && $exam->end_time->isPast();
+            @endphp
             <div class="course-row">
                 <div class="thumb" style="--c1:#6c5ce7;--c2:#a29bfe;">
                     E
@@ -79,11 +86,23 @@
                 <div class="body">
                     <h4>{{ $exam->title }}</h4>
                     <div class="meta">
-                        <i class="far fa-clock"></i> {{ $exam->duration }} মিনিট &middot; 
-                        <i class="far fa-calendar-alt"></i> শেষ সময়: {{ $exam->end_time->format('M d, h:i A') }}
+                        <i class="far fa-clock"></i> {{ $exam->duration }} মিনিট &middot;
+                        <i class="far fa-calendar-alt"></i> শেষ সময়: {{ $exam->end_time->format('M d, h:i A') }}
                     </div>
                 </div>
-                <a href="{{ route('exams.start', $exam->id) }}" class="btn btn-primary btn-sm">{{ app()->getLocale() == 'bn' ? 'অংশগ্রহণ করুন' : 'Participate' }}</a>
+                @if($isCompleted)
+                    @if($exam->status == 'finished')
+                        <a href="{{ route('exams.result', $exam->id) }}" class="btn btn-success btn-sm">{{ app()->getLocale() == 'bn' ? 'ফলাফল দেখুন' : 'View Result' }}</a>
+                    @else
+                        <span class="status-pill status-approved">{{ app()->getLocale() == 'bn' ? 'অংশগ্রহণ সম্পন্ন' : 'Attended' }}</span>
+                    @endif
+                @elseif($isUpcoming)
+                    <span class="status-pill status-pending">{{ app()->getLocale() == 'bn' ? 'আসন্ন' : 'Upcoming' }}</span>
+                @elseif($isEnded)
+                    <span class="status-pill status-rejected">{{ app()->getLocale() == 'bn' ? 'সময় শেষ' : 'Expired' }}</span>
+                @else
+                    <a href="{{ route('exams.start', $exam->id) }}" class="btn btn-primary btn-sm">{{ app()->getLocale() == 'bn' ? 'অংশগ্রহণ করুন' : 'Participate' }}</a>
+                @endif
             </div>
             @empty
             <div class="empty-state">

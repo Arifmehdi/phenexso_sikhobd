@@ -1768,7 +1768,7 @@ public function quickAdd(Request $request)
                 $location->address_title = ($billingAddress ?: null) ?? (($hasCourse || $hasEbook) ? 'Registration' : 'Order');
             }
 
-            $order = $this->createOrder($user, $location, $deliveryCost, $paymentMethod, $subtotal, $deliveryCost, $grandTotal, $orderNote, $registrationFields, $transactionId);
+            $order = $this->createOrder($user, $location, $deliveryCost, $paymentMethod, $subtotal, $deliveryCost, $grandTotal, $orderNote, $registrationFields, $transactionId, ($hasProduct ? $deliveryArea : null));
 
             $this->storeOrderItems($order, $cartItems, $user->id);
             Cart::where('user_id', $user->id)->delete();
@@ -1826,7 +1826,7 @@ public function quickAdd(Request $request)
             $location->mobile = $request->input('mobile');
             $location->address_title = ($billingAddress ?: null) ?? (($hasCourse || $hasEbook) ? 'Registration' : 'Order');
 
-            $order = $this->createOrder($user, $location, $deliveryCost, $paymentMethod, $subtotal, $deliveryCost, $grandTotal, $orderNote, $registrationFields, $transactionId);
+            $order = $this->createOrder($user, $location, $deliveryCost, $paymentMethod, $subtotal, $deliveryCost, $grandTotal, $orderNote, $registrationFields, $transactionId, ($hasProduct ? $deliveryArea : null));
 
             $this->storeOrderItems($order, $cartItems, $user->id);
             Cart::where('session_id', session('session_id'))->delete();
@@ -2175,7 +2175,7 @@ public function quickAdd(Request $request)
         return implode(', ', $parts);
     }
 
-    private function createOrder($user, $location, $area, $paymentMethod, $subtotal, $deliveryCost, $grandTotal, $orderNote, $registrationFields = [], $transactionId = null)
+    private function createOrder($user, $location, $area, $paymentMethod, $subtotal, $deliveryCost, $grandTotal, $orderNote, $registrationFields = [], $transactionId = null, $deliveryArea = null)
     {
         // Online (TXN ID submitted) => awaiting admin verification; COD => unpaid
         $paymentStatus = ($paymentMethod === 'online' && !empty($transactionId)) ? 'pending' : 'unpaid';
@@ -2193,6 +2193,7 @@ public function quickAdd(Request $request)
             'payment_gateway'=> $paymentMethod,
             'payment_trx_id' => $transactionId,
             'delivery_cost'  => $deliveryCost,
+            'delivery_area'  => $deliveryArea,
             'pending_at'     => now(),
             'addedby_id'     => $user ? $user->id : null,
             'order_note'     => $orderNote,
@@ -2280,9 +2281,16 @@ public function quickAdd(Request $request)
 
     public function orderPrint(Order $order)
     {
+        // A user may only print their own order (admins can print any)
+        $isAdmin = Auth::check() && (Auth::user()->hasRole('admin') || Auth::user()->role === 'admin');
+        if ($order->user_id && Auth::id() !== $order->user_id && !$isAdmin) {
+            abort(403, 'You are not allowed to view this invoice.');
+        }
+
         $items = $order->orderItems()->get();
 
-        return view('user.order.orderPrint', compact('order', 'items'));
+        // Use the same invoice as the admin side
+        return view('admin.orders.orderPrint', compact('order', 'items'));
     }
 
 
