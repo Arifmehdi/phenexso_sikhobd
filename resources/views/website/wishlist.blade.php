@@ -1,6 +1,6 @@
-@extends('website.layouts.sikhobd')
+﻿@extends('website.layouts.sikhobd')
 
-@section('title', 'আমার উইশলিস্ট — ' . ($ws->name ?? env('APP_NAME')))
+@section('title', __('frontend.wishlist.title') . ' — ' . ($ws->name ?? env('APP_NAME')))
 
 @push('css')
 <style>
@@ -99,8 +99,8 @@
 <section class="section" style="background: var(--bg-soft); min-height: 70vh;">
     <div class="container">
         <div class="section-header" style="text-align: left;">
-            <h2 data-i18n="nav.wishlist">আমার উইশলিস্ট</h2>
-            <p style="color: var(--text-soft);">আপনার পছন্দের কোর্সগুলো এখানে সংরক্ষিত আছে।</p>
+            <h2 data-i18n="nav.wishlist">{{ __('frontend.wishlist.title') }}</h2>
+            <p style="color: var(--text-soft);">{{ __('frontend.wishlist.saved_courses') }}</p>
         </div>
 
         @if($wishlists->count() > 0)
@@ -130,7 +130,7 @@
                                 <button class="btn btn-accent btn-sm add-to-cart-ajax" 
                                         data-id="{{ $product->id }}" 
                                         style="padding: 8px 16px; font-size: 14px;">
-                                    <i class="fa-solid fa-cart-plus"></i> <span data-i18n="nav.add_to_cart">কার্টে যোগ করুন</span>
+                                    <i class="fa-solid fa-cart-plus"></i> <span data-i18n="nav.add_to_cart">{{ __('frontend.wishlist.add_to_cart') }}</span>
                                 </button>
                             </div>
                         </div>
@@ -140,9 +140,9 @@
         @else
             <div class="empty-wishlist">
                 <i class="fa-solid fa-heart-circle-xmark"></i>
-                <h3 style="color: var(--text-main); margin-bottom: 16px;">আপনার উইশলিস্ট খালি!</h3>
-                <p style="color: var(--text-soft); margin-bottom: 30px;">আমাদের কোর্সগুলো দেখুন এবং আপনার পছন্দের কোর্সটি খুঁজে নিন।</p>
-                <a href="{{ route('courses') }}" class="btn btn-primary" data-i18n="nav.courses">কোর্সসমূহ দেখুন</a>
+                <h3 style="color: var(--text-main); margin-bottom: 16px;">{{ __('frontend.wishlist.empty') }}</h3>
+                <p style="color: var(--text-soft); margin-bottom: 30px;">{{ __('frontend.wishlist.empty_desc') }}</p>
+                <a href="{{ route('courses') }}" class="btn btn-primary" data-i18n="nav.courses">{{ __('frontend.wishlist.browse_courses') }}</a>
             </div>
         @endif
     </div>
@@ -157,14 +157,14 @@
         const card = $(`#wishlist-row-${id}`);
 
         Swal.fire({
-            title: 'আপনি কি নিশ্চিত?',
+            title: __('frontend.wishlist.remove_confirm'),
             text: "এই আইটেমটি উইশলিস্ট থেকে সরিয়ে ফেলা হবে।",
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#ff4d4d',
             cancelButtonColor: '#6c757d',
             confirmButtonText: 'হ্যাঁ, সরিয়ে ফেলুন',
-            cancelButtonText: 'না'
+            cancelButtonText: __('frontend.wishlist.remove_no')
         }).then((result) => {
             if (result.isConfirmed) {
                 $.post("{{ route('wishlist.remove') }}", {
@@ -209,7 +209,7 @@
                 showCartNotification('কার্টে সফলভাবে যোগ করা হয়েছে');
                 
                 setTimeout(() => {
-                    btn.html('<i class="fa-solid fa-cart-plus"></i> <span data-i18n="nav.add_to_cart">কার্টে যোগ করুন</span>');
+                    btn.html('<i class="fa-solid fa-cart-plus"></i> <span data-i18n="nav.add_to_cart">{{ __('frontend.wishlist.add_to_cart') }}</span>');
                 }, 2000);
             },
             error: function() {
@@ -220,3 +220,4 @@
     });
 </script>
 @endpush
+

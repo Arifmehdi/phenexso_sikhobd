@@ -1,9 +1,9 @@
 @extends('website.layouts.sikhobd')
 
-@section('title', 'যোগাযোগ — '.($ws->website_title ?? 'Qalam HR'))
+@section('title', __('frontend.page.contact.title') . ' — ' . ($ws->website_title ?? 'Qalam HR'))
 
 @section('meta')
-<meta name="description" content="Get in touch with {{ $ws->website_title ?? 'Qalam HR' }}. We are here to help you with your inquiries.">
+<meta name="description" content="{{ __('frontend.contact.subtitle') }}">
 <meta name="keywords" content="Contact, {{ $ws->website_title ?? 'Qalam HR' }}, Help, Inquiries">
 @endsection
 
@@ -11,8 +11,8 @@
 <!-- Page Hero -->
 <section class="page-hero">
   <div class="container">
-    <h1 data-i18n="page.contact.title">যোগাযোগ করুন</h1>
-    <p data-i18n="page.contact.sub">যেকোনো প্রশ্ন বা পরামর্শে আমরা সবসময় প্রস্তুত</p>
+    <h1>{{ __('frontend.contact.title') }}</h1>
+    <p>{{ __('frontend.contact.subtitle') }}</p>
   </div>
 </section>
 
@@ -22,33 +22,33 @@
     <div class="contact-grid">
       <!-- Info Card -->
       <div class="info-card">
-        <h3 style="color:var(--primary); margin-bottom: 12px;">Get in touch</h3>
-        <p style="color:var(--text-soft); font-size:14px;">We respond within 24 hours.</p>
+        <h3 style="color:var(--primary); margin-bottom: 12px;">{{ __('frontend.contact.get_in_touch') }}</h3>
+        <p style="color:var(--text-soft); font-size:14px;">{{ __('frontend.contact.response_time') }}</p>
         <div class="info-item">
           <div class="info-icon"><i class="fa-solid fa-phone"></i></div>
           <div>
-            <h4>Phone</h4>
+            <h4>{{ __('frontend.contact.phone') }}</h4>
             <p>{{ $ws->phone ?? '16910 (24/7 helpline)' }}</p>
           </div>
         </div>
         <div class="info-item">
           <div class="info-icon"><i class="fa-solid fa-envelope"></i></div>
           <div>
-            <h4>Email</h4>
-            <p>{{ $ws->email ?? 'support@10minuteschool.com' }}</p>
+            <h4>{{ __('frontend.contact.email') }}</h4>
+            <p>{{ $ws->email ?? 'support@example.com' }}</p>
           </div>
         </div>
         <div class="info-item">
           <div class="info-icon"><i class="fa-solid fa-location-dot"></i></div>
           <div>
-            <h4>Office</h4>
-            <p>{{ $ws->address ?? 'House 53, Road 12, Block C, Banani, Dhaka 1213' }}</p>
+            <h4>{{ __('frontend.contact.office') }}</h4>
+            <p>{{ $ws->address ?? 'Dhaka, Bangladesh' }}</p>
           </div>
         </div>
         <div class="info-item">
           <div class="info-icon"><i class="fa-solid fa-clock"></i></div>
           <div>
-            <h4>Hours</h4>
+            <h4>{{ __('frontend.contact.hours') }}</h4>
             <p>Sun – Thu, 9:00 AM – 8:00 PM</p>
           </div>
         </div>
@@ -60,17 +60,37 @@
         @if(session('success'))
           <div class="alert alert-success" style="margin-bottom: 20px;">{{ session('success') }}</div>
         @endif
-        <h3 style="color:var(--primary); margin-bottom:20px;">Send us a message</h3>
+        <h3 style="color:var(--primary); margin-bottom:20px;">{{ __('frontend.contact.send_message') }}</h3>
         <div class="form-row">
-          <div class="field"><label data-i18n="form.name">আপনার নাম</label><input type="text" name="name" required></div>
-          <div class="field"><label data-i18n="form.email">ইমেইল</label><input type="email" name="email" required></div>
+          <div class="field">
+            <label>{{ __('frontend.contact.your_name') }}</label>
+            <input type="text" name="name" required>
+          </div>
+          <div class="field">
+            <label>{{ __('frontend.contact.your_email') }}</label>
+            <input type="email" name="email" required>
+          </div>
         </div>
         <div class="form-row">
-          <div class="field"><label data-i18n="form.phone">ফোন</label><input type="tel" name="phone"></div>
-          <div class="field"><label data-i18n="form.subject">বিষয়</label><select name="subject"><option>General</option><option>Course inquiry</option><option>Payment</option><option>Technical</option></select></div>
+          <div class="field">
+            <label>{{ __('frontend.contact.your_phone') }}</label>
+            <input type="tel" name="phone">
+          </div>
+          <div class="field">
+            <label>{{ __('frontend.contact.subject') }}</label>
+            <select name="subject">
+              <option>{{ __('frontend.contact.subjects.general') }}</option>
+              <option>{{ __('frontend.contact.subjects.course') }}</option>
+              <option>{{ __('frontend.contact.subjects.payment') }}</option>
+              <option>{{ __('frontend.contact.subjects.technical') }}</option>
+            </select>
+          </div>
         </div>
-        <div class="field"><label data-i18n="form.message">আপনার বার্তা</label><textarea name="message" required></textarea></div>
-        <button type="submit" class="btn btn-primary" data-i18n="form.send">বার্তা পাঠান</button>
+        <div class="field">
+          <label>{{ __('frontend.contact.message') }}</label>
+          <textarea name="message" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">{{ __('frontend.contact.send_btn') }}</button>
       </form>
     </div>
     <div class="contact-page-map mt-5">

@@ -470,6 +470,116 @@ class FrontendController extends Controller
         return view('website.course_play', compact('product', 'lessons', 'sections', 'completions'));
     }
 
+    public function liveProductSearch(Request $request)
+    {
+        $q = trim($request->get('q', ''));
+        if (strlen($q) < 1) return response()->json([]);
+
+        try {
+            // Collect current cart contents to show in-cart state
+            $userId    = Auth::id();
+            $sessionId = Session::get('session_id') ?? Session::getId();
+
+            $cartWhere = function ($q) use ($userId, $sessionId) {
+                if ($userId) {
+                    $q->where('user_id', $userId);
+                } else {
+                    $q->where('session_id', $sessionId);
+                }
+            };
+
+            $cartProductIds = Cart::where($cartWhere)->whereNotNull('product_id')
+                                  ->pluck('product_id')->toArray();
+            $cartEbookIds   = Cart::where($cartWhere)->whereNotNull('ebook_id')
+                                  ->pluck('ebook_id')->toArray();
+
+            $results = [];
+
+            // ── Shop Products ──────────────────────────────────────
+            Product::where('active', 1)->where('type', 'product')
+                ->whereNotNull('slug')
+                ->where(fn($b) => $b->where('name_en','like',"%{$q}%")->orWhere('name_bn','like',"%{$q}%"))
+                ->select(['id','name_en','name_bn','selling_price','discount','featured_image','slug','stock'])
+                ->limit(4)->get()
+                ->each(function ($p) use (&$results, $cartProductIds) {
+                    $results[] = $this->searchFormatProduct($p, 'product', $cartProductIds);
+                });
+
+            // ── Courses ────────────────────────────────────────────
+            Product::where('active', 1)->where('type', 'course')
+                ->whereNotNull('slug')
+                ->where(fn($b) => $b->where('name_en','like',"%{$q}%")->orWhere('name_bn','like',"%{$q}%"))
+                ->select(['id','name_en','name_bn','selling_price','discount','featured_image','slug','stock'])
+                ->limit(3)->get()
+                ->each(function ($p) use (&$results, $cartProductIds) {
+                    $results[] = $this->searchFormatProduct($p, 'course', $cartProductIds);
+                });
+
+            // ── Ebooks ─────────────────────────────────────────────
+            \App\Models\Ebook::where('active', 1)
+                ->where(fn($b) => $b->where('title_en','like',"%{$q}%")->orWhere('title_bn','like',"%{$q}%"))
+                ->select(['id','title_en','title_bn','price','discount','cover_image','is_free'])
+                ->limit(3)->get()
+                ->each(function ($e) use (&$results, $cartEbookIds) {
+                    $results[] = $this->searchFormatEbook($e, $cartEbookIds);
+                });
+
+            return response()->json(array_values(array_slice($results, 0, 10)));
+        } catch (\Exception $e) {
+            return response()->json([]);
+        }
+    }
+
+    private function searchFormatProduct($p, string $type, array $cartIds = []): array
+    {
+        try { $img = route('imagecache', ['template' => 'pnism', 'filename' => $p->fi()]); }
+        catch (\Exception $e) { $img = asset('sikhobd/img/placeholder.png'); }
+        try { $url = route('productDetails', $p->slug); }
+        catch (\Exception $e) { $url = '#'; }
+
+        return [
+            'id'              => $p->id,
+            'name'            => $p->name_en ?: ($p->name_bn ?: ''),
+            'selling_price'   => (float)($p->selling_price ?? 0),
+            'discount'        => (float)($p->discount ?? 0),
+            'final_price'     => (float)$p->discounted_price,
+            'image'           => $img,
+            'url'             => $url,
+            'cart_url'        => route('addToCart'),
+            'in_stock'        => $type === 'product' ? (int)($p->stock ?? 0) > 0 : true,
+            'in_cart'         => in_array($p->id, $cartIds),
+            'item_type'       => $type,
+            'is_free'         => false,
+        ];
+    }
+
+    private function searchFormatEbook($e, array $cartIds = []): array
+    {
+        try {
+            $img = $e->cover_image
+                ? route('imagecache', ['template' => 'pnism', 'filename' => $e->cover_image])
+                : asset('sikhobd/img/placeholder.png');
+        } catch (\Exception $ex) { $img = asset('sikhobd/img/placeholder.png'); }
+
+        $price = (float)($e->price ?? 0);
+        $disc  = (float)($e->discount ?? 0);
+
+        return [
+            'id'              => $e->id,
+            'name'            => $e->title_en ?: ($e->title_bn ?: ''),
+            'selling_price'   => $price,
+            'discount'        => $disc,
+            'final_price'     => $e->is_free ? 0 : max(0, $price - $disc),
+            'image'           => $img,
+            'url'             => route('ebooks.show', $e->id),
+            'cart_url'        => route('ebooks.buy', $e->id),
+            'in_stock'        => true,
+            'in_cart'         => in_array($e->id, $cartIds),
+            'item_type'       => 'ebook',
+            'is_free'         => (bool)$e->is_free,
+        ];
+    }
+
     public function search(Request $request)
     {
         $queryString = trim($request->get('q', ''));

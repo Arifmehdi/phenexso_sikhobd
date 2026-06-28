@@ -317,6 +317,11 @@
                                 </nav>
                             </div>
 
+                            <!-- Desktop Search Icon -->
+                            <button id="desktopSearchToggle" class="btn d-none d-lg-inline-flex align-items-center justify-content-center ms-2" style="width:38px;height:38px;border-radius:50%;background:#f0f0f0;border:none;" title="Search">
+                                <i class="fas fa-search" style="color:#333;font-size:15px;"></i>
+                            </button>
+
                             <!-- Collapse Button -->
                             <button class="btn header-btn-collapse-nav d-lg-none ms-2" data-bs-toggle="collapse" data-bs-target=".header-nav-main nav">
                                 <i class="fas fa-bars"></i>

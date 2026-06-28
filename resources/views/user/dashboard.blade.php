@@ -223,16 +223,17 @@
                     <a href="#" onclick="switchTab('tab-courses'); return false;">সব দেখুন</a>
                 </div>
                 @foreach($enrollments->take(3) as $enrollment)
+                @if(!$enrollment->product) @continue @endif
                 <div class="course-row">
-                    <a href="{{ route('courseDetail', $enrollment->product->slug) }}" class="thumb" style="--c1:#6c5ce7;--c2:#a29bfe; overflow: hidden; display: flex; align-items: center; justify-content: center; text-decoration: none;">
-                        @if($enrollment->product->fi())
+                    <a href="{{ route('courseDetail', $enrollment->product->slug ?? '#') }}" class="thumb" style="--c1:#6c5ce7;--c2:#a29bfe; overflow: hidden; display: flex; align-items: center; justify-content: center; text-decoration: none;">
+                        @if($enrollment->product->fi() && $enrollment->product->fi() !== 'not_found.png')
                             <img src="{{ route('imagecache', ['template' => 'sbixs', 'filename' => $enrollment->product->fi()]) }}" alt="" style="width: 100%; height: 100%; object-fit: cover;">
                         @else
                             {{ substr($enrollment->product->name_en ?? 'C', 0, 1) }}
                         @endif
                     </a>
                     <div class="body">
-                        <h4><a href="{{ route('courseDetail', $enrollment->product->slug) }}" style="text-decoration: none; color: inherit;">{{ $enrollment->product->name_en ?? 'Course' }}</a></h4>
+                        <h4><a href="{{ route('courseDetail', $enrollment->product->slug ?? '#') }}" style="text-decoration: none; color: inherit;">{{ $enrollment->product->name_en ?? $enrollment->product->name_bn ?? 'Course' }}</a></h4>
                         <div class="meta">
                             @if($enrollment->product->instructor)
                                 <i class="fa-solid fa-chalkboard-user"></i>
@@ -243,7 +244,7 @@
                         </div>
                     </div>
                     @if($enrollment->status == 'active')
-                        <a href="{{ route('courseDetail', $enrollment->product->slug) }}" class="btn btn-primary btn-sm">Continue</a>
+                        <a href="{{ route('courseDetail', $enrollment->product->slug ?? '#') }}" class="btn btn-primary btn-sm">Continue</a>
                     @else
                         <span class="status-pill status-pending">{{ ucfirst($enrollment->status) }}</span>
                     @endif
@@ -271,7 +272,7 @@
                         <tbody>
                             @forelse($orders->take(5) as $order)
                             <tr>
-                                <td class="order-id">#{{ str_pad($order->id, 6, '0', STR_PAD_LEFT) }}</td>
+                                <td class="order-id">#{{ $order->id }}</td>
                                 <td style="color: var(--text-soft);">{{ $order->created_at->format('M d, Y') }}</td>
                                 <td>
                                     @php
@@ -311,33 +312,36 @@
             </div>
             <div class="panel">
                 @forelse($enrollments as $enrollment)
+                @if(!$enrollment->product) @continue @endif
+                @php
+                    $product    = $enrollment->product;
+                    $productUrl = $product->slug ? route('courseDetail', $product->slug) : '#';
+                    $progress   = $courseProgress[$enrollment->product_id] ?? 0;
+                    $hasCertificate = isset($userCertificates[$enrollment->product_id]);
+                    $isCompleted    = $progress >= 100;
+                @endphp
                 <div class="course-row">
-                    <a href="{{ route('courseDetail', $enrollment->product->slug) }}" class="thumb" style="--c1:#6c5ce7;--c2:#a29bfe; overflow: hidden; display: flex; align-items: center; justify-content: center; text-decoration: none;">
-                        @if($enrollment->product->fi())
-                            <img src="{{ route('imagecache', ['template' => 'sbixs', 'filename' => $enrollment->product->fi()]) }}" alt="" style="width: 100%; height: 100%; object-fit: cover;">
+                    <a href="{{ $productUrl }}" class="thumb" style="--c1:#6c5ce7;--c2:#a29bfe; overflow: hidden; display: flex; align-items: center; justify-content: center; text-decoration: none;">
+                        @if($product->fi() && $product->fi() !== 'not_found.png')
+                            <img src="{{ route('imagecache', ['template' => 'sbixs', 'filename' => $product->fi()]) }}" alt="" style="width: 100%; height: 100%; object-fit: cover;">
                         @else
-                            {{ substr($enrollment->product->name_en ?? 'C', 0, 1) }}
+                            {{ substr($product->name_en ?? 'C', 0, 1) }}
                         @endif
                     </a>
-                    @php
-                        $progress = $courseProgress[$enrollment->product_id] ?? 0;
-                        $hasCertificate = isset($userCertificates[$enrollment->product_id]);
-                        $isCompleted = $progress >= 100;
-                    @endphp
                     <div class="body">
-                        <h4><a href="{{ route('courseDetail', $enrollment->product->slug) }}" style="text-decoration: none; color: inherit;">{{ $enrollment->product->name_en ?? 'Course' }}</a></h4>
-                        @if($enrollment->product->instructor)
+                        <h4><a href="{{ $productUrl }}" style="text-decoration: none; color: inherit;">{{ $product->name_en ?? $product->name_bn ?? 'Course' }}</a></h4>
+                        @if($product->instructor)
                         <div class="meta" style="display:flex; align-items:center; gap:8px; margin-top:4px;">
-                            <span style="width:24px; height:24px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; background:#6c5ce7; color:#fff; font-size:10px; font-weight:700; overflow:hidden; background-size:cover; background-position:center; {{ $enrollment->product->instructor->image ? "background-image:url('".asset('storage/users/'.$enrollment->product->instructor->image)."');" : '' }}">
-                                @if(!$enrollment->product->instructor->image){{ strtoupper(substr($enrollment->product->instructor->name, 0, 1)) }}@endif
+                            <span style="width:24px; height:24px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; background:#6c5ce7; color:#fff; font-size:10px; font-weight:700; overflow:hidden; background-size:cover; background-position:center; {{ $product->instructor->image ? "background-image:url('".asset('storage/users/'.$product->instructor->image)."');" : '' }}">
+                                @if(!$product->instructor->image){{ strtoupper(substr($product->instructor->name, 0, 1)) }}@endif
                             </span>
                             <span>ইনস্ট্রাকটর:
-                                <a href="{{ route('instructor.profile', $enrollment->product->instructor->id) }}" style="color:#6c5ce7; font-weight:600; text-decoration:none;">{{ $enrollment->product->instructor->name }}</a>
+                                <a href="{{ route('instructor.profile', $product->instructor->id) }}" style="color:#6c5ce7; font-weight:600; text-decoration:none;">{{ $product->instructor->name }}</a>
                             </span>
                         </div>
                         @endif
                         <div class="meta">
-                            <i class="fa-solid fa-book-open"></i> {{ $enrollment->product->lessons_count ?? 0 }} {{ app()->getLocale()=='bn' ? 'টি লেসন' : 'Lessons' }}
+                            <i class="fa-solid fa-book-open"></i> {{ $product->lessons_count ?? 0 }} {{ app()->getLocale()=='bn' ? 'টি লেসন' : 'Lessons' }}
                         </div>
                         <div class="meta">
                             @if($enrollment->enrolled_at)
@@ -357,7 +361,7 @@
                             <i class="fa-solid fa-certificate"></i> {{ $hasCertificate ? 'Download Certificate' : 'Get Certificate' }}
                         </a>
                     @elseif($enrollment->status == 'active')
-                        <a href="{{ route('courseDetail', $enrollment->product->slug) }}" class="btn btn-primary btn-sm">Continue Learning</a>
+                        <a href="{{ $productUrl }}" class="btn btn-primary btn-sm">Continue Learning</a>
                     @else
                         <span class="status-pill status-pending">{{ ucfirst($enrollment->status) }}</span>
                     @endif
@@ -405,7 +409,7 @@
                         <tbody>
                             @forelse($orders as $order)
                             <tr>
-                                <td class="order-id">#{{ str_pad($order->id, 6, '0', STR_PAD_LEFT) }}</td>
+                                <td class="order-id">#{{ $order->id }}</td>
                                 <td style="color: var(--text-soft);">{{ $order->created_at->format('M d, Y') }}</td>
                                 <td>
                                     @php
@@ -458,7 +462,7 @@
                             @forelse(($orderItems ?? collect()) as $item)
                             <tr>
                                 <td>{{ $item->product_name }}</td>
-                                <td class="order-id">#{{ str_pad($item->order_id, 6, '0', STR_PAD_LEFT) }}</td>
+                                <td class="order-id">#{{ $item->order_id }}</td>
                                 <td style="color: var(--text-soft);">{{ optional($item->order)->created_at ? $item->order->created_at->format('M d, Y') : '' }}</td>
                                 <td>{{ $item->quantity }}</td>
                                 <td>৳{{ number_format($item->product_price) }}</td>

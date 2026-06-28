@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Chalan #{{ str_pad($order->id, 6, '0', STR_PAD_LEFT) }}</title>
+    <title>Chalan #{{ $order->id }}</title>
     <link rel="stylesheet" href="{{ asset('/') }}alt/plugins/fontawesome-free/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -76,7 +76,7 @@
         </div>
         <div class="ch-meta">
             <div class="label">CHALAN</div>
-            <div class="row"><strong>Chalan #:</strong> {{ str_pad($order->id, 6, '0', STR_PAD_LEFT) }}</div>
+            <div class="row"><strong>Chalan #:</strong> {{ $order->id }}</div>
             <div class="row"><strong>Date:</strong> {{ \Carbon\Carbon::parse($order->created_at)->format('d M, Y') }}</div>
         </div>
     </div>
@@ -95,7 +95,7 @@
         <div class="info-box">
             <div class="heading">Chalan Info</div>
             <div class="body">
-                <strong>Chalan #:</strong> {{ str_pad($order->id, 6, '0', STR_PAD_LEFT) }}<br>
+                <strong>Chalan #:</strong> {{ $order->id }}<br>
                 <strong>Order Date:</strong> {{ \Carbon\Carbon::parse($order->created_at)->format('d M, Y') }}<br>
                 <strong>Status:</strong> {{ ucfirst($order->order_status ?? '') }}
             </div>
@@ -157,3 +157,4 @@
 </div>
 </body>
 </html>
+

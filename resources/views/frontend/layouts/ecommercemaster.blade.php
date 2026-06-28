@@ -187,7 +187,7 @@ $totalCartPrice = \App\Models\Cart::totalCartPrice();
             <div class="other-icons">
                 <a href="{{ url('/') }}"><i class="fas fa-home"></i></a>
                 <a href="{{ url('/') }}"><i class="fas fa-th-large"></i></a>
-                <a href="#"><i class="fas fa-search"></i></a>
+                <a href="#" class="mobile-search-trigger"><i class="fas fa-search"></i></a>
             </div>
         </div>
 
@@ -465,6 +465,393 @@ $totalCartPrice = \App\Models\Cart::totalCartPrice();
 <a class="floating-message-icon" href="https://wa.me/8801334927985?text=Hello%20there!" target="_blank">
     <img src="{{ asset('frontend/assets/img/icons/whatsapp.svg') }}" alt="WhatsApp">
 </a>
+
+<!-- ============================================================
+     DESKTOP SEARCH OVERLAY
+============================================================ -->
+<div id="desktopSearchOverlay">
+    <div id="desktopSearchBox">
+        <div class="dso-input-wrap">
+            <i class="fas fa-search dso-icon"></i>
+            <input type="text" id="desktopSearchInput" placeholder="Search products…" autocomplete="off">
+            <button id="desktopSearchClose"><i class="fas fa-times"></i></button>
+        </div>
+        <div id="desktopSearchResults"></div>
+    </div>
+</div>
+
+<!-- ============================================================
+     MOBILE SEARCH DRAWER (right → left)
+============================================================ -->
+<div id="mobileSearchBackdrop"></div>
+<div id="mobileSearchDrawer">
+    <div class="msd-header">
+        <span class="msd-title">Search Products</span>
+        <button id="mobileSearchClose"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="msd-input-wrap">
+        <i class="fas fa-search msd-icon"></i>
+        <input type="text" id="mobileSearchInput" placeholder="Search products…" autocomplete="off">
+    </div>
+    <div id="mobileSearchResults"></div>
+</div>
+
+<style>
+/* ============================================================
+   DESKTOP SEARCH OVERLAY
+============================================================ */
+#desktopSearchOverlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.55);
+    z-index: 99999;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 80px;
+}
+#desktopSearchOverlay.active { display: flex; }
+
+#desktopSearchBox {
+    background: #fff;
+    border-radius: 12px;
+    width: 680px;
+    max-width: 95vw;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.22);
+    overflow: hidden;
+}
+
+.dso-input-wrap {
+    display: flex;
+    align-items: center;
+    padding: 14px 18px;
+    border-bottom: 1px solid #eee;
+    gap: 10px;
+}
+.dso-icon { color: #999; font-size: 16px; }
+#desktopSearchInput {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 17px;
+    color: #333;
+    background: transparent;
+}
+#desktopSearchInput::placeholder { color: #bbb; }
+#desktopSearchClose {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #999;
+    font-size: 18px;
+    padding: 4px 6px;
+    line-height: 1;
+    transition: color .2s;
+}
+#desktopSearchClose:hover { color: #333; }
+
+#desktopSearchResults {
+    max-height: 420px;
+    overflow-y: auto;
+    padding: 8px 0;
+}
+
+/* ============================================================
+   MOBILE SEARCH DRAWER
+============================================================ */
+#mobileSearchBackdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 99998;
+}
+#mobileSearchBackdrop.active { display: block; }
+
+#mobileSearchDrawer {
+    position: fixed;
+    top: 0; right: -100%;
+    width: 88%;
+    max-width: 400px;
+    height: 100%;
+    background: #fff;
+    z-index: 99999;
+    display: flex;
+    flex-direction: column;
+    transition: right .3s cubic-bezier(.4,0,.2,1);
+    box-shadow: -4px 0 24px rgba(0,0,0,0.18);
+}
+#mobileSearchDrawer.open { right: 0; }
+
+.msd-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 18px;
+    border-bottom: 1px solid #eee;
+    background: #f8f9fa;
+}
+.msd-title { font-weight: 600; font-size: 16px; color: #333; }
+#mobileSearchClose {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #666;
+    font-size: 18px;
+    padding: 4px 6px;
+    line-height: 1;
+}
+
+.msd-input-wrap {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid #eee;
+    gap: 10px;
+}
+.msd-icon { color: #999; font-size: 15px; }
+#mobileSearchInput {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 15px;
+    color: #333;
+    background: transparent;
+}
+
+#mobileSearchResults {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 0;
+}
+
+/* ============================================================
+   SHARED: SEARCH RESULT CARDS
+============================================================ */
+.search-result-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    border-bottom: 1px solid #f2f2f2;
+    transition: background .15s;
+}
+.search-result-item:last-child { border-bottom: none; }
+.search-result-item:hover { background: #f8f9fb; }
+
+.sri-img {
+    width: 58px;
+    height: 58px;
+    object-fit: cover;
+    border-radius: 8px;
+    flex-shrink: 0;
+    border: 1px solid #eee;
+}
+
+.sri-info {
+    flex: 1;
+    min-width: 0;
+}
+.sri-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: #222;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-decoration: none;
+    display: block;
+    line-height: 1.3;
+    margin-bottom: 4px;
+}
+.sri-name:hover { color: #0A52A3; }
+.sri-price { font-size: 13px; }
+.sri-price-final { color: #0A52A3; font-weight: 600; }
+.sri-price-original { color: #aaa; text-decoration: line-through; margin-left: 5px; font-size: 12px; }
+
+.sri-btn {
+    flex-shrink: 0;
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    background: #0A52A3;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background .2s;
+}
+.sri-btn:hover { background: #083d80; }
+.sri-btn.added { background: #28a745; }
+
+.search-no-results, .search-loading {
+    padding: 24px 16px;
+    text-align: center;
+    color: #888;
+    font-size: 14px;
+}
+.search-loading i { animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.search-view-all {
+    display: block;
+    text-align: center;
+    padding: 12px;
+    font-size: 13px;
+    color: #0A52A3;
+    text-decoration: none;
+    border-top: 1px solid #eee;
+    font-weight: 500;
+}
+.search-view-all:hover { background: #f0f5ff; }
+</style>
+
+<script>
+(function () {
+    const SEARCH_URL = '{{ route("liveProductSearch") }}';
+    const CSRF      = $('meta[name="csrf-token"]').attr('content');
+
+    /* ---- Utilities ---- */
+    function debounce(fn, delay) {
+        let t;
+        return function (...args) { clearTimeout(t); t = setTimeout(() => fn.apply(this, args), delay); };
+    }
+
+    function buildResultsHTML(products, query) {
+        if (!products.length) {
+            return '<div class="search-no-results">No products found for <strong>"' + $('<span>').text(query).html() + '"</strong></div>';
+        }
+
+        let html = '';
+        products.forEach(function (p) {
+            const name = $('<span>').text(p.name).html();
+            const finalPrice = parseFloat(p.final_price) || parseFloat(p.selling_price) || 0;
+            const origPrice  = parseFloat(p.selling_price) || 0;
+            const hasDiscount = p.discount > 0;
+
+            let priceHtml = '<span class="sri-price-final">৳' + finalPrice.toFixed(2) + '</span>';
+            if (hasDiscount) {
+                priceHtml += '<span class="sri-price-original">৳' + origPrice.toFixed(2) + '</span>';
+            }
+
+            html += `
+            <div class="search-result-item productCartItem">
+                <a href="${p.url}">
+                    <img class="sri-img" src="${p.image}" alt="${name}" onerror="this.src='{{ asset('frontend/assets/img/placeholder.jpg') }}'">
+                </a>
+                <div class="sri-info">
+                    <a href="${p.url}" class="sri-name">${name}</a>
+                    <div class="sri-price">${priceHtml}</div>
+                </div>
+                <input type="hidden" class="product_qty" value="1">
+                <button class="sri-btn addToCart"
+                    data-url="${p.add_to_cart_url}"
+                    data-product="${p.id}"
+                    ${!p.in_stock ? 'disabled title="Out of stock"' : ''}>
+                    ${p.in_stock ? '<i class="fas fa-cart-plus me-1"></i>Add' : 'Out of stock'}
+                </button>
+            </div>`;
+        });
+
+        html += `<a class="search-view-all" href="{{ route('search') }}?q=${encodeURIComponent(query)}">View all results <i class="fas fa-arrow-right ms-1"></i></a>`;
+        return html;
+    }
+
+    function fetchResults(query, $container) {
+        if (query.length < 1) { $container.html(''); return; }
+
+        $container.html('<div class="search-loading"><i class="fas fa-spinner me-2"></i>Searching…</div>');
+
+        $.get(SEARCH_URL, { q: query }, function (data) {
+            $container.html(buildResultsHTML(data, query));
+        }).fail(function () {
+            $container.html('<div class="search-no-results">Search failed. Please try again.</div>');
+        });
+    }
+
+    const debouncedFetch = debounce(fetchResults, 280);
+
+    /* ---- Desktop overlay ---- */
+    const $overlay     = $('#desktopSearchOverlay');
+    const $dInput      = $('#desktopSearchInput');
+    const $dResults    = $('#desktopSearchResults');
+
+    $('#desktopSearchToggle').on('click', function () {
+        $overlay.addClass('active');
+        setTimeout(function () { $dInput.focus(); }, 80);
+    });
+
+    $('#desktopSearchClose').on('click', function () {
+        $overlay.removeClass('active');
+        $dInput.val('');
+        $dResults.html('');
+    });
+
+    $overlay.on('click', function (e) {
+        if (!$(e.target).closest('#desktopSearchBox').length) {
+            $overlay.removeClass('active');
+            $dInput.val('');
+            $dResults.html('');
+        }
+    });
+
+    $dInput.on('input', function () {
+        debouncedFetch($(this).val().trim(), $dResults);
+    });
+
+    /* ---- Mobile drawer ---- */
+    const $drawer   = $('#mobileSearchDrawer');
+    const $backdrop = $('#mobileSearchBackdrop');
+    const $mInput   = $('#mobileSearchInput');
+    const $mResults = $('#mobileSearchResults');
+
+    function openMobileDrawer() {
+        $drawer.addClass('open');
+        $backdrop.addClass('active');
+        $('body').css('overflow', 'hidden');
+        setTimeout(function () { $mInput.focus(); }, 320);
+    }
+
+    function closeMobileDrawer() {
+        $drawer.removeClass('open');
+        $backdrop.removeClass('active');
+        $('body').css('overflow', '');
+        $mInput.val('');
+        $mResults.html('');
+    }
+
+    // Mobile bottom bar search icon
+    $(document).on('click', '.mobile-search-trigger, [data-search-open]', function (e) {
+        e.preventDefault();
+        openMobileDrawer();
+    });
+
+    $('#mobileSearchClose').on('click', closeMobileDrawer);
+    $backdrop.on('click', closeMobileDrawer);
+
+    $mInput.on('input', function () {
+        debouncedFetch($(this).val().trim(), $mResults);
+    });
+
+    // Keyboard: Esc to close both
+    $(document).on('keydown', function (e) {
+        if (e.key === 'Escape') {
+            $overlay.removeClass('active');
+            closeMobileDrawer();
+        }
+    });
+
+    // After addToCart success — visually mark the button as added
+    $(document).on('click', '.sri-btn.addToCart', function () {
+        const $btn = $(this);
+        $btn.html('<i class="fas fa-check me-1"></i>Added').addClass('added').prop('disabled', true);
+        setTimeout(function () {
+            $btn.html('<i class="fas fa-cart-plus me-1"></i>Add').removeClass('added').prop('disabled', false);
+        }, 2200);
+    });
+})();
+</script>
 
 </body>
 </html>

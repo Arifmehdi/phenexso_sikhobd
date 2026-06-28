@@ -1,6 +1,6 @@
-@extends('website.layouts.sikhobd')
+﻿@extends('website.layouts.sikhobd')
 
-@section('title', ($content->title ?? 'আমাদের সম্পর্কে') . ' — ' . ($ws->website_title ?? 'Qalam HR'))
+@section('title', __('frontend.about.title') . ' — ' . ($ws->website_title ?? 'Qalam HR')) . ' — ' . ($ws->website_title ?? 'Qalam HR'))
 
 @section('meta')
 <meta name="description" content="{{ $ws->meta_description ?? 'QalamHR is one of the premier training institutes in Bangladesh.' }}">
@@ -13,7 +13,7 @@
   <section class="about-hero">
     <div class="container">
       <div class="about-hero-content">
-        <span class="eyebrow">{{ app()->getLocale() == 'bn' ? 'আমাদের সম্পর্কে জানুন' : 'Discover Our Journey' }}</span>
+        <span class="eyebrow">{{ __('frontend.about.discover') }}</span>
         <h1>{{ app()->getLocale() == 'bn' ? ($content->title_bn ?? $content->title ?? 'আমাদের সম্পর্কে') : ($content->title_en ?? $content->title ?? 'About Us') }}</h1>
         <p>{{ app()->getLocale() == 'bn' ? ($content->subtitle_bn ?? $content->subtitle ?? 'শিক্ষা সবার জন্য — এই বিশ্বাস থেকেই আমাদের যাত্রা শুরু') : ($content->subtitle_en ?? $content->subtitle ?? 'Education for all — our journey started with this belief') }}</p>
       </div>
@@ -32,7 +32,7 @@
                 {!! app()->getLocale() == 'bn' ? ($content->description_bn ?? $content->description ?? '<p>শিখবে বিডি ২০১৫ সালে একটি সহজ লক্ষ্য নিয়ে যাত্রা শুরু করেছিল — বাংলাদেশের প্রত্যেকের জন্য গুণগত শিক্ষা সহজলভ্য করা।</p>') : ($content->description_en ?? $content->description ?? '<p>SikhoBD started in 2015 with a simple goal — make quality education accessible to everyone in Bangladesh.</p>') !!}
             </div>
             <div class="mt-4">
-              <a href="{{ route('contact') }}" class="btn btn-primary btn-lg">{{ app()->getLocale() == 'bn' ? 'যোগাযোগ করুন' : 'Get in touch' }}</a>
+              <a href="{{ route('contact') }}" class="btn btn-primary btn-lg">{{ __('frontend.about.get_in_touch') }}</a>
             </div>
           </div>
         </div>
@@ -63,7 +63,7 @@
                 Our <em>impact</em>
             @endif
         </h2>
-        <p class="section-subtitle">{{ app()->getLocale() == 'bn' ? 'আমরা গর্বের সাথে আমাদের অর্জনগুলো তুলে ধরছি' : 'We take pride in sharing our milestones with you' }}</p>
+        <p class="section-subtitle">{{ __('frontend.about.milestones') }}</p>
       </div>
       
       <div class="impact-grid">
@@ -560,3 +560,4 @@ $(document).ready(function() {
 });
 </script>
 @endpush
+

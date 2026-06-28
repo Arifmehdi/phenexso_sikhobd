@@ -95,11 +95,13 @@ class EbookController extends Controller
 
         if (request()->ajax()) {
             return response()->json([
-                'status' => true,
-                'message' => 'ই-বুকটি কার্টে যোগ করা হয়েছে।',
+                'status'         => true,
+                'message'        => 'ই-বুকটি কার্টে যোগ করা হয়েছে।',
+                'cartCount'      => Cart::cartCount(),
+                'cartItemsCount' => Cart::CartItemsCount(),
+                'cartTotal'      => Cart::totalCartPrice(),
             ]);
         }
-
         return redirect()->route('new.checkout')->with('success', 'ই-বুকটি কার্টে যোগ করা হয়েছে।');
     }
 
@@ -242,3 +244,4 @@ class EbookController extends Controller
         return response()->json(['html' => $html]);
     }
 }
+
