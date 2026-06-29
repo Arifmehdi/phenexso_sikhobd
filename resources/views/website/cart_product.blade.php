@@ -1,4 +1,4 @@
-@extends('website.layouts.sikhobd')
+﻿@extends('website.layouts.sikhobd')
 
 @section('title', 'শপিং কার্ট — ' . ($ws->name ?? env('APP_NAME')))
 
@@ -59,10 +59,10 @@
 @section('content')
 <section class="page-hero">
     <div class="container text-center">
-        <h1 style="font-weight: 900; font-size: 36px; letter-spacing: -1px;">চেকআউট</h1>
+        <h1 style="font-weight: 900; font-size: 36px; letter-spacing: -1px;">{{ __('frontend.checkout.title') }}</h1>
         <div class="crumbs justify-content-center mt-2">
             <a href="{{ route('home') }}">Home</a> <span class="mx-2 opacity-50">/</span> 
-            <span style="color: var(--accent); font-weight: 700;">Secure Checkout</span>
+            <span style="color: var(--accent); font-weight: 700;">{{ __('frontend.checkout.secure') }}</span>
         </div>
     </div>
 </section>
@@ -78,7 +78,7 @@
                     <div class="modern-card">
                         <div class="card-header-clean">
                             <i class="fa-solid fa-truck-fast"></i>
-                            <h2>১. শিপিং এবং ডেলিভারি তথ্য</h2>
+                            <h2>{{ __('frontend.checkout.step_shipping') }}</h2>
                         </div>
                         <div class="form-content">
                             <div class="row g-4">
@@ -123,19 +123,19 @@
                     <div class="modern-card">
                         <div class="card-header-clean">
                             <i class="fa-solid fa-receipt"></i>
-                            <h2>অর্ডার সামারি</h2>
+                            <h2>{{ __('frontend.checkout.order_summary') }}</h2>
                         </div>
                         <div class="summary-box">
                             <div class="summary-line">
-                                <span>সাবটোটাল</span>
+                                <span>{{ __('frontend.checkout.subtotal') }}</span>
                                 <span id="summary-subtotal" class="fw-bold text-dark">৳{{ number_format($cartSubtotal) }}</span>
                             </div>
                             <div class="summary-line">
-                                <span>ডেলিভারি চার্জ</span>
+                                <span>{{ __('frontend.checkout.delivery') }}</span>
                                 <span class="fw-bold text-dark">৳{{ number_format($shippingCharge) }}</span>
                             </div>
                             <div class="summary-line grand-total">
-                                <span>সর্বমোট</span>
+                                <span>{{ __('frontend.checkout.grand_total') }}</span>
                                 <span id="summary-total">৳{{ number_format($cartSubtotal + $shippingCharge) }}</span>
                             </div>
                         </div>
@@ -144,7 +144,7 @@
                     <div class="modern-card">
                         <div class="card-header-clean">
                             <i class="fa-solid fa-box-open"></i>
-                            <h2>২. অর্ডারকৃত পণ্যসমূহ</h2>
+                            <h2>{{ __('frontend.checkout.step_items') }}</h2>
                         </div>
                         <div class="items-list">
                             @foreach($cartItems as $item)
@@ -171,27 +171,27 @@
                     <div class="modern-card">
                         <div class="card-header-clean">
                             <i class="fa-solid fa-wallet"></i>
-                            <h2>৩. পেমেন্ট মেথড এবং অর্ডার</h2>
+                            <h2>{{ __('frontend.checkout.step_payment') }}</h2>
                         </div>
                         <div class="form-content" style="padding-top: 20px;">
                             <label class="pay-card active">
                                 <input type="radio" name="payment_method" value="cod" checked>
                                 <div>
-                                    <div class="fw-bold text-dark" style="font-size: 14px;">Cash on Delivery</div>
-                                    <div class="text-muted small">পণ্য হাতে পেয়ে টাকা দিন</div>
+                                    <div class="fw-bold text-dark" style="font-size: 14px;">{{ __('frontend.checkout.cod') }}</div>
+                                    <div class="text-muted small">{{ __('frontend.checkout.cod_desc') }}</div>
                                 </div>
                             </label>
                             <label class="pay-card">
                                 <input type="radio" name="payment_method" value="online">
                                 <div>
-                                    <div class="fw-bold text-dark" style="font-size: 14px;">Online Payment</div>
-                                    <div class="text-muted small">বিকাশ, নগদ বা কার্ড পেমেন্ট</div>
+                                    <div class="fw-bold text-dark" style="font-size: 14px;">{{ __('frontend.checkout.online') }}</div>
+                                    <div class="text-muted small">{{ __('frontend.checkout.online_desc') }}</div>
                                 </div>
                             </label>
 
                             <div class="form-check mt-3 mb-3">
                                 <input class="form-check-input" type="checkbox" id="termsCheck" required checked>
-                                <label class="form-check-label text-muted small" for="termsCheck">সাইটের শর্তাবলী মেনে নিচ্ছি</label>
+                                <label class="form-check-label text-muted small" for="termsCheck">{{ __('frontend.checkout.agree_terms') }}</label>
                             </div>
 
                             <button type="submit" class="action-btn">
@@ -205,9 +205,9 @@
         @else
         <div class="text-center py-5" style="background:#fff; border-radius: 30px; border: 1px solid #e2e8f0;">
             <img src="https://cdn-icons-png.flaticon.com/512/1170/1170577.png" alt="" style="width: 100px; opacity: 0.2; margin-bottom: 20px;">
-            <h2 style="font-weight: 900; color: #1e293b;">আপনার কার্ট বর্তমানে খালি</h2>
-            <p class="text-muted mb-4">আমাদের কালেকশন থেকে আপনার পছন্দের পণ্য যোগ করুন</p>
-            <a href="{{ route('shop') }}" class="btn btn-primary" style="padding: 15px 40px; border-radius: 16px; font-weight: 800;">শপিং শুরু করুন</a>
+            <h2 style="font-weight: 900; color: #1e293b;">{{ __('frontend.checkout.empty_cart') }}</h2>
+            <p class="text-muted mb-4">{{ __('frontend.checkout.empty_desc') }}</p>
+            <a href="{{ route('shop') }}" class="btn btn-primary" style="padding: 15px 40px; border-radius: 16px; font-weight: 800;">{{ __('frontend.checkout.start_shopping') }}</a>
         </div>
         @endif
     </div>
@@ -275,3 +275,5 @@
     }
 </script>
 @endpush
+
+

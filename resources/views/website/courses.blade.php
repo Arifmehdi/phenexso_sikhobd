@@ -65,6 +65,7 @@
     .elearn-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: auto; padding-top: 12px; border-top: 1px solid var(--border); }
     .elearn-price { font-size: 19px; font-weight: 800; color: var(--accent); }
     .elearn-price.free { color: #16a34a; }
+    .elearn-price .old-price { font-size: 13px; color: var(--text-muted); text-decoration: line-through; margin-left: 6px; font-weight: 600; }
     .elearn-enroll-btn {
         height: 38px; padding: 0 16px; border: none; border-radius: 9px;
         background: var(--accent); color: #fff; font-weight: 700; font-size: 13px;
@@ -191,7 +192,7 @@
                     @if($course->isFree())
                       <span class="elearn-price free">Free</span>
                     @else
-                      <span class="elearn-price">৳ {{ number_format($course->selling_price) }}</span>
+                      <span class="elearn-price">@if($course->discount > 0)৳ {{ number_format($course->discounted_price) }}<span class="old-price">৳ {{ number_format($course->selling_price) }}</span>@else৳ {{ number_format($course->selling_price) }}@endif</span>
                     @endif
                     @if(in_array($course->id, $enrolledCourseIds ?? []))
                       <a href="{{ route('course.play', $course->slug) }}" class="elearn-enroll-btn" style="background:#16a34a;">

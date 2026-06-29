@@ -534,7 +534,11 @@ class FrontendController extends Controller
     {
         try { $img = route('imagecache', ['template' => 'pnism', 'filename' => $p->fi()]); }
         catch (\Exception $e) { $img = asset('sikhobd/img/placeholder.png'); }
-        try { $url = route('productDetails', $p->slug); }
+        try {
+            $url = $type === 'course'
+                ? route('courseDetail', $p->slug)
+                : route('productDetails', $p->slug);
+        }
         catch (\Exception $e) { $url = '#'; }
 
         return [
@@ -555,11 +559,9 @@ class FrontendController extends Controller
 
     private function searchFormatEbook($e, array $cartIds = []): array
     {
-        try {
-            $img = $e->cover_image
-                ? route('imagecache', ['template' => 'pnism', 'filename' => $e->cover_image])
-                : asset('sikhobd/img/placeholder.png');
-        } catch (\Exception $ex) { $img = asset('sikhobd/img/placeholder.png'); }
+        $img = $e->cover_image
+            ? asset('storage/ebook_covers/' . $e->cover_image)
+            : asset('sikhobd/img/placeholder.png');
 
         $price = (float)($e->price ?? 0);
         $disc  = (float)($e->discount ?? 0);

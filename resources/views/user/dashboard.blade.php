@@ -223,7 +223,7 @@
                     <a href="#" onclick="switchTab('tab-courses'); return false;">সব দেখুন</a>
                 </div>
                 @foreach($enrollments->take(3) as $enrollment)
-                @if(!$enrollment->product) @continue @endif
+                @if($enrollment->product)
                 <div class="course-row">
                     <a href="{{ route('courseDetail', $enrollment->product->slug ?? '#') }}" class="thumb" style="--c1:#6c5ce7;--c2:#a29bfe; overflow: hidden; display: flex; align-items: center; justify-content: center; text-decoration: none;">
                         @if($enrollment->product->fi() && $enrollment->product->fi() !== 'not_found.png')
@@ -249,6 +249,7 @@
                         <span class="status-pill status-pending">{{ ucfirst($enrollment->status) }}</span>
                     @endif
                 </div>
+                @endif
                 @endforeach
             </div>
             @endif
@@ -312,7 +313,7 @@
             </div>
             <div class="panel">
                 @forelse($enrollments as $enrollment)
-                @if(!$enrollment->product) @continue @endif
+                @if($enrollment->product)
                 @php
                     $product    = $enrollment->product;
                     $productUrl = $product->slug ? route('courseDetail', $product->slug) : '#';
@@ -366,6 +367,7 @@
                         <span class="status-pill status-pending">{{ ucfirst($enrollment->status) }}</span>
                     @endif
                 </div>
+                @endif
                 @empty
                 <div class="empty-state">
                     <i class="fa-solid fa-graduation-cap"></i>

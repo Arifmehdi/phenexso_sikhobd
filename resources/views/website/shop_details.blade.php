@@ -1,4 +1,4 @@
-@extends('website.layouts.sikhobd')
+﻿@extends('website.layouts.sikhobd')
 
 @section('title', $product->name_en . ' — ' . ($ws->name ?? env('APP_NAME')))
 
@@ -207,7 +207,7 @@
 <section class="page-hero">
     <div class="container">
         <div class="crumbs" style="margin-bottom: 10px;">
-            <a href="{{ route('home') }}">Home</a> <span>/</span> 
+            <a href="{{ route('home') }}">{{ __('frontend.pdp.home') }}</a> <span>/</span> 
             <a href="{{ route('shop') }}">Shop</a> <span>/</span> 
             <span style="color: var(--accent);">{{ $product->name_en }}</span>
         </div>
@@ -252,7 +252,7 @@
                         </div>
                         <span class="review-count">({{ $product->reviews->count() }} Reviews)</span>
                         <span style="color: var(--border);">|</span>
-                        <span class="review-count"><i class="fa-solid fa-check-circle" style="color: var(--success);"></i> In Stock</span>
+                        <span class="review-count"><i class="fa-solid fa-check-circle" style="color: var(--success);"></i> {{ __('frontend.pdp.in_stock') }}</span>
                     </div>
 
                     <div class="price-section">
@@ -270,7 +270,7 @@
                     </div>
 
                     <div class="qty-box">
-                        <span style="font-weight: 700; color: var(--primary);">Quantity:</span>
+                        <span style="font-weight: 700; color: var(--primary);">{{ __('frontend.pdp.quantity') }}</span>
                         <div class="qty-selector">
                             <button class="qty-btn" onclick="updateQty(-1)">-</button>
                             <input type="text" id="mainQty" class="qty-input" value="1" readonly>
@@ -304,7 +304,7 @@
         <!-- Product Tabs -->
         <div class="product-details-container">
             <div class="cd-tabs">
-                <button class="active" data-tab="desc">Description</button>
+                <button class="active" data-tab="desc">{{ __('frontend.pdp.description') }}</button>
                 <button data-tab="reviews">Reviews ({{ $product->reviews->count() }})</button>
                 <button data-tab="policy">Shipping & Return</button>
             </div>
@@ -318,7 +318,7 @@
             <div data-tab-content="reviews" style="display: none;">
                 <div class="row">
                     <div class="col-lg-7">
-                        <h4 style="color: var(--primary); margin-bottom: 25px;">Customer Reviews</h4>
+                        <h4 style="color: var(--primary); margin-bottom: 25px;">{{ __('frontend.pdp.reviews') }}</h4>
                         @forelse($product->reviews as $review)
                         <div style="padding-bottom: 20px; border-bottom: 1px solid var(--border); margin-bottom: 20px;">
                             <div style="color: #f59e0b; margin-bottom: 8px; font-size: 12px;">
@@ -336,7 +336,7 @@
                     </div>
                     <div class="col-lg-5">
                         <div style="background: var(--bg-soft); padding: 30px; border-radius: var(--radius);">
-                            <h4 style="color: var(--primary); margin-bottom: 20px;">Write a Review</h4>
+                            <h4 style="color: var(--primary); margin-bottom: 20px;">{{ __('frontend.pdp.write_review') }}</h4>
                             <form action="{{ route('reviewsStore') }}" method="POST">
                                 @csrf
                                 <input type="hidden" name="product_id" value="{{ $product->id }}">
@@ -354,7 +354,7 @@
                                     <label class="form-label" style="font-weight: 700; font-size: 14px;">Your Comment</label>
                                     <textarea name="comment" class="form-control" rows="4" style="border-radius: 12px;" placeholder="What did you like about this product?"></textarea>
                                 </div>
-                                <button type="submit" class="btn btn-primary w-100" style="justify-content: center; height: 48px; border-radius: 12px; font-weight: 700;">Submit Review</button>
+                                <button type="submit" class="btn btn-primary w-100" style="justify-content: center; height: 48px; border-radius: 12px; font-weight: 700;">{{ __('frontend.pdp.submit_review') }}</button>
                             </form>
                         </div>
                     </div>
@@ -375,7 +375,7 @@
         @if($relatedProducts->count() > 0)
         <div class="mt-5">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-                <h2 style="color: var(--primary); font-weight: 800;">Related Products</h2>
+                <h2 style="color: var(--primary); font-weight: 800;">{{ __('frontend.pdp.related') }}</h2>
                 <a href="{{ route('shop') }}" style="color: var(--accent); font-weight: 700; text-decoration: none;">View All <i class="fa-solid fa-arrow-right ms-1"></i></a>
             </div>
             
@@ -515,3 +515,4 @@
     });
 </script>
 @endpush
+

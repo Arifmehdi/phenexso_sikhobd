@@ -1,4 +1,4 @@
-@extends('website.layouts.sikhobd')
+﻿@extends('website.layouts.sikhobd')
 
 @section('title', 'কোর্স রেজিস্ট্রেশন — ' . ($ws->name ?? env('APP_NAME')))
 
@@ -59,7 +59,7 @@
 @section('content')
 <section class="page-hero">
     <div class="container text-center">
-        <h1 style="font-weight: 900; font-size: 36px; letter-spacing: -1px;">কোর্স এনরোলমেন্ট</h1>
+        <h1 style="font-weight: 900; font-size: 36px; letter-spacing: -1px;">{{ __('frontend.enroll.title') }}</h1>
         <div class="crumbs justify-content-center mt-2">
             <a href="{{ route('home') }}">Home</a> <span class="mx-2 opacity-50">/</span> 
             <span style="color: var(--accent); font-weight: 700;">Registration</span>
@@ -78,7 +78,7 @@
                     <div class="modern-card">
                         <div class="card-header-clean">
                             <i class="fa-solid fa-user-graduate"></i>
-                            <h2>১. রেজিস্ট্রেশন তথ্য</h2>
+                            <h2>{{ __('frontend.enroll.step_reg') }}</h2>
                         </div>
                         <div class="form-content">
                             <div class="row g-4">
@@ -96,19 +96,19 @@
                                 </div>
 
                                 <div class="col-md-6">
-                                    <label class="custom-label">পেশা *</label>
+                                    <label class="custom-label">{{ __('frontend.enroll.profession') }}</label>
                                     <select name="occupation" class="form-control custom-input" required>
-                                        <option value="">নির্বাচন করুন</option>
-                                        <option value="Student">ছাত্র (Student)</option>
-                                        <option value="Job Holder">চাকুরীজীবী (Job Holder)</option>
+                                        <option value="">{{ __('frontend.enroll.select') }}</option>
+                                        <option value="Student">{{ __('frontend.enroll.prof_student') }}</option>
+                                        <option value="Job Holder">{{ __('frontend.enroll.prof_job') }}</option>
                                         <option value="Business">ব্যবসায়ী (Business)</option>
-                                        <option value="Other">অন্যান্য (Other)</option>
+                                        <option value="Other">{{ __('frontend.enroll.prof_other') }}</option>
                                     </select>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="custom-label">সর্বশেষ পড়াশোনা (Last Study) *</label>
                                     <select name="last_academic_status" class="form-control custom-input" required>
-                                        <option value="">নির্বাচন করুন</option>
+                                        <option value="">{{ __('frontend.enroll.select') }}</option>
                                         <option value="PSC/Ebtedayee">PSC/ইবতেদায়ী</option>
                                         <option value="JSC/JDC">JSC/জেডিসি</option>
                                         <option value="SSC/Dakhil">SSC/দাখিল</option>
@@ -121,7 +121,7 @@
                                 </div>
 
                                 <div class="col-12">
-                                    <label class="custom-label">অর্ডার নোট (ঐচ্ছিক)</label>
+                                    <label class="custom-label">{{ __('frontend.enroll.order_note') }}</label>
                                     <textarea name="order_note" class="form-control custom-input" rows="2" placeholder="এনরোলমেন্ট সম্পর্কে বিশেষ কোনো তথ্য থাকলে দিন"></textarea>
                                 </div>
                             </div>
@@ -133,15 +133,15 @@
                     <div class="modern-card">
                         <div class="card-header-clean">
                             <i class="fa-solid fa-receipt"></i>
-                            <h2>রেজিস্ট্রেশন সামারি</h2>
+                            <h2>{{ __('frontend.enroll.reg_summary') }}</h2>
                         </div>
                         <div class="summary-box">
                             <div class="summary-line">
-                                <span>কোর্স ফি</span>
+                                <span>{{ __('frontend.enroll.course_fee') }}</span>
                                 <span id="summary-subtotal" class="fw-bold text-dark">৳{{ number_format($cartSubtotal) }}</span>
                             </div>
                             <div class="summary-line grand-total">
-                                <span>সর্বমোট</span>
+                                <span>{{ __('frontend.enroll.grand_total') }}</span>
                                 <span id="summary-total">৳{{ number_format($cartSubtotal) }}</span>
                             </div>
                         </div>
@@ -150,7 +150,7 @@
                     <div class="modern-card">
                         <div class="card-header-clean">
                             <i class="fa-solid fa-box-open"></i>
-                            <h2>২. এনরোলমেন্টকৃত কোর্সসমূহ</h2>
+                            <h2>{{ __('frontend.enroll.step_courses') }}</h2>
                         </div>
                         <div class="items-list">
                             @foreach($cartItems as $item)
@@ -177,14 +177,14 @@
                     <div class="modern-card">
                         <div class="card-header-clean">
                             <i class="fa-solid fa-wallet"></i>
-                            <h2>৩. পেমেন্ট মেথড এবং রেজিস্ট্রেশন</h2>
+                            <h2>{{ __('frontend.enroll.step_payment') }}</h2>
                         </div>
                         <div class="form-content" style="padding-top: 20px;">
                             <label class="pay-card active">
                                 <input type="radio" name="payment_method" value="cod" checked>
                                 <div>
                                     <div class="fw-bold text-dark" style="font-size: 14px;">Cash on Registration</div>
-                                    <div class="text-muted small">সরাসরি অফিসে এসে বা পরে পেমেন্ট করুন</div>
+                                    <div class="text-muted small">{{ __('frontend.enroll.pay_later') }}</div>
                                 </div>
                             </label>
                             <label class="pay-card">
@@ -281,3 +281,4 @@
     }
 </script>
 @endpush
+

@@ -267,7 +267,7 @@
               @if($product->isFree())
                 <span class="elearn-price free">Free</span>
               @else
-                <span class="elearn-price">৳ {{ number_format($product->selling_price, 0) }}@if($product->price > $product->selling_price)<span class="old-price">৳ {{ number_format($product->price, 0) }}</span>@endif</span>
+                <span class="elearn-price">@if($product->discount > 0)৳ {{ number_format($product->discounted_price, 0) }}<span class="old-price">৳ {{ number_format($product->selling_price, 0) }}</span>@else৳ {{ number_format($product->selling_price, 0) }}@endif</span>
               @endif
               @if(in_array($product->id, $enrolledCourseIds ?? []))
                 <a href="{{ route('course.play', $product->slug) }}" class="elearn-enroll-btn" style="background:#16a34a;">

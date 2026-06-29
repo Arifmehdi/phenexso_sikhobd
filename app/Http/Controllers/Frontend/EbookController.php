@@ -17,36 +17,75 @@ class EbookController extends Controller
 {
     public function index(Request $request)
     {
-        // Paid eBooks only (free ones live under the "Free eBook" menu)
-        $query = Ebook::where('active', 1)->where('status', 'approved')->where('is_free', 0);
+        // Base: paid eBooks (free ones live under the "Free eBook" menu)
+        $base = Ebook::where('active', 1)->where('status', 'approved')->where('is_free', 0);
 
+        $query = clone $base;
+
+        // Search
+        if ($request->filled('q')) {
+            $q = trim($request->q);
+            $query->where(fn($w) => $w->where('title_bn', 'like', "%{$q}%")
+                                      ->orWhere('title_en', 'like', "%{$q}%")
+                                      ->orWhere('author_name', 'like', "%{$q}%"));
+        }
+
+        // Category
         if ($request->category) {
             $query->where('category_id', $request->category);
         }
 
-        $ebooks = $query->latest()->paginate(12);
-        $categories = ProductCategory::where('type', 'ebook')->where('active', 1)->get();
-
-        // Get ebook cart IDs for current user or guest session
-        $cartEbookIds = [];
-        if(Auth::check()) {
-            $cartEbookIds = Cart::where('user_id', Auth::id())
-                ->whereNull('product_id')
-                ->pluck('ebook_id')
-                ->toArray();
-        } elseif(session('session_id')) {
-            $cartEbookIds = Cart::where('session_id', session('session_id'))
-                ->whereNull('product_id')
-                ->pluck('ebook_id')
-                ->toArray();
+        // Author
+        if ($request->filled('author')) {
+            $query->where('author_name', $request->author);
         }
 
-        return view('website.ebooks.index', compact('ebooks', 'categories', 'cartEbookIds'));
+        // Price range
+        if ($request->filled('price')) {
+            switch ($request->price) {
+                case '0-100':    $query->whereBetween('price', [0, 100]); break;
+                case '100-300':  $query->whereBetween('price', [100, 300]); break;
+                case '300-500':  $query->whereBetween('price', [300, 500]); break;
+                case '500-plus': $query->where('price', '>', 500); break;
+            }
+        }
+
+        // Sort
+        switch ($request->sort) {
+            case 'price_low':  $query->orderBy('price', 'asc'); break;
+            case 'price_high': $query->orderBy('price', 'desc'); break;
+            case 'popular':    $query->orderByDesc('view_count'); break;
+            default:           $query->latest(); break;
+        }
+
+        $ebooks = $query->with('category')->paginate(18)->appends($request->all());
+
+        $categories = ProductCategory::where('type', 'ebook')->where('active', 1)->get();
+
+        // Distinct authors (with counts) from the full paid pool
+        $authors = (clone $base)->whereNotNull('author_name')->where('author_name', '!=', '')
+            ->selectRaw('author_name, COUNT(*) as cnt')
+            ->groupBy('author_name')->orderByDesc('cnt')->limit(30)->get();
+
+        // Top / popular ebooks for the "Recently Sold" carousel
+        $popularEbooks = (clone $base)->orderByDesc('view_count')->limit(10)->get();
+
+        // Cart ebook ids
+        $cartEbookIds = [];
+        if(Auth::check()) {
+            $cartEbookIds = Cart::where('user_id', Auth::id())->whereNull('product_id')->pluck('ebook_id')->toArray();
+        } elseif(session('session_id')) {
+            $cartEbookIds = Cart::where('session_id', session('session_id'))->whereNull('product_id')->pluck('ebook_id')->toArray();
+        }
+
+        return view('website.ebooks.index', compact('ebooks', 'categories', 'authors', 'popularEbooks', 'cartEbookIds'));
     }
 
     public function show($id)
     {
-        $ebook = Ebook::where('active', 1)->where('status', 'approved')->findOrFail($id);
+        $ebook = Ebook::where('active', 1)->where('status', 'approved')
+                      ->with('category')
+                      ->findOrFail($id);
         $ebook->increment('view_count');
 
         $isEnrolled = false;
@@ -57,7 +96,25 @@ class EbookController extends Controller
                 ->exists();
         }
 
-        return view('website.ebooks.details', compact('ebook', 'isEnrolled'));
+        // Related: same category first, then fill from others (need enough for sidebar + grid)
+        $relatedEbooks = Ebook::where('active', 1)->where('status', 'approved')
+            ->where('id', '!=', $id)
+            ->when($ebook->category_id, fn($q) => $q->where('category_id', $ebook->category_id))
+            ->latest()->limit(14)->get();
+
+        if ($relatedEbooks->count() < 14) {
+            $more = Ebook::where('active', 1)->where('status', 'approved')
+                ->where('id', '!=', $id)
+                ->whereNotIn('id', $relatedEbooks->pluck('id'))
+                ->latest()->limit(14 - $relatedEbooks->count())->get();
+            $relatedEbooks = $relatedEbooks->concat($more);
+        }
+
+        // Split: first 4 for the hero sidebar, rest for the bottom grid
+        $sidebarEbooks = $relatedEbooks->take(4);
+        $gridEbooks    = $relatedEbooks->slice(4)->values();
+
+        return view('website.ebooks.details', compact('ebook', 'isEnrolled', 'relatedEbooks', 'sidebarEbooks', 'gridEbooks'));
     }
 
     public function buy($id)

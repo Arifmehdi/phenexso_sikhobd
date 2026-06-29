@@ -1,4 +1,4 @@
-@extends('website.layouts.sikhobd')
+﻿@extends('website.layouts.sikhobd')
 
 @section('title', 'আওয়ার শপ — ' . ($ws->name ?? env('APP_NAME')))
 
@@ -274,10 +274,10 @@
         <!-- Reusing the sidebar style from courses page -->
         <aside class="filter-side">
           <form action="{{ route('shop') }}" method="GET" id="filterForm">
-            <h3 style="color:var(--primary); margin-bottom:16px; font-size:16px;" data-i18n="filter">ফিল্টার</h3>
+            <h3 style="color:var(--primary); margin-bottom:16px; font-size:16px;" data-i18n="filter">{{ __('frontend.shopx.filter') }}</h3>
             
             <div class="filter-group">
-              <h4 data-i18n="category">ক্যাটাগরি</h4>
+              <h4 data-i18n="category">{{ __('frontend.shopx.category') }}</h4>
               <a href="{{ route('shop') }}" style="display: block; margin-bottom: 8px; font-size: 14px; color: {{ !request('category') ? 'var(--accent)' : 'var(--text-soft)' }}; font-weight: 600;">All Products</a>
               @foreach($allRootCategories as $cat)
               <label>
@@ -290,7 +290,7 @@
             </div>
 
             <div class="filter-group">
-              <h4 data-i18n="price.range">মূল্য</h4>
+              <h4 data-i18n="price.range">{{ __('frontend.shopx.price') }}</h4>
               <label>
                 <input type="radio" name="price" value="all" 
                        {{ request('price') == 'all' || !request('price') ? 'checked' : '' }}
@@ -299,23 +299,23 @@
               </label>
               <label>
                 <input type="radio" name="price" value="0-1000" {{ request('price') == '0-1000' ? 'checked' : '' }} onchange="document.getElementById('filterForm').submit()"> 
-                <span>৳ 0 - 1k</span>
+                <span>{{ __('frontend.shopx.price_0_1k') }}</span>
               </label>
               <label>
                 <input type="radio" name="price" value="1000-5000" {{ request('price') == '1000-5000' ? 'checked' : '' }} onchange="document.getElementById('filterForm').submit()"> 
-                <span>৳ 1k - 5k</span>
+                <span>{{ __('frontend.shopx.price_1k_5k') }}</span>
               </label>
               <label>
                 <input type="radio" name="price" value="5000-plus" {{ request('price') == '5000-plus' ? 'checked' : '' }} onchange="document.getElementById('filterForm').submit()"> 
-                <span>৳ 5k+</span>
+                <span>{{ __('frontend.shopx.price_5k_plus') }}</span>
               </label>
             </div>
             
-            <a href="{{ route('shop') }}" class="btn btn-outline btn-sm" style="width:100%; margin-top: 10px; justify-content: center;">Clear Filters</a>
+            <a href="{{ route('shop') }}" class="btn btn-outline btn-sm" style="width:100%; margin-top: 10px; justify-content: center;">{{ __('frontend.shopx.clear_filters') }}</a>
           </form>
 
           <div class="filter-group mt-5 d-none d-lg-block">
-            <h4 data-i18n="best_sellers">বেস্ট সেলার</h4>
+            <h4 data-i18n="best_sellers">{{ __('frontend.shopx.best_seller') }}</h4>
             @foreach($topClickedProducts->take(3) as $top)
             <a href="{{ route('productDetails', $top->slug) }}" style="display: flex; gap: 10px; margin-bottom: 15px; text-decoration: none;">
                 <div style="width: 50px; height: 50px; background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 5px;">
@@ -339,8 +339,8 @@
             <form action="{{ url()->current() }}" method="GET">
                 <select name="sort" class="form-select-sm" style="border: 1px solid var(--border); border-radius: 8px; padding: 5px 10px;" onchange="this.form.submit()">
                     <option value="1" {{ request('sort') == 1 ? 'selected' : '' }}>Latest</option>
-                    <option value="3" {{ request('sort') == 3 ? 'selected' : '' }}>Price: High to Low</option>
-                    <option value="4" {{ request('sort') == 4 ? 'selected' : '' }}>Price: Low to High</option>
+                    <option value="3" {{ request('sort') == 3 ? 'selected' : '' }}>{{ __('frontend.shopx.sort_high_low') }}</option>
+                    <option value="4" {{ request('sort') == 4 ? 'selected' : '' }}>{{ __('frontend.shopx.sort_low_high') }}</option>
                 </select>
             </form>
           </div>
@@ -351,7 +351,7 @@
              <article class="course-card {{ $isInCart ? 'in-cart-card' : '' }}" data-pid="{{ $product->id }}">
                <div class="shop-product-thumb">
                  @if($isInCart)
-                 <span class="in-cart-badge"><i class="fa-solid fa-check-circle"></i> In Cart</span>
+                 <span class="in-cart-badge"><i class="fa-solid fa-check-circle"></i> {{ __('frontend.shopx.in_cart') }}</span>
                  @elseif($product->discount > 0)
                  <span class="course-tag">{{ $product->discount }}% OFF</span>
                  @elseif($product->feature)
@@ -380,7 +380,7 @@
 
                  <div class="course-foot" style="border: none; padding-top: 10px; display: flex; flex-direction: column; gap: 6px;">
                    <div class="shop-price-box">
-                     <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Price :</span>
+                     <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">{{ __('frontend.shopx.price_label') }}</span>
                      @if($product->discount > 0)
                        <span class="price">৳{{ number_format($product->discounted_price) }}</span>
                        <span class="old-price-sm">৳{{ number_format($product->regular_price) }}</span>
@@ -411,8 +411,8 @@
             @empty
             <div style="grid-column: 1/-1; text-align: center; padding: 60px; background: var(--bg-soft); border-radius: var(--radius-lg);">
                 <i class="fa-solid fa-box-open" style="font-size: 48px; color: var(--text-muted); margin-bottom: 20px;"></i>
-                <h3 style="color: var(--text-soft);">No products found matching your criteria.</h3>
-                <a href="{{ route('shop') }}" class="btn btn-primary" style="margin-top: 20px;">Reset Filters</a>
+                <h3 style="color: var(--text-soft);">{{ __('frontend.shopx.no_products') }}</h3>
+                <a href="{{ route('shop') }}" class="btn btn-primary" style="margin-top: 20px;">{{ __('frontend.shopx.reset_filters') }}</a>
             </div>
             @endforelse
           </div>
@@ -461,7 +461,7 @@
             let $thumb = $card.find('.shop-product-thumb');
             if (!$thumb.find('.in-cart-badge').length) {
                 $thumb.find('.course-tag').remove();
-                $thumb.prepend('<span class="in-cart-badge"><i class="fa-solid fa-check-circle"></i> In Cart</span>');
+                $thumb.prepend('<span class="in-cart-badge"><i class="fa-solid fa-check-circle"></i> {{ __('frontend.shopx.in_cart') }}</span>');
                 if (!$thumb.find('.in-cart-overlay').length) {
                     $thumb.append('<div class="in-cart-overlay"></div>');
                 }
@@ -477,7 +477,7 @@
 
             // Text buttons — replace Add To Cart with "Go to Cart" link, disable Buy Now
             $card.find('.shop-cart-btn.addToCart').replaceWith(
-                '<a href="{{ route('cart') }}" class="go-to-cart-link"><i class="fa-solid fa-cart-shopping"></i> Go to Cart</a>'
+                '<a href="{{ route('cart') }}" class="go-to-cart-link"><i class="fa-solid fa-cart-shopping"></i> {{ __('frontend.shopx.go_to_cart') }}</a>'
             );
             $card.find('.shop-buy-btn.buyNow').addClass('in-cart-state')
                 .attr('disabled', true)
@@ -570,3 +570,4 @@
     });
 </script>
 @endpush
+

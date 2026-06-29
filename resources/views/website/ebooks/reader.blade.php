@@ -58,9 +58,9 @@
             <button class="tb-btn" onclick="zoomReader(0.15)"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
             <button class="tb-btn" onclick="window.print()"><i class="fa-solid fa-print"></i> Print</button>
             @if($canDownload)
-                <a class="tb-btn primary" href="{{ $downloadUrl }}"><i class="fa-solid fa-download"></i> Download</a>
+                <a class="tb-btn primary" href="{{ $downloadUrl }}"><i class="fa-solid fa-download"></i> {{ __('frontend.reader.download') }}</a>
             @endif
-            <a class="tb-btn" href="{{ route('ebooks.show', $ebook->id) }}"><i class="fa-solid fa-arrow-left"></i> Back</a>
+            <a class="tb-btn" href="{{ route('ebooks.show', $ebook->id) }}"><i class="fa-solid fa-arrow-left"></i> {{ __('frontend.reader.back') }}</a>
         </div>
     </div>
 
