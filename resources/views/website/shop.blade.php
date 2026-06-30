@@ -251,6 +251,40 @@
         opacity: 0.5;
         cursor: not-allowed;
     }
+
+    /* ── Mobile accordion filter (shop) ── */
+    .shop-filter-toggle { display:none; }
+    @media (max-width: 991px) {
+        .shop-filter-toggle {
+            display:flex; align-items:center; justify-content:space-between; gap:8px;
+            width:100%; padding:12px 16px; margin-bottom:14px;
+            background:var(--primary); color:#fff; border:none; border-radius:var(--radius-lg);
+            font-size:14px; font-weight:700; cursor:pointer;
+        }
+        .shop-filter-toggle i.chev { transition:transform .25s; }
+        .shop-filter-toggle.open i.chev { transform:rotate(180deg); }
+
+        /* Collapse whole filter panel */
+        .shop-filter { display:none !important; }
+        .shop-filter.open { display:block !important; }
+        .shop-filter-h3 { display:none; } /* toggle button already says "Filter" */
+
+        /* Each filter group becomes an accordion */
+        .shop-filter .filter-group h4 {
+            cursor:pointer; display:flex; align-items:center; justify-content:space-between;
+            margin-bottom:0;
+        }
+        .shop-filter .filter-group h4::after {
+            content:'\f078'; font-family:'Font Awesome 6 Free'; font-weight:900;
+            font-size:11px; color:var(--text-muted); transition:transform .25s;
+        }
+        .shop-filter .filter-group.open h4::after { transform:rotate(180deg); }
+        /* Collapse: hide everything after the h4 unless the group is open */
+        .shop-filter .filter-group:not(.open) h4 ~ * { display:none; }
+        .shop-filter .filter-group h4 { padding-bottom:6px; }
+        /* The "Clear filters" button stays visible */
+        .shop-filter form > a.btn { display:flex !important; }
+    }
 </style>
 @endpush
 
@@ -271,10 +305,16 @@
   <section class="section" style="padding-top: 40px;">
     <div class="container">
       <div class="courses-layout">
+        <!-- Mobile filter toggle -->
+        <button type="button" class="shop-filter-toggle" id="shopFilterToggle">
+            <span><i class="fa-solid fa-sliders me-2"></i>{{ __('frontend.shopx.filter') }}</span>
+            <i class="fa-solid fa-chevron-down chev"></i>
+        </button>
+
         <!-- Reusing the sidebar style from courses page -->
-        <aside class="filter-side">
+        <aside class="filter-side shop-filter" id="shopFilters">
           <form action="{{ route('shop') }}" method="GET" id="filterForm">
-            <h3 style="color:var(--primary); margin-bottom:16px; font-size:16px;" data-i18n="filter">{{ __('frontend.shopx.filter') }}</h3>
+            <h3 class="shop-filter-h3" style="color:var(--primary); margin-bottom:16px; font-size:16px;" data-i18n="filter">{{ __('frontend.shopx.filter') }}</h3>
             
             <div class="filter-group">
               <h4 data-i18n="category">{{ __('frontend.shopx.category') }}</h4>
@@ -441,6 +481,27 @@
 @push('js')
 <script>
     $(document).ready(function() {
+        // ── Mobile filter panel toggle ──
+        var sfToggle = document.getElementById('shopFilterToggle');
+        var sfPanel  = document.getElementById('shopFilters');
+        if (sfToggle && sfPanel) {
+            sfToggle.addEventListener('click', function() {
+                sfPanel.classList.toggle('open');
+                sfToggle.classList.toggle('open');
+            });
+        }
+        // ── Accordion: each filter group (mobile only) ──
+        document.querySelectorAll('.shop-filter .filter-group h4').forEach(function(h4) {
+            h4.addEventListener('click', function() {
+                if (window.innerWidth > 991) return; // accordion only on mobile
+                this.closest('.filter-group').classList.toggle('open');
+            });
+        });
+        // Auto-open the group that has an active filter (checked input)
+        document.querySelectorAll('.shop-filter .filter-group').forEach(function(grp) {
+            if (grp.querySelector('input:checked:not([value="all"])')) grp.classList.add('open');
+        });
+
         // Quick View AJAX
         $('.quick-view-btn').click(function() {
             let id = $(this).data('id');

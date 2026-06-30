@@ -184,7 +184,7 @@ class SslCommerzPaymentController extends Controller
                 }
                 if ($hasCourse || $hasEbook) {
                     $rules['occupation'] = 'required|string|max:255';
-                    $rules['last_academic_status'] = 'required|string|max:255';
+                    $rules['last_academic_status'] = 'nullable|string|max:255';
                 }
                 $request->validate($rules);
 

@@ -329,10 +329,43 @@
     .ebx-clear { display:inline-flex; align-items:center; gap:6px; font-size:13px; color:var(--accent); text-decoration:none; font-weight:600; padding:4px; }
     .ebx-clear:hover { text-decoration:underline; }
 
+    /* Mobile "Filters" toggle button (hidden on desktop) */
+    .ebx-filter-toggle { display:none; }
+    @media(max-width:991px){
+        .ebx-filter-toggle {
+            display:flex; align-items:center; justify-content:space-between; gap:8px;
+            width:100%; padding:12px 16px; margin-bottom:14px;
+            background:var(--primary); color:#fff; border:none; border-radius:var(--radius-lg);
+            font-size:14px; font-weight:700; cursor:pointer;
+        }
+        .ebx-filter-toggle i.chev { transition:transform .25s; }
+        .ebx-filter-toggle.open i.chev { transform:rotate(180deg); }
+
+        /* Collapse whole filter panel on mobile */
+        .ebx-filters { display:none; }
+        .ebx-filters.open { display:block; }
+
+        /* Each filter section becomes an accordion */
+        .ebx-ftitle {
+            cursor:pointer; display:flex; align-items:center; justify-content:space-between;
+            margin-bottom:0; padding-bottom:0; border-bottom:none;
+        }
+        .ebx-ftitle::after {
+            content:'\f078'; font-family:'Font Awesome 6 Free'; font-weight:900;
+            font-size:11px; color:var(--text-muted); transition:transform .25s;
+        }
+        .ebx-fbox.open .ebx-ftitle::after { transform:rotate(180deg); }
+        /* search box has no title — keep it open always */
+        .ebx-fbox .ebx-flist { display:none; padding-top:10px; }
+        .ebx-fbox.open .ebx-flist { display:flex; }
+    }
+
     /* Override grid to 4 cols in the main area */
     .ebx-main .ebook-grid { grid-template-columns:repeat(3,1fr); gap:18px; }
-    @media(max-width:991px){ .ebx-main .ebook-grid{ grid-template-columns:repeat(3,1fr); } }
-    @media(max-width:767px){ .ebx-main .ebook-grid{ grid-template-columns:repeat(2,1fr); gap:12px; } }
+    @media(max-width:991px){ .ebx-main .ebook-grid{ grid-template-columns:repeat(2,1fr); } }
+    @media(max-width:575px){
+        .ebx-main .ebook-grid{ grid-template-columns:1fr; gap:14px; }
+    }
 </style>
 @endpush
 
@@ -386,8 +419,14 @@
 
         <div class="ebx-layout">
 
+            {{-- Mobile filter toggle --}}
+            <button type="button" class="ebx-filter-toggle" id="ebxFilterToggle">
+                <span><i class="fa-solid fa-sliders me-2"></i>{{ __('frontend.shopx.filter') }}</span>
+                <i class="fa-solid fa-chevron-down chev"></i>
+            </button>
+
             {{-- LEFT FILTER SIDEBAR --}}
-            <aside class="ebx-filters">
+            <aside class="ebx-filters" id="ebxFilters">
                 {{-- Search --}}
                 <div class="ebx-fbox">
                     <form method="GET" class="ebx-search">
@@ -781,6 +820,29 @@
                 showCloseButton: true,
             });
         }
+
+        // ── Mobile filter panel toggle ──
+        var fToggle = document.getElementById('ebxFilterToggle');
+        var fPanel  = document.getElementById('ebxFilters');
+        if (fToggle && fPanel) {
+            fToggle.addEventListener('click', function() {
+                fPanel.classList.toggle('open');
+                fToggle.classList.toggle('open');
+            });
+        }
+
+        // ── Accordion: each filter section (mobile only) ──
+        document.querySelectorAll('.ebx-filters .ebx-ftitle').forEach(function(title) {
+            title.addEventListener('click', function() {
+                if (window.innerWidth > 991) return; // accordion only on mobile
+                this.closest('.ebx-fbox').classList.toggle('open');
+            });
+        });
+        // Auto-open the section that has an active filter
+        document.querySelectorAll('.ebx-fitem.active').forEach(function(item) {
+            var box = item.closest('.ebx-fbox');
+            if (box) box.classList.add('open');
+        });
 
         // Popular carousel scroll
         var track = document.getElementById('ebxPopTrack');

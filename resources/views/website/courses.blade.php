@@ -73,6 +73,37 @@
         cursor: pointer; text-decoration: none; white-space: nowrap; transition: all .25s ease;
     }
     .elearn-enroll-btn:hover { background: var(--primary); color: #fff; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,.15); }
+
+    /* ── Mobile accordion filter (courses) ── */
+    .crs-filter-toggle { display:none; }
+    @media (max-width: 991px) {
+        .crs-filter-toggle {
+            display:flex; align-items:center; justify-content:space-between; gap:8px;
+            width:100%; padding:12px 16px; margin-bottom:14px;
+            background:var(--primary); color:#fff; border:none; border-radius:var(--radius-lg);
+            font-size:14px; font-weight:700; cursor:pointer;
+        }
+        .crs-filter-toggle i.chev { transition:transform .25s; }
+        .crs-filter-toggle.open i.chev { transform:rotate(180deg); }
+
+        /* Collapse whole filter panel */
+        .crs-filter { display:none !important; }
+        .crs-filter.open { display:block !important; }
+        .crs-filter-h3 { display:none; }
+
+        /* Each filter group becomes an accordion */
+        .crs-filter .filter-group h4 {
+            cursor:pointer; display:flex; align-items:center; justify-content:space-between;
+            margin-bottom:0; padding-bottom:6px;
+        }
+        .crs-filter .filter-group h4::after {
+            content:'\f078'; font-family:'Font Awesome 6 Free'; font-weight:900;
+            font-size:11px; color:var(--text-muted); transition:transform .25s;
+        }
+        .crs-filter .filter-group.open h4::after { transform:rotate(180deg); }
+        .crs-filter .filter-group:not(.open) h4 ~ * { display:none; }
+        .crs-filter form > a.btn { display:flex !important; }
+    }
 </style>
 @endpush
 
@@ -90,9 +121,15 @@
   <section class="section" style="padding-top: 40px;">
     <div class="container">
       <div class="courses-layout">
-        <aside class="filter-side">
+        <!-- Mobile filter toggle -->
+        <button type="button" class="crs-filter-toggle" id="crsFilterToggle">
+            <span><i class="fa-solid fa-sliders me-2"></i>{{ __('frontend.shopx.filter') }}</span>
+            <i class="fa-solid fa-chevron-down chev"></i>
+        </button>
+
+        <aside class="filter-side crs-filter" id="crsFilters">
           <form action="{{ route('courses') }}" method="GET" id="filter-form">
-            <h3 style="color:var(--primary); margin-bottom:16px; font-size:16px;" data-i18n="filter">ফিল্টার</h3>
+            <h3 class="crs-filter-h3" style="color:var(--primary); margin-bottom:16px; font-size:16px;" data-i18n="filter">ফিল্টার</h3>
             
             <div class="filter-group">
               <h4 data-i18n="category">{{ __('category') }}</h4>
@@ -225,6 +262,29 @@
 
 @push('js')
 <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // ── Mobile filter panel toggle ──
+        var cfToggle = document.getElementById('crsFilterToggle');
+        var cfPanel  = document.getElementById('crsFilters');
+        if (cfToggle && cfPanel) {
+            cfToggle.addEventListener('click', function() {
+                cfPanel.classList.toggle('open');
+                cfToggle.classList.toggle('open');
+            });
+        }
+        // ── Accordion: each filter group (mobile only) ──
+        document.querySelectorAll('.crs-filter .filter-group h4').forEach(function(h4) {
+            h4.addEventListener('click', function() {
+                if (window.innerWidth > 991) return;
+                this.closest('.filter-group').classList.toggle('open');
+            });
+        });
+        // Auto-open group with an active filter
+        document.querySelectorAll('.crs-filter .filter-group').forEach(function(grp) {
+            if (grp.querySelector('input:checked:not([value=""])')) grp.classList.add('open');
+        });
+    });
+
     $(document).on('click', '.add-to-wishlist-ajax', function() {
         const productId = $(this).data('id');
         const btn = $(this);

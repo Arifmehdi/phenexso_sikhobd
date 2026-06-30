@@ -802,12 +802,12 @@ class ProductController extends Controller
         // Save the updated order
         $order->save();
 
-        // If order has a course and is confirmed/delivered, approve and activate enrollment
-        if ($order->has_course && in_array($request->order_status, ['confirmed', 'delivered'])) {
+        // If order is confirmed/delivered, approve & activate any course/e-book enrollments
+        if (in_array($request->order_status, ['confirmed', 'delivered']) && \App\Models\Enrollment::where('order_id', $order->id)->exists()) {
             $order->update(['admin_approval' => 'approved']);
-            
-            // Activate all related enrollments
-            Enrollment::where('order_id', $order->id)->update([
+
+            // Activate all related enrollments (courses + e-books)
+            \App\Models\Enrollment::where('order_id', $order->id)->update([
                 'status' => 'active',
                 'enrolled_at' => now()
             ]);
@@ -873,16 +873,25 @@ class ProductController extends Controller
         $order->editedby_id    = Auth::id(); // Fix: assignment operator should be '='
         $order->save();
 
-        // Automatic Enrollment for Course Products if order is paid
+        // Automatic Enrollment for Courses & E-books once the order is paid
         if ($order->payment_status === 'paid') {
             foreach ($order->orderItems as $item) {
                 if ($item->product && $item->product->type === 'course') {
                     \App\Models\Enrollment::updateOrCreate(
                         ['user_id' => $order->user_id, 'product_id' => $item->product_id],
                         [
-                            'order_id' => $order->id,
+                            'order_id'    => $order->id,
                             'enrolled_at' => now(),
-                            'status' => 'active'
+                            'status'      => 'active',
+                        ]
+                    );
+                } elseif ($item->ebook_id) {
+                    \App\Models\Enrollment::updateOrCreate(
+                        ['user_id' => $order->user_id, 'ebook_id' => $item->ebook_id],
+                        [
+                            'order_id'    => $order->id,
+                            'enrolled_at' => now(),
+                            'status'      => 'active',
                         ]
                     );
                 }

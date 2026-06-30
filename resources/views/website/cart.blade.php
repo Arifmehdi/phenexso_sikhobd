@@ -315,7 +315,7 @@
                             </div>
 
                             <button type="submit" class="action-btn">
-                                {{ ($hasCourse || $hasEbook) ? __('frontend.cartpage.submit_reg') : __('frontend.cartpage.submit_order') }} <i class="fa-solid fa-check-circle"></i>
+                                {{ auth()->check() ? __('frontend.cartpage.submit_order') : __('frontend.cartpage.submit_reg') }} <i class="fa-solid fa-check-circle"></i>
                             </button>
                         </div>
                     </div>

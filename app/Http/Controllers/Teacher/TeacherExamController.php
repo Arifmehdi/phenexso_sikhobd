@@ -17,10 +17,22 @@ class TeacherExamController extends Controller
         return view('teacher.exams.index', compact('exams'));
     }
 
+    /**
+     * Courses that belong to (are assigned to) the logged-in teacher.
+     */
+    private function teacherCourses()
+    {
+        return \App\Models\Product::where('type', 'course')
+            ->where('active', 1)
+            ->where('instructor_id', Auth::id())
+            ->orderBy('name_en')
+            ->get();
+    }
+
     public function create()
     {
-        $users = \App\Models\User::orderBy('name')->get();
-        return view('teacher.exams.create', compact('users'));
+        $courses = $this->teacherCourses();
+        return view('teacher.exams.create', compact('courses'));
     }
 
     public function store(Request $request)
@@ -31,15 +43,16 @@ class TeacherExamController extends Controller
             'start_time' => 'required|date',
             'end_time' => 'required|date|after:start_time',
             'question_count' => 'required|integer',
-            'student_ids' => 'nullable|array',
-            'student_ids.*' => 'exists:users,id'
+            'course_ids' => 'nullable|array',
+            'course_ids.*' => 'exists:products,id',
         ]);
 
         $exam = Exam::create($request->all() + ['created_by' => Auth::id()]);
-        
-        if ($request->has('student_ids')) {
-            $exam->students()->sync($request->student_ids);
-        }
+
+        // Only allow assigning courses the teacher actually owns
+        $allowed = $this->teacherCourses()->pluck('id')->toArray();
+        $courseIds = array_values(array_intersect($request->course_ids ?? [], $allowed));
+        $exam->courses()->sync($courseIds);
 
         return redirect()->route('teacher.exams.select-questions', $exam->id);
     }
@@ -47,9 +60,9 @@ class TeacherExamController extends Controller
     public function edit(Exam $exam)
     {
         if ($exam->created_by !== Auth::id()) abort(403);
-        $users = \App\Models\User::orderBy('name')->get();
-        $selected_student_ids = $exam->students()->pluck('users.id')->toArray();
-        return view('teacher.exams.edit', compact('exam', 'users', 'selected_student_ids'));
+        $courses = $this->teacherCourses();
+        $selected_course_ids = $exam->courses()->pluck('products.id')->toArray();
+        return view('teacher.exams.edit', compact('exam', 'courses', 'selected_course_ids'));
     }
 
     public function update(Request $request, Exam $exam)
@@ -62,17 +75,16 @@ class TeacherExamController extends Controller
             'start_time' => 'required|date',
             'end_time' => 'required|date|after:start_time',
             'question_count' => 'required|integer',
-            'student_ids' => 'nullable|array',
-            'student_ids.*' => 'exists:users,id'
+            'course_ids' => 'nullable|array',
+            'course_ids.*' => 'exists:products,id',
         ]);
 
         $exam->update($request->all());
-        
-        if ($request->has('student_ids')) {
-            $exam->students()->sync($request->student_ids);
-        } else {
-            $exam->students()->detach();
-        }
+
+        // Only allow assigning courses the teacher actually owns
+        $allowed = $this->teacherCourses()->pluck('id')->toArray();
+        $courseIds = array_values(array_intersect($request->course_ids ?? [], $allowed));
+        $exam->courses()->sync($courseIds);
 
         return redirect()->route('user.dashboard', ['activeTab' => 'teacher_exams'])->with('success', 'Exam updated successfully.');
     }

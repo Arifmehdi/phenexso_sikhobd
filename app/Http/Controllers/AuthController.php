@@ -411,11 +411,18 @@ class AuthController extends Controller
         $stockRequests = \App\Models\ProductStockRequest::where('user_id', Auth::id())->latest()->paginate(20); // Initialize
         $products = \App\Models\Product::all(); // Add this line
         $enrollments = \App\Models\Enrollment::where('user_id', $user->id)
+            ->whereNotNull('product_id')
             ->with(['product' => function ($q) {
                 $q->with('instructor')->withCount(['lessons' => function ($lq) {
                     $lq->where('active', 1);
                 }]);
             }])
+            ->latest()->get();
+
+        // Purchased e-books (enrollment with ebook_id)
+        $ebookEnrollments = \App\Models\Enrollment::where('user_id', $user->id)
+            ->whereNotNull('ebook_id')
+            ->with('ebook')
             ->latest()->get();
 
         // Product-wise items for the student's orders (for the "Product-wise" view)
@@ -460,7 +467,7 @@ class AuthController extends Controller
             $teacher_exams_count = \App\Models\Exam::where('created_by', $user->id)->count();
         }
 
-        return view('user.dashboard', compact('user', 'todayOrdersCount', 'cancelOrdersCount', 'orders', 'orderItems', 'activeTab','featured_products', 'stockRequests', 'products', 'enrollments', 'courseProgress', 'userCertificates', 'exams', 'completed_exams', 'teacher_questions_count', 'teacher_exams_count', 'teacher_questions', 'teacher_exams'));
+        return view('user.dashboard', compact('user', 'todayOrdersCount', 'cancelOrdersCount', 'orders', 'orderItems', 'activeTab','featured_products', 'stockRequests', 'products', 'enrollments', 'ebookEnrollments', 'courseProgress', 'userCertificates', 'exams', 'completed_exams', 'teacher_questions_count', 'teacher_exams_count', 'teacher_questions', 'teacher_exams'));
     }
 
     public function orders(Request $request)

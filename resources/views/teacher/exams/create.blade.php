@@ -47,13 +47,17 @@
                             <small class="text-muted">Total questions students will see.</small>
                         </div>
                         <div class="form-group mb-3">
-                            <label class="fw-bold mb-2">Assign to Specific Students (Optional)</label>
-                            <select name="student_ids[]" class="form-select select2" multiple="multiple" data-placeholder="Select Students" style="width: 100%;">
-                                @foreach($users as $user)
-                                    <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->email }})</option>
-                                @endforeach
+                            <label class="fw-bold mb-2">Assign to Courses
+                                <small class="text-muted">— only students enrolled in the selected course(s) will get this exam</small>
+                            </label>
+                            <select name="course_ids[]" id="courseSelect" class="form-select select2" multiple="multiple" data-placeholder="Select your courses" style="width: 100%;">
+                                @forelse($courses as $course)
+                                    <option value="{{ $course->id }}">{{ $course->name_en ?? $course->name_bn }}</option>
+                                @empty
+                                    <option value="" disabled>You have no assigned courses</option>
+                                @endforelse
                             </select>
-                            <small class="text-muted">Leave empty if it's open for all students.</small>
+                            <small class="text-muted">Only the courses assigned to you are shown. Leave empty to make it public.</small>
                         </div>
                     </div>
                     <div class="card-footer bg-light p-4" style="border-radius: 0 0 15px 15px;">
