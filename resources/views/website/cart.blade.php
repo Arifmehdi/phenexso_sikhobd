@@ -19,8 +19,25 @@
     .custom-input:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 4px rgba(var(--primary-rgb), 0.1); outline: none; }
     
     /* Optimized Row Layout */
-    .item-row { padding: 15px 20px; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; gap: 15px; position: relative; }
+    .item-row { padding: 15px 20px; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; gap: 12px; position: relative; transition: opacity 0.2s; }
     .item-row:last-child { border-bottom: none; }
+    .item-row.unchecked { opacity: 0.45; }
+
+    /* Select-all header + custom checkbox */
+    .items-head { display: flex; align-items: center; gap: 10px; padding: 12px 20px; border-bottom: 1px solid #f1f5f9; font-size: 12px; font-weight: 700; color: #64748b; }
+    .cart-cbx {
+        -webkit-appearance: none; -moz-appearance: none; appearance: none;
+        width: 20px; height: 20px; min-width: 20px; margin: 0;
+        border: 2px solid #cbd5e1; border-radius: 5px; background: #fff;
+        cursor: pointer; flex-shrink: 0; position: relative; display: inline-block;
+        vertical-align: middle; transition: background 0.15s, border-color 0.15s;
+    }
+    .cart-cbx:checked { background: var(--primary); border-color: var(--primary); }
+    .cart-cbx:checked::after {
+        content: ''; position: absolute; left: 6px; top: 2px;
+        width: 5px; height: 10px; border: solid #fff; border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
+    }
     .item-img { width: 45px; height: 45px; border-radius: 8px; object-fit: contain; background: #fff; border: 1px solid #f1f5f9; flex-shrink: 0; }
     .item-info { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: 15px; }
     .item-name { font-size: 13px; font-weight: 700; color: var(--primary); text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; }
@@ -48,7 +65,11 @@
     /* Layout Logic: Address Left, Everything Else Right */
     .checkout-layout { display: flex; gap: 30px; align-items: flex-start; }
     .col-address { flex: 1; }
-    .col-details-sidebar { flex: 0 0 450px; width: 450px; }
+    .col-details-sidebar { flex: 0 0 450px; width: 450px; display: flex; flex-direction: column; }
+    /* Reorder sidebar cards: Product list on top, Summary below it, Payment last */
+    .col-details-sidebar > .modern-card:nth-child(1) { order: 2; } /* Order Summary */
+    .col-details-sidebar > .modern-card:nth-child(2) { order: 1; } /* Product Items */
+    .col-details-sidebar > .modern-card:nth-child(3) { order: 3; } /* Payment */
 
     @media (max-width: 1100px) {
         .checkout-layout { flex-direction: column; }
@@ -61,10 +82,10 @@
 @section('content')
 <section class="page-hero">
     <div class="container text-center">
-        <h1 data-i18n="cart.title" style="font-weight: 900; font-size: 36px; letter-spacing: -1px;">চেকআউট</h1>
+        <h1 data-i18n="cart.title" style="font-weight: 900; font-size: 36px; letter-spacing: -1px;">{{ __('frontend.cartpage.title') }}</h1>
         <div class="crumbs justify-content-center mt-2">
-            <a href="{{ route('home') }}">Home</a> <span class="mx-2 opacity-50">/</span> 
-            <span style="color: var(--accent); font-weight: 700;">Secure Checkout</span>
+            <a href="{{ route('home') }}">{{ __('frontend.nav.home') }}</a> <span class="mx-2 opacity-50">/</span> 
+            <span style="color: var(--accent); font-weight: 700;">{{ __('frontend.checkout.secure') }}</span>
         </div>
     </div>
 </section>
@@ -74,6 +95,7 @@
         @if($cartItems->count() > 0)
         <form action="{{ route('codOrderStore') }}" method="POST" id="checkoutForm">
             @csrf
+            <input type="hidden" name="selected_items" id="selectedItems" value="">
             <div class="checkout-layout">
                 
                 <!-- Left Column (Address Only) -->
@@ -81,75 +103,75 @@
                     <div class="modern-card">
                         <div class="card-header-clean">
                             <i class="fa-solid {{ ($hasCourse || $hasEbook) && !$hasProduct ? 'fa-user-graduate' : 'fa-truck-fast' }}"></i>
-                            <h2>১. {{ ($hasCourse || $hasEbook) && !$hasProduct ? 'রেজিস্ট্রেশন তথ্য' : ((($hasCourse || $hasEbook) && $hasProduct) ? 'শিপিং এবং রেজিস্ট্রেশন তথ্য' : 'শিপিং এবং ডেলিভারি তথ্য') }}</h2>
+                            <h2>১. {{ ($hasCourse || $hasEbook) && !$hasProduct ? __('frontend.cartpage.step1_reg') : ((($hasCourse || $hasEbook) && $hasProduct) ? __('frontend.cartpage.step1_ship_reg') : __('frontend.cartpage.step1_ship')) }}</h2>
                         </div>
                         <div class="form-content">
                             @if(!auth()->check())
                             <div class="alert alert-info mb-4" style="border-radius: 12px; font-size: 14px;">
-                                <i class="fa-solid fa-circle-info mr-2"></i> আপনার কি আগে থেকেই অ্যাকাউন্ট আছে? <a href="{{ route('login') }}" class="fw-bold">লগইন করুন</a>
+                                <i class="fa-solid fa-circle-info mr-2"></i> {{ __('frontend.cartpage.have_account') }} <a href="{{ route('login') }}" class="fw-bold">{{ __('frontend.cartpage.login') }}</a>
                             </div>
                             @endif
                             <div class="row g-4">
                                 <div class="col-md-6">
-                                    <label class="custom-label">পুরো নাম *</label>
-                                    <input type="text" name="name" class="form-control custom-input" value="{{ optional(auth()->user())->name }}" placeholder="আপনার নাম লিখুন" required>
+                                    <label class="custom-label">{{ __('frontend.cartpage.name') }}</label>
+                                    <input type="text" name="name" class="form-control custom-input" value="{{ optional(auth()->user())->name }}" placeholder="{{ __('frontend.cartpage.name_ph') }}" required>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="custom-label">মোবাইল নম্বর *</label>
-                                    <input type="text" name="mobile" class="form-control custom-input" value="{{ optional(auth()->user())->mobile }}" placeholder="মোবাইল নম্বর" required>
+                                    <label class="custom-label">{{ __('frontend.cartpage.mobile') }}</label>
+                                    <input type="text" name="mobile" class="form-control custom-input" value="{{ optional(auth()->user())->mobile }}" placeholder="{{ __('frontend.cartpage.mobile_ph') }}" required>
                                 </div>
                                 <div class="col-12">
-                                    <label class="custom-label">ইমেইল ঠিকানা *</label>
-                                    <input type="email" name="email" class="form-control custom-input" value="{{ optional(auth()->user())->email }}" placeholder="আপনার ইমেইল" required>
+                                    <label class="custom-label">{{ __('frontend.cartpage.email') }}</label>
+                                    <input type="email" name="email" class="form-control custom-input" value="{{ optional(auth()->user())->email }}" placeholder="{{ __('frontend.cartpage.email_ph') }}" required>
                                 </div>
 
                                 @if($hasCourse || $hasEbook)
                                     <div class="col-md-6">
-                                        <label class="custom-label">পেশা *</label>
+                                        <label class="custom-label">{{ __('frontend.cartpage.profession') }}</label>
                                         <select name="occupation" class="form-control custom-input" required>
-                                            <option value="">নির্বাচন করুন</option>
-                                            <option value="Student" {{ optional(auth()->user())->occupation == 'Student' ? 'selected' : '' }}>ছাত্র (Student)</option>
-                                            <option value="Job Holder" {{ optional(auth()->user())->occupation == 'Job Holder' ? 'selected' : '' }}>চাকুরীজীবী (Job Holder)</option>
-                                            <option value="Business" {{ optional(auth()->user())->occupation == 'Business' ? 'selected' : '' }}>ব্যবসায়ী (Business)</option>
-                                            <option value="Other" {{ optional(auth()->user())->occupation == 'Other' ? 'selected' : '' }}>অন্যান্য (Other)</option>
+                                            <option value="">{{ __('frontend.cartpage.select') }}</option>
+                                            <option value="Student" {{ optional(auth()->user())->occupation == 'Student' ? 'selected' : '' }}>{{ __('frontend.cartpage.prof_student') }}</option>
+                                            <option value="Job Holder" {{ optional(auth()->user())->occupation == 'Job Holder' ? 'selected' : '' }}>{{ __('frontend.cartpage.prof_job') }}</option>
+                                            <option value="Business" {{ optional(auth()->user())->occupation == 'Business' ? 'selected' : '' }}>{{ __('frontend.cartpage.prof_business') }}</option>
+                                            <option value="Other" {{ optional(auth()->user())->occupation == 'Other' ? 'selected' : '' }}>{{ __('frontend.cartpage.prof_other') }}</option>
                                         </select>
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="custom-label">সর্বশেষ পড়াশোনা (Last Study)</label>
+                                        <label class="custom-label">{{ __('frontend.cartpage.last_study') }}</label>
                                         <select name="last_academic_status" class="form-control custom-input">
-                                            <option value="">নির্বাচন করুন</option>
-                                            <option value="PSC/Ebtedayee">PSC/ইবতেদায়ী</option>
-                                            <option value="JSC/JDC">JSC/জেডিসি</option>
-                                            <option value="SSC/Dakhil">SSC/দাখিল</option>
-                                            <option value="HSC/Alim">HSC/আলিম</option>
-                                            <option value="Bachelors/Honors">স্নাতক/অনার্স</option>
-                                            <option value="Masters">স্নাতকোত্তর</option>
-                                            <option value="Diploma">ডিপ্লোমা</option>
-                                            <option value="Other">অন্যান্য</option>
+                                            <option value="">{{ __('frontend.cartpage.select') }}</option>
+                                            <option value="PSC/Ebtedayee">{{ __('frontend.cartpage.study_psc') }}</option>
+                                            <option value="JSC/JDC">{{ __('frontend.cartpage.study_jsc') }}</option>
+                                            <option value="SSC/Dakhil">{{ __('frontend.cartpage.study_ssc') }}</option>
+                                            <option value="HSC/Alim">{{ __('frontend.cartpage.study_hsc') }}</option>
+                                            <option value="Bachelors/Honors">{{ __('frontend.cartpage.study_graduate') }}</option>
+                                            <option value="Masters">{{ __('frontend.cartpage.study_postgrad') }}</option>
+                                            <option value="Diploma">{{ __('frontend.cartpage.study_diploma') }}</option>
+                                            <option value="Other">{{ __('frontend.cartpage.study_other') }}</option>
                                         </select>
                                     </div>
                                 @endif
 
                                 @if($hasProduct)
                                 <div class="col-md-4">
-                                    <label class="custom-label">বিভাগ (Division) *</label>
+                                    <label class="custom-label">{{ __('frontend.cartpage.division') }}</label>
                                     <select name="division_id" id="division_id" class="form-control custom-input" required>
-                                        <option value="">বিভাগ নির্বাচন করুন</option>
+                                        <option value="">{{ __('frontend.cartpage.division_select') }}</option>
                                         @foreach($divisions as $division)
                                             <option value="{{ $division->id }}" data-name="{{ $division->name }}">{{ $division->bn_name ?? $division->name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
                                 <div class="col-md-4">
-                                    <label class="custom-label">জেলা (District) *</label>
+                                    <label class="custom-label">{{ __('frontend.cartpage.district') }}</label>
                                     <select name="district_id" id="district_id" class="form-control custom-input" required disabled>
-                                        <option value="">আগে বিভাগ নির্বাচন করুন</option>
+                                        <option value="">{{ __('frontend.cartpage.district_first') }}</option>
                                     </select>
                                 </div>
                                 <div class="col-md-4">
-                                    <label class="custom-label">উপজেলা / থানা (Upazila) *</label>
+                                    <label class="custom-label">{{ __('frontend.cartpage.upazila') }}</label>
                                     <select name="upazila_id" id="upazila_id" class="form-control custom-input" required disabled>
-                                        <option value="">আগে জেলা নির্বাচন করুন</option>
+                                        <option value="">{{ __('frontend.cartpage.upazila_first') }}</option>
                                     </select>
                                 </div>
                                 <div class="col-12">
@@ -160,22 +182,22 @@
                                     </div>
                                 </div>
                                 <div class="col-12">
-                                    <label class="custom-label">বিস্তারিত ঠিকানা (বাসা, রোড, এলাকা) *</label>
-                                    <textarea name="billing_address" class="form-control custom-input" rows="3" placeholder="বাসা/হোল্ডিং নম্বর, রোড, এলাকা" required>{{ auth()->check() && auth()->user()->locations()->first() ? auth()->user()->locations()->first()->address_title : '' }}</textarea>
+                                    <label class="custom-label">{{ __('frontend.cartpage.address') }}</label>
+                                    <textarea name="billing_address" class="form-control custom-input" rows="3" placeholder="{{ __('frontend.cartpage.address_ph') }}" required>{{ auth()->check() && auth()->user()->locations()->first() ? auth()->user()->locations()->first()->address_title : '' }}</textarea>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="custom-label">অফিসের ঠিকানা (ঐচ্ছিক)</label>
-                                    <input type="text" name="office_address" class="form-control custom-input" placeholder="অফিসের ঠিকানা লিখুন">
+                                    <label class="custom-label">{{ __('frontend.cartpage.office_address') }}</label>
+                                    <input type="text" name="office_address" class="form-control custom-input" placeholder="{{ __('frontend.cartpage.office_address_ph') }}">
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="custom-label">অফিস টাইম (ঐচ্ছিক)</label>
-                                    <input type="text" name="office_time" class="form-control custom-input" placeholder="উদাহরণ: সকাল ৯টা - বিকাল ৫টা">
+                                    <label class="custom-label">{{ __('frontend.cartpage.office_time') }}</label>
+                                    <input type="text" name="office_time" class="form-control custom-input" placeholder="{{ __('frontend.cartpage.office_time_ph') }}">
                                 </div>
                                 @endif
 
                                 <div class="col-12">
-                                    <label class="custom-label">অর্ডার নোট (ঐচ্ছিক)</label>
-                                    <textarea name="order_note" class="form-control custom-input" rows="2" placeholder="অর্ডার সম্পর্কে বিশেষ কোনো তথ্য থাকলে দিন"></textarea>
+                                    <label class="custom-label">{{ __('frontend.cartpage.order_note') }}</label>
+                                    <textarea name="order_note" class="form-control custom-input" rows="2" placeholder="{{ __('frontend.cartpage.order_note_ph') }}"></textarea>
                                 </div>
                             </div>
                         </div>
@@ -189,19 +211,19 @@
                     <div class="modern-card">
                         <div class="card-header-clean">
                             <i class="fa-solid fa-receipt"></i>
-                            <h2>{{ ($hasCourse || $hasEbook) ? 'রেজিস্ট্রেশন সামারি' : 'অর্ডার সামারি' }}</h2>
+                            <h2>{{ ($hasCourse || $hasEbook) ? __('frontend.cartpage.summary_reg') : __('frontend.cartpage.summary_order') }}</h2>
                         </div>
                         <div class="summary-box">
                             <div class="summary-line">
-                                <span>সাবটোটাল</span>
+                                <span>{{ __('frontend.cartpage.subtotal') }}</span>
                                 <span id="summary-subtotal" class="fw-bold text-dark">৳{{ number_format($cartSubtotal) }}</span>
                             </div>
                             <div class="summary-line">
-                                <span>ডেলিভারি চার্জ</span>
+                                <span>{{ __('frontend.cartpage.delivery') }}</span>
                                 <span id="summary-delivery" class="fw-bold text-dark" data-charge="{{ $shippingCharge }}">৳{{ number_format($shippingCharge) }}</span>
                             </div>
                             <div class="summary-line grand-total">
-                                <span>সর্বমোট</span>
+                                <span>{{ __('frontend.cartpage.total') }}</span>
                                 <span id="summary-total" data-subtotal="{{ $cartSubtotal }}">৳{{ number_format($cartSubtotal + $shippingCharge) }}</span>
                             </div>
                         </div>
@@ -211,37 +233,43 @@
                     <div class="modern-card">
                         <div class="card-header-clean">
                             <i class="fa-solid fa-box-open"></i>
-                            <h2>২. {{ ($hasCourse || $hasEbook) ? 'এনরোলমেন্টকৃত কোর্স/ই-বুক' : 'অর্ডারকৃত পণ্যসমূহ' }}</h2>
+                            <h2>২. {{ ($hasCourse || $hasEbook) ? __('frontend.cartpage.items_enroll') : __('frontend.cartpage.items_order') }}</h2>
+                        </div>
+                        <div class="items-head">
+                            <input type="checkbox" id="selectAllItems" class="cart-cbx" checked>
+                            <span>{{ ($hasCourse || $hasEbook) ? __('frontend.cartpage.select_all') : __('frontend.cartpage.select_all') }}</span>
                         </div>
                         <div class="items-list">
                             @foreach($cartItems as $item)
-                            <div class="item-row" id="cart-row-{{ $item->id }}">
+                            @php $rowPrice = $item->ebook_id ? $item->ebook->final_price : ($item->quantity * $item->product->final_price); @endphp
+                            <div class="item-row" id="cart-row-{{ $item->id }}" data-id="{{ $item->id }}" data-price="{{ $rowPrice }}">
+                                <input type="checkbox" class="item-check cart-cbx" data-id="{{ $item->id }}" checked>
                                 @if($item->ebook_id)
                                     <img src="{{ asset('storage/ebook_covers/' . $item->ebook->cover_image) }}" class="item-img" alt="">
                                     <div class="item-info">
                                         <a href="{{ route('ebooks.show', $item->ebook_id) }}" class="item-name">{{ Str::limit($item->ebook->title_bn ?? $item->ebook->title_en, 40) }}</a>
-                                        
+
                                         <div class="qty-ctrl">
                                             <input type="text" class="qty-val" value="1" readonly style="width: 40px;">
                                         </div>
-                                        
+
                                         <div class="item-price-val">৳{{ number_format($item->ebook->final_price) }}</div>
-                                        
+
                                         <i class="fa-solid fa-xmark remove-x" onclick="removeCartItem({{ $item->id }})"></i>
                                     </div>
                                 @else
                                     <img src="{{ route('imagecache', ['template' => 'pnism', 'filename' => $item->product->fi()]) }}" class="item-img" alt="">
                                     <div class="item-info">
                                         <a href="{{ route('productDetails', $item->product->slug) }}" class="item-name">{{ Str::limit($item->product->name_en, 40) }}</a>
-                                        
+
                                         <div class="qty-ctrl">
                                             <button type="button" class="qty-btn" onclick="updateCartQty({{ $item->id }}, -1)">-</button>
                                             <input type="text" id="qty-input-{{ $item->id }}" class="qty-val" value="{{ $item->quantity }}" readonly>
                                             <button type="button" class="qty-btn" onclick="updateCartQty({{ $item->id }}, 1)">+</button>
                                         </div>
-                                        
+
                                         <div class="item-price-val" id="item-subtotal-{{ $item->id }}">৳{{ number_format($item->quantity * $item->product->final_price) }}</div>
-                                        
+
                                         <i class="fa-solid fa-xmark remove-x" onclick="removeCartItem({{ $item->id }})"></i>
                                     </div>
                                 @endif
@@ -254,40 +282,40 @@
                     <div class="modern-card">
                         <div class="card-header-clean">
                             <i class="fa-solid fa-wallet"></i>
-                            <h2>৩. পেমেন্ট মেথড এবং {{ ($hasCourse || $hasEbook) ? 'রেজিস্ট্রেশন' : 'অর্ডার' }}</h2>
+                            <h2>৩. {{ __('frontend.cartpage.payment_method') }} {{ ($hasCourse || $hasEbook) ? __('frontend.cartpage.payment_reg') : __('frontend.cartpage.payment_order') }}</h2>
                         </div>
                         <div class="form-content" style="padding-top: 20px;">
                             <label class="pay-card active">
                                 <input type="radio" name="payment_method" value="cod" checked>
                                 <div>
-                                    <div class="fw-bold text-dark" style="font-size: 14px;">Cash on Delivery</div>
-                                    <div class="text-muted small">পণ্য হাতে পেয়ে টাকা দিন</div>
+                                    <div class="fw-bold text-dark" style="font-size: 14px;">{{ __('frontend.cartpage.cod') }}</div>
+                                    <div class="text-muted small">{{ __('frontend.cartpage.cod_desc') }}</div>
                                 </div>
                             </label>
                             <label class="pay-card">
                                 <input type="radio" name="payment_method" value="online">
                                 <div>
-                                    <div class="fw-bold text-dark" style="font-size: 14px;">Online Payment</div>
-                                    <div class="text-muted small">বিকাশ, নগদ, রকেট অথবা কার্ড পেমেন্ট</div>
+                                    <div class="fw-bold text-dark" style="font-size: 14px;">{{ __('frontend.cartpage.online') }}</div>
+                                    <div class="text-muted small">{{ __('frontend.cartpage.online_desc') }}</div>
                                 </div>
                             </label>
 
                             <div id="online_payment_details" class="mt-3 mb-3" style="display: none;">
                                 <div class="alert alert-light" style="border-radius: 16px; padding: 16px; border: 1px solid #e2e8f0;">
-                                    <p class="mb-2 fw-bold">Online payment instruction</p>
-                                    <p class="mb-1">পেমেন্ট পাঠান <strong>01349494295</strong> (bKash / Nagad / Rocket).</p>
-                                    <label class="custom-label">Transaction ID (TXN ID) *</label>
-                                    <input type="text" name="transaction_id" id="transaction_id" class="form-control custom-input" placeholder="পেমেন্টের টিআরএন আইডি দিন">
+                                    <p class="mb-2 fw-bold">{{ __('frontend.cartpage.online_instruction') }}</p>
+                                    <p class="mb-1">{{ __('frontend.cartpage.pay_send') }} <strong>01349494295</strong> (bKash / Nagad / Rocket).</p>
+                                    <label class="custom-label">{{ __('frontend.cartpage.txn') }}</label>
+                                    <input type="text" name="transaction_id" id="transaction_id" class="form-control custom-input" placeholder="{{ __('frontend.cartpage.txn_ph') }}">
                                 </div>
                             </div>
 
                             <div class="form-check mt-3 mb-3">
                                 <input class="form-check-input" type="checkbox" id="termsCheck" required checked>
-                                <label class="form-check-label text-muted small" for="termsCheck">সাইটের শর্তাবলী মেনে নিচ্ছি</label>
+                                <label class="form-check-label text-muted small" for="termsCheck">{{ __('frontend.cartpage.terms') }}</label>
                             </div>
 
                             <button type="submit" class="action-btn">
-                                {{ ($hasCourse || $hasEbook) ? 'রেজিস্ট্রেশন সম্পন্ন করুন' : 'অর্ডার সম্পন্ন করুন' }} <i class="fa-solid fa-check-circle"></i>
+                                {{ ($hasCourse || $hasEbook) ? __('frontend.cartpage.submit_reg') : __('frontend.cartpage.submit_order') }} <i class="fa-solid fa-check-circle"></i>
                             </button>
                         </div>
                     </div>
@@ -299,9 +327,9 @@
         @else
         <div class="text-center py-5" style="background:#fff; border-radius: 30px; border: 1px solid #e2e8f0;">
             <img src="https://cdn-icons-png.flaticon.com/512/1170/1170577.png" alt="" style="width: 100px; opacity: 0.2; margin-bottom: 20px;">
-            <h2 style="font-weight: 900; color: #1e293b;">আপনার কার্ট বর্তমানে খালি</h2>
-            <p class="text-muted mb-4">আমাদের কালেকশন থেকে আপনার পছন্দের পণ্য যোগ করুন</p>
-            <a href="{{ route('shop') }}" class="btn btn-primary" style="padding: 15px 40px; border-radius: 16px; font-weight: 800;">শপিং শুরু করুন</a>
+            <h2 style="font-weight: 900; color: #1e293b;">{{ __('frontend.cartpage.empty') }}</h2>
+            <p class="text-muted mb-4">{{ __('frontend.cartpage.empty_desc') }}</p>
+            <a href="{{ route('shop') }}" class="btn btn-primary" style="padding: 15px 40px; border-radius: 16px; font-weight: 800;">{{ __('frontend.cartpage.start_shopping') }}</a>
         </div>
         @endif
     </div>
@@ -366,19 +394,19 @@
             $('#delivery_area').val(isDhaka ? 'inside' : 'outside');
             $('#summary-delivery').data('charge', charge);
             recalcTotal();
-            $('#delivery-zone-text').text((isDhaka ? 'ঢাকার ভিতরে' : 'ঢাকার বাইরে') + ' — ডেলিভারি চার্জ ৳' + charge.toLocaleString());
+            $('#delivery-zone-text').text((isDhaka ? '{{ __('frontend.cartpage.inside_dhaka') }}' : '{{ __('frontend.cartpage.outside_dhaka') }}') + ' — {{ __('frontend.cartpage.delivery_charge') }}' + charge.toLocaleString());
             $('#delivery-zone-info').show();
         }
 
         $('#division_id').on('change', function() {
             const divId = $(this).val();
             const $district = $('#district_id'), $upazila = $('#upazila_id');
-            $upazila.prop('disabled', true).html('<option value="">আগে জেলা নির্বাচন করুন</option>');
+            $upazila.prop('disabled', true).html('<option value="">{{ __('frontend.cartpage.upazila_first') }}</option>');
             $('#delivery-zone-info').hide();
-            if (!divId) { $district.prop('disabled', true).html('<option value="">আগে বিভাগ নির্বাচন করুন</option>'); return; }
-            $district.prop('disabled', true).html('<option value="">লোড হচ্ছে...</option>');
+            if (!divId) { $district.prop('disabled', true).html('<option value="">{{ __('frontend.cartpage.district_first') }}</option>'); return; }
+            $district.prop('disabled', true).html('<option value="">{{ __('frontend.cartpage.loading') }}</option>');
             $.getJSON(districtsBase + '/' + divId, function(data) {
-                let opts = '<option value="">জেলা নির্বাচন করুন</option>';
+                let opts = '<option value="">{{ __('frontend.cartpage.district_select') }}</option>';
                 data.forEach(function(d) { opts += '<option value="' + d.id + '" data-name="' + d.name + '">' + (d.bn_name || d.name) + '</option>'; });
                 $district.html(opts).prop('disabled', false);
             });
@@ -388,22 +416,70 @@
             const distId = $(this).val();
             const distName = ($(this).find('option:selected').data('name') || '').toString().toLowerCase();
             const $upazila = $('#upazila_id');
-            if (!distId) { $upazila.prop('disabled', true).html('<option value="">আগে জেলা নির্বাচন করুন</option>'); $('#delivery-zone-info').hide(); return; }
+            if (!distId) { $upazila.prop('disabled', true).html('<option value="">{{ __('frontend.cartpage.upazila_first') }}</option>'); $('#delivery-zone-info').hide(); return; }
             setDeliveryZone(distName === 'dhaka');
-            $upazila.prop('disabled', true).html('<option value="">লোড হচ্ছে...</option>');
+            $upazila.prop('disabled', true).html('<option value="">{{ __('frontend.cartpage.loading') }}</option>');
             $.getJSON(upazilasBase + '/' + distId, function(data) {
-                let opts = '<option value="">উপজেলা / থানা নির্বাচন করুন</option>';
+                let opts = '<option value="">{{ __('frontend.cartpage.upazila_select') }}</option>';
                 data.forEach(function(u) { opts += '<option value="' + u.id + '">' + (u.bn_name || u.name) + '</option>'; });
                 $upazila.html(opts).prop('disabled', false);
             });
         });
+
+        // ── Item selection checkboxes ──
+        $(document).on('change', '.item-check', function() {
+            recalcTotal();
+            const total = $('.item-check').length;
+            const checked = $('.item-check:checked').length;
+            $('#selectAllItems').prop('checked', total === checked);
+        });
+
+        $('#selectAllItems').on('change', function() {
+            $('.item-check').prop('checked', this.checked);
+            recalcTotal();
+        });
+
+        // Block submit if nothing selected
+        $('#checkoutForm').on('submit', function(e) {
+            if (recalcTotal() === 0) {
+                e.preventDefault();
+                Swal.fire({ icon: 'warning', title: '{{ __('frontend.cartpage.select_item') }}', confirmButtonColor: 'var(--primary)' });
+                return false;
+            }
+        });
+
+        // Initial calculation
+        recalcTotal();
     });
 
     function recalcTotal() {
-        const subtotal = parseFloat($('#summary-total').data('subtotal')) || 0;
+        let subtotal = 0, checkedCount = 0;
+        $('.item-check').each(function() {
+            const row = document.getElementById('cart-row-' + $(this).data('id'));
+            if (!row) return;
+            if (this.checked) {
+                subtotal += parseFloat(row.getAttribute('data-price')) || 0;
+                checkedCount++;
+                row.classList.remove('unchecked');
+            } else {
+                row.classList.add('unchecked');
+            }
+        });
         const charge = parseFloat($('#summary-delivery').data('charge')) || 0;
+        $('#summary-subtotal').text('৳' + subtotal.toLocaleString());
         $('#summary-delivery').text('৳' + charge.toLocaleString());
-        $('#summary-total').text('৳' + (subtotal + charge).toLocaleString());
+        $('#summary-total').data('subtotal', subtotal).text('৳' + (subtotal + charge).toLocaleString());
+
+        // Collect selected cart ids for submission
+        const ids = [];
+        $('.item-check:checked').each(function(){ ids.push($(this).data('id')); });
+        $('#selectedItems').val(ids.join(','));
+
+        // Disable order button when nothing is selected
+        const $btn = $('.action-btn');
+        $btn.prop('disabled', checkedCount === 0)
+            .css({ opacity: checkedCount === 0 ? 0.5 : 1, cursor: checkedCount === 0 ? 'not-allowed' : 'pointer' });
+        return checkedCount;
     }
 
     function updateCartQty(cartId, change) {
@@ -429,13 +505,13 @@
 
     function removeCartItem(cartId) {
         Swal.fire({
-            title: 'নিশ্চিত?',
-            text: "পণ্যটি মুছে ফেলতে চান?",
+            title: '{{ __('frontend.cartpage.confirm') }}',
+            text: "{{ __('frontend.cartpage.confirm_remove') }}",
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: 'var(--primary)',
-            confirmButtonText: 'হ্যাঁ, মুছুন',
-            cancelButtonText: 'না'
+            confirmButtonText: '{{ __('frontend.cartpage.yes_remove') }}',
+            cancelButtonText: '{{ __('frontend.cartpage.no') }}'
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
@@ -446,12 +522,11 @@
                         if(res.status) {
                             $(`#cart-row-${cartId}`).fadeOut(300, function() {
                                 $(this).remove();
-                                if($('.item-row').length == 0) location.reload();
+                                if($('.item-row').length == 0) { location.reload(); return; }
+                                recalcTotal();
                             });
-                            $('#summary-subtotal').text('৳' + res.cartTotal.toLocaleString());
-                            $('#summary-total').data('subtotal', res.cartTotal); recalcTotal();
                             $('.cartCount').text(res.cartCount);
-                            showCartNotification('পণ্যটি সরানো হয়েছে');
+                            showCartNotification('{{ __('frontend.cartpage.removed') }}');
                         }
                     }
                 });

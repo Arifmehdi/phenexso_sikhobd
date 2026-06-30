@@ -18,7 +18,7 @@
         <address>
             <strong>Order Info</strong><br>
 
-            Order Id: {{ $order->id }}<br>
+            Order Id: #{{ str_pad($order->id, 6, '0', STR_PAD_LEFT) }}<br>
 
             Order Date: {{ $order->created_at->format('d/m/Y') }}<br>
 

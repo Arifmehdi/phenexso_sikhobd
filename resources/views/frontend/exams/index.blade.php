@@ -1,6 +1,6 @@
 @extends('website.layouts.sikhobd')
 
-@section('title', 'আমার পরীক্ষাসমূহ — ' . ($ws->name ?? env('APP_NAME')))
+@section('title', __('frontend.exams.page_title') . ' — ' . ($ws->name ?? env('APP_NAME')))
 
 @push('css')
 <style>
@@ -32,27 +32,27 @@
         </div>
         <nav class="dash-nav">
             <a href="{{ route('user.dashboard') }}#tab-dashboard">
-                <i class="fa-solid fa-house"></i> <span>ড্যাশবোর্ড</span>
+                <i class="fa-solid fa-house"></i> <span>{{ __('frontend.exams.nav_dashboard') }}</span>
             </a>
             <a href="{{ route('user.dashboard') }}#tab-courses">
-                <i class="fa-solid fa-graduation-cap"></i> <span>আমার কোর্সসমূহ</span>
+                <i class="fa-solid fa-graduation-cap"></i> <span>{{ __('frontend.exams.nav_courses') }}</span>
             </a>
             <a href="{{ route('user.dashboard') }}#tab-orders-inline">
-                <i class="fa-solid fa-cart-shopping"></i> <span>আমার অর্ডারসমূহ</span>
+                <i class="fa-solid fa-cart-shopping"></i> <span>{{ __('frontend.exams.nav_orders') }}</span>
             </a>
             <a href="{{ route('user.dashboard') }}#tab-exams" class="active">
-                <i class="fa-solid fa-file-pen"></i> <span>আমার পরীক্ষাসমূহ</span>
+                <i class="fa-solid fa-file-pen"></i> <span>{{ __('frontend.exams.nav_exams') }}</span>
             </a>
             <a href="{{ route('logout') }}" style="color: var(--accent); margin-top: auto;">
-                <i class="fa-solid fa-right-from-bracket"></i> <span>লগআউট</span>
+                <i class="fa-solid fa-right-from-bracket"></i> <span>{{ __('frontend.exams.nav_logout') }}</span>
             </a>
         </nav>
     </aside>
     @else
     <section class="page-hero" style="background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%); padding: 60px 0; color: #fff; text-align: center; width: 100%;">
         <div class="container">
-            <h1>{{ app()->getLocale() == 'bn' ? 'সকল পরীক্ষা' : 'All Exams' }}</h1>
-            <p>{{ app()->getLocale() == 'bn' ? 'আপনার মেধা যাচাই করুন আমাদের বিভিন্ন পরীক্ষার মাধ্যমে' : 'Test your knowledge with our various exams' }}</p>
+            <h1>{{ __('frontend.exams.all_exams') }}</h1>
+            <p>{{ __('frontend.exams.all_exams_sub') }}</p>
         </div>
     </section>
     @endauth
@@ -62,15 +62,15 @@
         @auth
         <div class="dash-head">
             <div>
-                <h1>আমার পরীক্ষাসমূহ</h1>
-                <p>আপনার সকল উপলব্ধ এবং সম্পন্ন করা পরীক্ষা</p>
+                <h1>{{ __('frontend.exams.page_title') }}</h1>
+                <p>{{ __('frontend.exams.page_sub') }}</p>
             </div>
         </div>
         @endauth
-        
+
         <div class="panel mb-4">
             <div class="panel-head">
-                <h3><i class="fa-solid fa-file-pen"></i> {{ app()->getLocale() == 'bn' ? 'উপলব্ধ পরীক্ষাসমূহ' : 'Available Exams' }}</h3>
+                <h3><i class="fa-solid fa-file-pen"></i> {{ __('frontend.exams.available') }}</h3>
             </div>
             @php $completedExamIds = $completed_exams->pluck('exam_id')->all(); @endphp
             @forelse($exams as $exam)
@@ -86,27 +86,27 @@
                 <div class="body">
                     <h4>{{ $exam->title }}</h4>
                     <div class="meta">
-                        <i class="far fa-clock"></i> {{ $exam->duration }} মিনিট &middot;
-                        <i class="far fa-calendar-alt"></i> শেষ সময়: {{ $exam->end_time->format('M d, h:i A') }}
+                        <i class="far fa-clock"></i> {{ $exam->duration }} {{ __('frontend.exams.minutes') }} &middot;
+                        <i class="far fa-calendar-alt"></i> {{ __('frontend.exams.ends') }}: {{ $exam->end_time->format('M d, h:i A') }}
                     </div>
                 </div>
                 @if($isCompleted)
                     @if($exam->status == 'finished')
-                        <a href="{{ route('exams.result', $exam->id) }}" class="btn btn-success btn-sm">{{ app()->getLocale() == 'bn' ? 'ফলাফল দেখুন' : 'View Result' }}</a>
+                        <a href="{{ route('exams.result', $exam->id) }}" class="btn btn-success btn-sm">{{ __('frontend.exams.view_result') }}</a>
                     @else
-                        <span class="status-pill status-approved">{{ app()->getLocale() == 'bn' ? 'অংশগ্রহণ সম্পন্ন' : 'Attended' }}</span>
+                        <span class="status-pill status-approved">{{ __('frontend.exams.attended') }}</span>
                     @endif
                 @elseif($isUpcoming)
-                    <span class="status-pill status-pending">{{ app()->getLocale() == 'bn' ? 'আসন্ন' : 'Upcoming' }}</span>
+                    <span class="status-pill status-pending">{{ __('frontend.exams.upcoming') }}</span>
                 @elseif($isEnded)
-                    <span class="status-pill status-rejected">{{ app()->getLocale() == 'bn' ? 'সময় শেষ' : 'Expired' }}</span>
+                    <span class="status-pill status-rejected">{{ __('frontend.exams.expired') }}</span>
                 @else
-                    <a href="{{ route('exams.start', $exam->id) }}" class="btn btn-primary btn-sm">{{ app()->getLocale() == 'bn' ? 'অংশগ্রহণ করুন' : 'Participate' }}</a>
+                    <a href="{{ route('exams.start', $exam->id) }}" class="btn btn-primary btn-sm">{{ __('frontend.exams.participate') }}</a>
                 @endif
             </div>
             @empty
             <div class="empty-state">
-                <h5>{{ app()->getLocale() == 'bn' ? 'বর্তমানে কোনো পরীক্ষা উপলব্ধ নেই' : 'No exams available at the moment' }}</h5>
+                <h5>{{ __('frontend.exams.none_available') }}</h5>
             </div>
             @endforelse
         </div>
@@ -114,17 +114,17 @@
         @auth
         <div class="panel">
             <div class="panel-head">
-                <h3><i class="fa-solid fa-check-double"></i> সম্পন্ন করা পরীক্ষাসমূহ</h3>
+                <h3><i class="fa-solid fa-check-double"></i> {{ __('frontend.exams.completed') }}</h3>
             </div>
             <div style="overflow-x: auto;">
                 <table class="custom-table">
                     <thead>
                         <tr>
-                            <th>পরীক্ষা</th>
-                            <th>তারিখ</th>
-                            <th>মার্কস</th>
-                            <th>অবস্থা</th>
-                            <th>অ্যাকশন</th>
+                            <th>{{ __('frontend.exams.col_exam') }}</th>
+                            <th>{{ __('frontend.exams.col_date') }}</th>
+                            <th>{{ __('frontend.exams.col_marks') }}</th>
+                            <th>{{ __('frontend.exams.col_status') }}</th>
+                            <th>{{ __('frontend.exams.col_action') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -135,18 +135,18 @@
                             <td>{{ $attempt->score }} / {{ $attempt->exam->question_count }}</td>
                             <td>
                                 @if($attempt->exam->status == 'finished')
-                                    <span class="status-pill status-approved">ফলাফল প্রকাশিত</span>
+                                    <span class="status-pill status-approved">{{ __('frontend.exams.result_published') }}</span>
                                 @else
-                                    <span class="status-pill status-pending">অপেক্ষমান</span>
+                                    <span class="status-pill status-pending">{{ __('frontend.exams.pending') }}</span>
                                 @endif
                             </td>
                             <td>
-                                <a href="{{ route('exams.result', $attempt->exam->id) }}" class="btn btn-primary btn-sm">বিস্তারিত</a>
+                                <a href="{{ route('exams.result', $attempt->exam->id) }}" class="btn btn-primary btn-sm">{{ __('frontend.exams.details') }}</a>
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="5" class="empty-state">আপনি কোনো পরীক্ষায় অংশগ্রহণ করেননি</td>
+                            <td colspan="5" class="empty-state">{{ __('frontend.exams.no_attempt') }}</td>
                         </tr>
                         @endforelse
                     </tbody>
@@ -155,8 +155,8 @@
         </div>
         @else
         <div class="text-center mt-5">
-            <p>{{ app()->getLocale() == 'bn' ? 'আপনার সম্পন্ন করা পরীক্ষা দেখতে লগইন করুন' : 'Login to see your completed exams' }}</p>
-            <a href="{{ route('login') }}" class="btn btn-outline">{{ app()->getLocale() == 'bn' ? 'লগইন করুন' : 'Login' }}</a>
+            <p>{{ __('frontend.exams.login_to_see') }}</p>
+            <a href="{{ route('login') }}" class="btn btn-outline">{{ __('frontend.exams.login') }}</a>
         </div>
         @endauth
     </section>

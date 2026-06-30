@@ -273,7 +273,7 @@
                         <tbody>
                             @forelse($orders->take(5) as $order)
                             <tr>
-                                <td class="order-id">#{{ $order->id }}</td>
+                                <td class="order-id">#{{ str_pad($order->id, 6, '0', STR_PAD_LEFT) }}</td>
                                 <td style="color: var(--text-soft);">{{ $order->created_at->format('M d, Y') }}</td>
                                 <td>
                                     @php
@@ -411,7 +411,7 @@
                         <tbody>
                             @forelse($orders as $order)
                             <tr>
-                                <td class="order-id">#{{ $order->id }}</td>
+                                <td class="order-id">#{{ str_pad($order->id, 6, '0', STR_PAD_LEFT) }}</td>
                                 <td style="color: var(--text-soft);">{{ $order->created_at->format('M d, Y') }}</td>
                                 <td>
                                     @php
@@ -464,7 +464,7 @@
                             @forelse(($orderItems ?? collect()) as $item)
                             <tr>
                                 <td>{{ $item->product_name }}</td>
-                                <td class="order-id">#{{ $item->order_id }}</td>
+                                <td class="order-id">#{{ str_pad($item->order_id, 6, '0', STR_PAD_LEFT) }}</td>
                                 <td style="color: var(--text-soft);">{{ optional($item->order)->created_at ? $item->order->created_at->format('M d, Y') : '' }}</td>
                                 <td>{{ $item->quantity }}</td>
                                 <td>৳{{ number_format($item->product_price) }}</td>

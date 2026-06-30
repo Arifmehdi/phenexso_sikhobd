@@ -41,7 +41,7 @@ use Illuminate\Support\Str;
                     <a href="{{ route('admin.orderDeatils',$order->id)}}" class="dropdown-item"><i class="fa fa-eye"></i> Details</a>
                 </div>
         </td>
-        <td>{{$order->id}}</td>
+        <td>#{{ str_pad($order->id, 6, '0', STR_PAD_LEFT) }}</td>
         <td>
             <a href="{{ route('admin.all_user',['id' => $order->user_id ?? '' ])}}">
             {{$order->user_id ?? ''}}

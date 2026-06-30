@@ -1362,12 +1362,12 @@ class FrontendController extends Controller
             })
             ->get();
 
-        // Calculate totals
+        // Calculate totals (use discounted final price to match item rows)
         $cartSubtotal = $cartItems->sum(function ($item) {
             if ($item->ebook_id) {
                 return $item->quantity * $item->ebook->final_price;
             }
-            return $item->quantity * $item->product->selling_price;
+            return $item->quantity * $item->product->final_price;
         });
 
         $hasCourse = $cartItems->contains(fn($item) => $item->product && $item->product->type === 'course');
@@ -1805,6 +1805,15 @@ public function quickAdd(Request $request)
         $ws = WebsiteParameter::first();
         $cartItems = Cart::getCartItems();
 
+        // Keep only the items the user selected (cart checkboxes)
+        $selectedIds = [];
+        if ($request->filled('selected_items')) {
+            $selectedIds = array_filter(array_map('intval', explode(',', $request->selected_items)));
+            if (!empty($selectedIds)) {
+                $cartItems = $cartItems->whereIn('id', $selectedIds)->values();
+            }
+        }
+
         if ($cartItems->isEmpty()) {
             return redirect()->back()->with('error', 'Your cart is empty.');
         }
@@ -1883,7 +1892,9 @@ public function quickAdd(Request $request)
             $order = $this->createOrder($user, $location, $deliveryCost, $paymentMethod, $subtotal, $deliveryCost, $grandTotal, $orderNote, $registrationFields, $transactionId, ($hasProduct ? $deliveryArea : null));
 
             $this->storeOrderItems($order, $cartItems, $user->id);
-            Cart::where('user_id', $user->id)->delete();
+            Cart::where('user_id', $user->id)
+                ->when(!empty($selectedIds), fn($q) => $q->whereIn('id', $selectedIds))
+                ->delete();
 
             $msg = ($hasCourse || $hasEbook) ? 'রেজিস্ট্রেশন সম্পন্ন হয়েছে। এডমিন অ্যাপ্রুভালের জন্য অপেক্ষা করুন।' : 'অর্ডারটি সফলভাবে সম্পন্ন হয়েছে।';
             return redirect()->route('order.complete')->with('success', $msg);
@@ -1941,7 +1952,9 @@ public function quickAdd(Request $request)
             $order = $this->createOrder($user, $location, $deliveryCost, $paymentMethod, $subtotal, $deliveryCost, $grandTotal, $orderNote, $registrationFields, $transactionId, ($hasProduct ? $deliveryArea : null));
 
             $this->storeOrderItems($order, $cartItems, $user->id);
-            Cart::where('session_id', session('session_id'))->delete();
+            Cart::where('session_id', session('session_id'))
+                ->when(!empty($selectedIds), fn($q) => $q->whereIn('id', $selectedIds))
+                ->delete();
 
             if ($location->email) {
                 try {
@@ -1993,7 +2006,9 @@ public function quickAdd(Request $request)
 
             $order = $this->createOrder($user, $location, $deliveryCost, $paymentMethod, $subtotal, $deliveryCost, $grandTotal, $orderNote, $courseFields);
             $this->storeOrderItems($order, $cartItems, $user->id);
-            Cart::where('user_id', $user->id)->delete();
+            Cart::where('user_id', $user->id)
+                ->when(!empty($selectedIds), fn($q) => $q->whereIn('id', $selectedIds))
+                ->delete();
 
             return redirect()->route('order.complete')->with('success', $successMsg);
         } else {
@@ -2215,7 +2230,8 @@ public function quickAdd(Request $request)
             if ($cart->ebook_id) {
                 return $cart->ebook->final_price * $cart->quantity;
             }
-            return $cart->product->selling_price * $cart->quantity;
+            // Use discounted final price to match the cart display
+            return $cart->product->final_price * $cart->quantity;
         });
     }
 
@@ -2344,15 +2360,15 @@ public function quickAdd(Request $request)
                 }
             } else {
                 $product = $cart->product;
-                
+
                 OrderItem::create([
                     'order_id'      => $order->id,
                     'user_id'       => $userId,
                     'product_id'    => $cart->product_id,
                     'product_name'  => $product->name_en,
-                    'product_price' => $product->selling_price,
+                    'product_price' => $product->final_price,
                     'quantity'      => $cart->quantity,
-                    'total_cost'    => $product->selling_price * $cart->quantity,
+                    'total_cost'    => $product->final_price * $cart->quantity,
                     'addedby_id'    => $userId,
                 ]);
 

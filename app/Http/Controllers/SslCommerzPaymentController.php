@@ -275,9 +275,9 @@ class SslCommerzPaymentController extends Controller
                         'user_id'       => $userId,
                         'product_id'    => $item->product_id,
                         'product_name'  => $item->product->name_en,
-                        'product_price' => $item->product->selling_price,
+                        'product_price' => $item->product->final_price,
                         'quantity'      => $item->quantity,
-                        'total_cost'    => $item->product->selling_price * $item->quantity,
+                        'total_cost'    => $item->product->final_price * $item->quantity,
                         'addedby_id'    => $userId,
                     ]);
 
@@ -542,7 +542,8 @@ class SslCommerzPaymentController extends Controller
             if ($cart->ebook_id) {
                 return $cart->ebook->final_price * $cart->quantity;
             }
-            return $cart->product->selling_price * $cart->quantity;
+            // Use discounted final price to match the cart display
+            return $cart->product->final_price * $cart->quantity;
         });
     }
 }

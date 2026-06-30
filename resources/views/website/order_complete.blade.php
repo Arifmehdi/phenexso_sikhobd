@@ -76,7 +76,7 @@
             <div style="background: #fff; padding: 30px; border-radius: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); border: 1px solid #e2e8f0;">
                 <h3 style="font-size: 18px; font-weight: 800; color: #1e293b; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
                     <i class="fa-solid fa-file-invoice" style="color: var(--primary);"></i>
-                    {{ $hasCourses ? __('frontend.order.enrollment_invoice') : __('frontend.order.invoice') }}: #{{ $order->id }}
+                    {{ $hasCourses ? __('frontend.order.enrollment_invoice') : __('frontend.order.invoice') }}: #{{ str_pad($order->id, 6, '0', STR_PAD_LEFT) }}
                 </h3>
 
                 <div style="border-bottom: 1px solid #f1f5f9; padding-bottom: 15px; margin-bottom: 15px; display: flex; justify-content: space-between; font-size: 14px;">

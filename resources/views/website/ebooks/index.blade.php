@@ -1,6 +1,6 @@
 ﻿@extends('website.layouts.sikhobd')
 
-@section('title', 'ই-বুক লাইব্রেরি — ' . ($ws->website_title ?? 'Qalam HR'))
+@section('title', __('frontend.ebookpage.library_title') . ' — ' . ($ws->website_title ?? 'Qalam HR'))
 
 @push('css')
 <style>
@@ -344,7 +344,7 @@
        {{-- @if($popularEbooks->count() > 0)
         <div class="ebx-pop">
             <div class="ebx-pop-head">
-                <h3><i class="fa-solid fa-fire" style="color:var(--accent);"></i> জনপ্রিয় ই-বুক</h3>
+                <h3><i class="fa-solid fa-fire" style="color:var(--accent);"></i> {{ __('frontend.ebookpage.popular') }}</h3>
                 <div class="ebx-pop-nav">
                     <button class="ebx-pop-btn" id="ebxPopPrev"><i class="fa-solid fa-chevron-left"></i></button>
                     <button class="ebx-pop-btn" id="ebxPopNext"><i class="fa-solid fa-chevron-right"></i></button>
@@ -368,18 +368,18 @@
 
         {{-- Breadcrumb + result count --}}
         <div class="ebx-crumbs">
-            <a href="{{ route('home') }}">হোম</a> <i class="fa-solid fa-chevron-right"></i>
-            <span>ই-বুক</span>
+            <a href="{{ route('home') }}">{{ __('frontend.nav.home') }}</a> <i class="fa-solid fa-chevron-right"></i>
+            <span>{{ __('frontend.ebookpage.ebook') }}</span>
         </div>
         <div class="ebx-result-head">
-            <h2>ই-বুক <small>({{ $ebooks->total() }} টি বই)</small></h2>
+            <h2>{{ __('frontend.ebookpage.ebook') }} <small>({{ $ebooks->total() }} {{ __('frontend.ebookpage.books_count') }})</small></h2>
             <form method="GET" class="ebx-sort">
                 @foreach(request()->except(['sort','page']) as $k=>$v)<input type="hidden" name="{{ $k }}" value="{{ $v }}">@endforeach
                 <select name="sort" onchange="this.form.submit()">
-                    <option value="">সাজান: নতুন</option>
-                    <option value="popular"    {{ request('sort')=='popular'?'selected':'' }}>জনপ্রিয়</option>
-                    <option value="price_low"  {{ request('sort')=='price_low'?'selected':'' }}>দাম: কম থেকে বেশি</option>
-                    <option value="price_high" {{ request('sort')=='price_high'?'selected':'' }}>দাম: বেশি থেকে কম</option>
+                    <option value="">{{ __('frontend.ebookpage.sort_newest') }}</option>
+                    <option value="popular"    {{ request('sort')=='popular'?'selected':'' }}>{{ __('frontend.ebookpage.sort_popular') }}</option>
+                    <option value="price_low"  {{ request('sort')=='price_low'?'selected':'' }}>{{ __('frontend.ebookpage.sort_low') }}</option>
+                    <option value="price_high" {{ request('sort')=='price_high'?'selected':'' }}>{{ __('frontend.ebookpage.sort_high') }}</option>
                 </select>
             </form>
         </div>
@@ -393,15 +393,15 @@
                     <form method="GET" class="ebx-search">
                         @foreach(request()->except(['q','page']) as $k=>$v)<input type="hidden" name="{{ $k }}" value="{{ $v }}">@endforeach
                         <i class="fa-solid fa-magnifying-glass"></i>
-                        <input type="text" name="q" value="{{ request('q') }}" placeholder="বই বা লেখক খুঁজুন...">
+                        <input type="text" name="q" value="{{ request('q') }}" placeholder="{{ __('frontend.ebookpage.search_ph') }}">
                     </form>
                 </div>
 
                 {{-- Category --}}
                 <div class="ebx-fbox">
-                    <div class="ebx-ftitle">বিষয়</div>
+                    <div class="ebx-ftitle">{{ __('frontend.ebookpage.subject') }}</div>
                     <div class="ebx-flist">
-                        <a href="{{ route('ebooks.index', request()->except(['category','page'])) }}" class="ebx-fitem {{ !request('category')?'active':'' }}">সব বিষয়</a>
+                        <a href="{{ route('ebooks.index', request()->except(['category','page'])) }}" class="ebx-fitem {{ !request('category')?'active':'' }}">{{ __('frontend.ebookpage.all_subjects') }}</a>
                         @foreach($categories as $cat)
                         <a href="{{ route('ebooks.index', array_merge(request()->except('page'),['category'=>$cat->id])) }}" class="ebx-fitem {{ request('category')==$cat->id?'active':'' }}">{{ $cat->name_bn ?? $cat->name_en }}</a>
                         @endforeach
@@ -411,9 +411,9 @@
                 {{-- Author --}}
                 @if($authors->count() > 0)
                 <div class="ebx-fbox">
-                    <div class="ebx-ftitle">লেখক</div>
+                    <div class="ebx-ftitle">{{ __('frontend.ebookpage.author') }}</div>
                     <div class="ebx-flist ebx-scroll">
-                        <a href="{{ route('ebooks.index', request()->except(['author','page'])) }}" class="ebx-fitem {{ !request('author')?'active':'' }}">সব লেখক</a>
+                        <a href="{{ route('ebooks.index', request()->except(['author','page'])) }}" class="ebx-fitem {{ !request('author')?'active':'' }}">{{ __('frontend.ebookpage.all_authors') }}</a>
                         @foreach($authors as $a)
                         <a href="{{ route('ebooks.index', array_merge(request()->except('page'),['author'=>$a->author_name])) }}" class="ebx-fitem {{ request('author')==$a->author_name?'active':'' }}">{{ $a->author_name }} <span class="ebx-fcount">{{ $a->cnt }}</span></a>
                         @endforeach
@@ -423,10 +423,10 @@
 
                 {{-- Price --}}
                 <div class="ebx-fbox">
-                    <div class="ebx-ftitle">মূল্য</div>
+                    <div class="ebx-ftitle">{{ __('frontend.ebookpage.price') }}</div>
                     <div class="ebx-flist">
-                        @php $prices = ['0-100'=>'৳০ – ৳১০০','100-300'=>'৳১০০ – ৳৩০০','300-500'=>'৳৩০০ – ৳৫০০','500-plus'=>'৳৫০০+']; @endphp
-                        <a href="{{ route('ebooks.index', request()->except(['price','page'])) }}" class="ebx-fitem {{ !request('price')?'active':'' }}">সব মূল্য</a>
+                        @php $prices = ['0-100'=>__('frontend.ebookpage.price_0_100'),'100-300'=>__('frontend.ebookpage.price_100_300'),'300-500'=>__('frontend.ebookpage.price_300_500'),'500-plus'=>__('frontend.ebookpage.price_500_plus')]; @endphp
+                        <a href="{{ route('ebooks.index', request()->except(['price','page'])) }}" class="ebx-fitem {{ !request('price')?'active':'' }}">{{ __('frontend.ebookpage.all_price') }}</a>
                         @foreach($prices as $key=>$lbl)
                         <a href="{{ route('ebooks.index', array_merge(request()->except('page'),['price'=>$key])) }}" class="ebx-fitem {{ request('price')==$key?'active':'' }}">{{ $lbl }}</a>
                         @endforeach
@@ -434,7 +434,7 @@
                 </div>
 
                 @if(request()->hasAny(['q','category','author','price']))
-                <a href="{{ route('ebooks.index') }}" class="ebx-clear"><i class="fa-solid fa-xmark"></i> ফিল্টার মুছুন</a>
+                <a href="{{ route('ebooks.index') }}" class="ebx-clear"><i class="fa-solid fa-xmark"></i> {{ __('frontend.ebookpage.clear_filter') }}</a>
                 @endif
             </aside>
 
@@ -456,7 +456,7 @@
                                 <img src="{{ asset('storage/ebook_covers/' . $ebook->cover_image) }}" alt="{{ $ebook->title_en }}">
                             </a>
 
-                            <span class="ebook-preview-badge"><i class="fa-solid fa-book-open-reader"></i> বইটি কিছু অংশ পড়ুন</span>
+                            <span class="ebook-preview-badge"><i class="fa-solid fa-book-open-reader"></i> {{ __('frontend.ebookpage.preview_badge') }}</span>
 
                             <div class="shop-actions">
                                 <button class="shop-action-btn quick-view-btn" data-id="{{ $ebook->id }}" title="View Details"><i class="fa-regular fa-eye"></i></button>
@@ -476,12 +476,12 @@
                             <h3 style="margin-top: 5px; font-size: 15px; font-weight: 700; line-height: 1.4;">
                                 <a href="{{ route('ebooks.show', $ebook->id) }}" style="text-decoration: none; color: inherit;">{{ Str::limit($ebook->title_bn ?? $ebook->title_en, 40) }}</a>
                             </h3>
-                            <p style="font-size: 12px; color: var(--text-muted); margin: 4px 0 10px;"><i class="fa-solid fa-pen-nib me-1"></i> {{ $ebook->author_name ?? 'অজানা' }}</p>
+                            <p style="font-size: 12px; color: var(--text-muted); margin: 4px 0 10px;"><i class="fa-solid fa-pen-nib me-1"></i> {{ $ebook->author_name ?? __('frontend.ebookpage.unknown') }}</p>
 
                             <div style="display: flex; flex-direction: column; gap: 6px;">
                                 <div class="shop-price-box" style="margin-bottom: 0; display:flex; align-items:baseline; gap:8px;">
                                     @if($ebook->is_free)
-                                        <span class="price" style="font-size: 16px; font-weight: 700; color: #16a34a;">ফ্রি</span>
+                                        <span class="price" style="font-size: 16px; font-weight: 700; color: #16a34a;">{{ __('frontend.ebookpage.free') }}</span>
                                     @else
                                         <span class="price" style="font-size: 16px; font-weight: 700; color: var(--accent);">৳{{ number_format($ebook->final_price, 0) }}</span>
                                         @if($ebook->discount > 0)
@@ -512,7 +512,7 @@
                     @empty
                     <div style="grid-column: 1/-1; text-align: center; padding: 60px; background: var(--bg-soft); border-radius: var(--radius-lg);">
                         <i class="fa-solid fa-book-open" style="font-size: 48px; color: var(--text-muted); margin-bottom: 20px;"></i>
-                        <h3 style="color: var(--text-soft);">কোনো ই-বুক পাওয়া যায়নি</h3>
+                        <h3 style="color: var(--text-soft);">{{ __('frontend.ebookpage.no_ebooks') }}</h3>
                     </div>
                     @endforelse
                 </div>
@@ -538,7 +538,7 @@
 <div class="ebx-modal-overlay" id="ebookPreviewModal">
     <div class="ebx-modal-box">
         <div class="ebx-modal-head">
-            <h4 id="ebookPreviewHeadTitle"><i class="fa-solid fa-book-open me-2" style="color:var(--accent);"></i>প্রিভিউ</h4>
+            <h4 id="ebookPreviewHeadTitle"><i class="fa-solid fa-book-open me-2" style="color:var(--accent);"></i>{{ __('frontend.ebookpage.preview') }}</h4>
             <button class="ebx-modal-close" id="ebookPreviewClose"><i class="fa-solid fa-xmark"></i></button>
         </div>
         <div class="ebx-modal-body">
@@ -546,7 +546,7 @@
             <div class="ebx-modal-pdf">
                 <div id="ebookPreviewLoader" class="ebx-modal-loader">
                     <i class="fa-solid fa-spinner fa-spin fa-2x"></i>
-                    <p style="font-size:13px;margin-top:12px;">প্রিভিউ লোড হচ্ছে...</p>
+                    <p style="font-size:13px;margin-top:12px;">{{ __('frontend.ebookpage.preview_loading') }}</p>
                 </div>
                 <iframe id="ebookPreviewFrame" class="ebx-modal-frame" src="" allowfullscreen></iframe>
             </div>
@@ -563,10 +563,8 @@
                 <p id="ebookPreviewDescription" style="font-size:12px;color:var(--text-soft);line-height:1.6;margin:6px 0 0;"></p>
                 <div style="margin-top:auto;display:flex;flex-direction:column;gap:8px;padding-top:14px;">
                     <a id="ebookPreviewBuyBtn" href="#" class="ebx-btn-buy">
-                        <i class="fa-solid fa-cart-shopping"></i> এখনই কিনুন
-                    </a>
-                    <a id="ebookPreviewDetailsBtn" href="#" class="ebx-btn-detail">
-                        বিস্তারিত দেখুন <i class="fa-solid fa-arrow-right ms-1"></i>
+                        <i class="fa-solid fa-cart-shopping"></i> {{ __('frontend.ebookpage.buy_now') }} </a>
+                    <a id="ebookPreviewDetailsBtn" href="#" class="ebx-btn-detail">{{ __('frontend.common.view_details') }} <i class="fa-solid fa-arrow-right ms-1"></i>
                     </a>
                 </div>
             </div>
@@ -663,11 +661,11 @@
                         $(this).show();
                     }).attr('src', res.pdf_url);
                 } else {
-                    $('#ebookPreviewLoader').html('<i class="fa-solid fa-book-open fa-2x" style="opacity:.5"></i><p style="font-size:13px;margin-top:12px;">এই বইয়ের প্রিভিউ পাওয়া যায়নি।</p>');
+                    $('#ebookPreviewLoader').html('<i class="fa-solid fa-book-open fa-2x" style="opacity:.5"></i><p style="font-size:13px;margin-top:12px;">{{ __('frontend.ebookpage.preview_na') }}</p>');
                 }
               })
               .fail(function() {
-                $('#ebookPreviewLoader').html('<i class="fa-solid fa-book-open fa-2x" style="opacity:.5"></i><p style="font-size:13px;margin-top:12px;">এই বইয়ের প্রিভিউ পাওয়া যায়নি।<br><span style="font-size:12px;opacity:.7">বিস্তারিত পেজে বইটি সম্পর্কে জানুন।</span></p>');
+                $('#ebookPreviewLoader').html('<i class="fa-solid fa-book-open fa-2x" style="opacity:.5"></i><p style="font-size:13px;margin-top:12px;">{{ __('frontend.ebookpage.preview_na') }}<br><span style="font-size:12px;opacity:.7">{{ __('frontend.ebookpage.preview_na_detail') }}</span></p>');
               });
 
             // Fetch full description via AJAX
@@ -779,7 +777,7 @@
             });
             Toast.fire({
                 icon: 'warning',
-                title: 'কার্টে যোগ করতে প্রথমে লগইন করুন।',
+                title: '{{ __('frontend.ebookpage.login_required') }}',
                 showCloseButton: true,
             });
         }
