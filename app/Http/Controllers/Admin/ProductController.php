@@ -720,11 +720,13 @@ class ProductController extends Controller
         $request->validate([
             'driver_id' => 'required|exists:users,id',
             'vehicle_id' => 'required|exists:vehicles,id',
+            'rider_note' => 'nullable|string|max:2000',
         ]);
 
         $order->update([
             'driver_id' => $request->driver_id,
             'vehicle_id' => $request->vehicle_id,
+            'rider_note' => $request->rider_note,
             'assigned_at' => now(),
             'order_status' => 'confirmed', // Optionally set status to confirmed when assigned
         ]);

@@ -25,7 +25,7 @@
     }
     .elearn-card:hover { transform: translateY(-6px); box-shadow: 0 16px 34px rgba(0,0,0,0.10); border-color: transparent; }
 
-    .elearn-thumb { aspect-ratio: 14 / 15; background: #eef2f7; position: relative; overflow: hidden; display: block; }
+    .elearn-thumb { aspect-ratio: 1 / 1; background: #eef2f7; position: relative; overflow: hidden; display: block; }
     .elearn-thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform .35s ease; }
     .elearn-card:hover .elearn-thumb img { transform: scale(1.06); }
 
@@ -552,11 +552,15 @@
     font-size: 24px;
     font-weight: 700;
     margin-bottom: 8px;
+    color: #fff;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.5);
   }
   .slider-content p {
     font-size: 14px;
-    opacity: 0.9;
+    color: #fff !important;
+    opacity: 0.95;
     margin: 0;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.55);
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;

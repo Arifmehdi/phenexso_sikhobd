@@ -13,11 +13,27 @@ class VehicleController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         menuSubmenu('vehicles', 'allVehicles');
-        $vehicles = Vehicle::latest()->paginate(10);
-        return view('admin.vehicles.index', compact('vehicles'));
+
+        $search = trim($request->get('search', ''));
+
+        $vehicles = Vehicle::when($search !== '', function ($q) use ($search) {
+                $q->where(function ($sub) use ($search) {
+                    $sub->where('vehicle_type', 'like', "%{$search}%")
+                        ->orWhere('plate_number', 'like', "%{$search}%")
+                        ->orWhereHas('drivers', function ($d) use ($search) {
+                            $d->where('name', 'like', "%{$search}%")
+                              ->orWhere('mobile', 'like', "%{$search}%");
+                        });
+                });
+            })
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('admin.vehicles.index', compact('vehicles', 'search'));
     }
 
     /**

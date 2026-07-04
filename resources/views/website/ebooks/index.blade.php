@@ -17,7 +17,7 @@
     }
 
     .ebook-thumb {
-        aspect-ratio: 260 / 372;
+        aspect-ratio: 1 / 1;
         background: #f8fafc;
         position: relative;
         display: flex;

@@ -32,6 +32,11 @@
     {{-- ④ Right side actions --}}
     <div class="sh-right">
 
+      {{-- Home icon (desktop + mobile) --}}
+      <a href="{{ route('home') }}" class="sh-icon-btn" aria-label="Home" title="{{ app()->getLocale() == 'bn' ? 'হোম' : 'Home' }}">
+        <i class="fa-solid fa-house"></i>
+      </a>
+
       {{-- Desktop: Language pill --}}
       <div class="lang-switch sh-lang-pill sh-dsk" role="group" aria-label="Language">
         <button data-lang="bn">বাং</button>
@@ -327,7 +332,7 @@
           </a>
         </div>
       </li>
-      <li class="m-item"><a href="{{ route('shop') }}" class="m-link">Shop</a></li>
+      <li class="m-item"><a href="{{ route('shop') }}" class="m-link">{{ app()->getLocale() == 'bn' ? 'শপ' : 'Shop' }}</a></li>
       <li class="m-item"><a href="{{ route('about') }}" class="m-link">আমাদের সম্পর্কে</a></li>
       <li class="m-item"><a href="{{ route('contact') }}" class="m-link">যোগাযোগ</a></li>
     </ul>

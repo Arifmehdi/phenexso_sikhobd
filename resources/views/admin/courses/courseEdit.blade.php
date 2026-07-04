@@ -172,7 +172,7 @@
                                     <div class="col-sm-8">
                                         <input type="file" class="form-control-file" id="feature_image" name="featured_image" accept="image/*">
                                         <small class="form-text text-muted">
-                                            <i class="fas fa-info-circle"></i> Recommended: <strong>560 × 600 px</strong> (14:15 ratio · use the same shape as 280 × 300).
+                                            <i class="fas fa-info-circle"></i> Recommended: <strong>600 × 600 px</strong> (1:1 square) so the full image shows without cropping. Min 300 × 300 px.
                                             JPG / PNG / WEBP, max 2 MB.
                                         </small>
                                     </div>

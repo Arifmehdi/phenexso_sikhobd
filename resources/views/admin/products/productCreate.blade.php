@@ -219,8 +219,11 @@
                             <div class="card-body">
                                 <div class="form-group row">
                                     <label for="feature_image" class="col-sm-4 col-form-label">Featured Image</label>
-                                    <div class="col-sm-6">
-                                        <input type="file" class="form-control-file" id="feature_image" name="featured_image" value="{{ old('feature_image') }}">
+                                    <div class="col-sm-8">
+                                        <input type="file" class="form-control-file" id="feature_image" name="featured_image" accept="image/*" value="{{ old('feature_image') }}">
+                                        <small class="form-text text-muted">
+                                            <i class="fas fa-info-circle"></i> Recommended: <strong>600 × 600 px</strong> (1:1 square) so the full image shows without cropping. Min 300 × 300 px.
+                                        </small>
                                     </div>
                                     @error('feature_image')
                                         <span class="text-danger">{{ $message }}</span>

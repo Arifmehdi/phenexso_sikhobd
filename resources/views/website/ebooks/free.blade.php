@@ -10,7 +10,7 @@
 
     .febook-card { background:#fff; border:1px solid var(--border); border-radius:16px; overflow:hidden; display:flex; flex-direction:column; transition: all .3s ease; }
     .febook-card:hover { transform: translateY(-6px); box-shadow: 0 16px 34px rgba(0,0,0,.10); }
-    .febook-thumb { aspect-ratio: 260/372; background:#f8fafc; position:relative; overflow:hidden; }
+    .febook-thumb { aspect-ratio: 1/1; background:#f8fafc; position:relative; overflow:hidden; }
     .febook-thumb img { width:100%; height:100%; object-fit:cover; transition: transform .35s; }
     .febook-card:hover .febook-thumb img { transform: scale(1.05); }
     .febook-free-tag { position:absolute; top:12px; left:12px; background:#16a34a; color:#fff; font-size:11px; font-weight:700; padding:4px 12px; border-radius:20px; text-transform:uppercase; letter-spacing:.5px; z-index:3; }

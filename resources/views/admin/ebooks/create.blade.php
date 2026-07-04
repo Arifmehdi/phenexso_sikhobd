@@ -77,7 +77,7 @@
                                 <label>Cover Image *</label>
                                 <input type="file" name="cover_image" class="form-control" accept="image/*" required>
                                 <small class="form-text text-muted">
-                                    <i class="fas fa-info-circle"></i> Recommended: <strong>260 × 372 px</strong> (portrait book-cover ratio).
+                                    <i class="fas fa-info-circle"></i> Recommended: <strong>600 × 600 px</strong> (1:1 square) so the full cover shows without cropping. Min 300 × 300 px.
                                     For sharpness use the same shape at 2× (520 × 744 px). JPG / PNG, max 2 MB.
                                 </small>
                             </div>

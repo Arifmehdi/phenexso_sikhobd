@@ -16,12 +16,29 @@ class DriverController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         menuSubmenu('drivers', 'allDrivers');
-        // $drivers = Driver::latest()->paginate(10);
-        $drivers = User::where('role', 'rider')->latest()->paginate(10);
-        return view('admin.drivers.index', compact('drivers'));
+
+        $search = trim($request->get('search', ''));
+
+        $drivers = User::where('role', 'rider')
+            ->when($search !== '', function ($q) use ($search) {
+                $q->where(function ($sub) use ($search) {
+                    $sub->where('name', 'like', "%{$search}%")
+                        ->orWhere('mobile', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%")
+                        ->orWhere('license_no', 'like', "%{$search}%")
+                        ->orWhere('agency_name', 'like', "%{$search}%")
+                        ->orWhere('nid', 'like', "%{$search}%")
+                        ->orWhere('address', 'like', "%{$search}%");
+                });
+            })
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('admin.drivers.index', compact('drivers', 'search'));
     }
 
     /**
@@ -49,6 +66,7 @@ class DriverController extends Controller
             'mobile' => 'required|string|max:20|unique:users',
             'email' => 'nullable|string|email|max:255|unique:users',
             'license_no' => 'nullable|string|max:255',
+            'agency_name' => 'nullable|string|max:255',
             'nid' => 'nullable|string|max:255',
             'address' => 'nullable|string|max:500',
             'is_approve' => 'required|integer|in:0,1',
@@ -93,6 +111,7 @@ class DriverController extends Controller
             'mobile' => 'required|string|max:20|unique:users,mobile,' . $driver->id,
             'email' => 'nullable|string|email|max:255|unique:users,email,' . $driver->id,
             'license_no' => 'nullable|string|max:255',
+            'agency_name' => 'nullable|string|max:255',
             'nid' => 'nullable|string|max:255',
             'address' => 'nullable|string|max:500',
             'is_approve' => 'required|integer|in:0,1',

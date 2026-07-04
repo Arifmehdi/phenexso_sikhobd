@@ -108,8 +108,21 @@
           </div>
 
           @if(!$isEnrolled)
-          <div class="cd-hero" style="background-image: url('{{ route('imagecache', ['template' => 'large', 'filename' => $product->fi()]) }}'); background-size: cover; background-position: center; position: relative; margin-bottom: 30px;">
-            <div class="play"><i class="fa-solid fa-play"></i></div>
+          @php
+              // First free lesson that actually has a video → used as the preview
+              $previewLesson = $lessons->first(function($l) {
+                  return $l->is_free && ($l->video_url || $l->video_file);
+              });
+          @endphp
+          <div class="cd-hero" style="background-image: url('{{ route('imagecache', ['template' => 'large', 'filename' => $product->fi()]) }}'); background-size: contain; background-repeat: no-repeat; background-position: center; position: relative; margin-bottom: 30px;">
+            @if($previewLesson)
+            <div class="play" onclick="window.renderLesson({{ $previewLesson->id }})" style="cursor:pointer;" title="{{ app()->getLocale() == 'bn' ? 'ফ্রি প্রিভিউ দেখুন' : 'Watch free preview' }}">
+                <i class="fa-solid fa-play"></i>
+            </div>
+            <span style="position:absolute; bottom:14px; left:14px; background:rgba(0,0,0,0.6); color:#fff; font-size:12px; font-weight:600; padding:4px 12px; border-radius:20px;">
+                <i class="fa-solid fa-circle-play"></i> {{ app()->getLocale() == 'bn' ? 'ফ্রি প্রিভিউ' : 'Free Preview' }}
+            </span>
+            @endif
           </div>
           @endif
 

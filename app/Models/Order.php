@@ -27,6 +27,7 @@ class Order extends Model
         'addedby_id',
         'editedby_id',
         'order_note',
+        'rider_note',
         'payment_trx_id',
         'seller_id',
         'rider_id',

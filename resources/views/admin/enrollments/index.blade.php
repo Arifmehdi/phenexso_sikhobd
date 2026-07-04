@@ -39,11 +39,17 @@
                             <tr>
                                 <td>{{ $enrollment->id }}</td>
                                 <td>
-                                    <strong>{{ $enrollment->user->name }}</strong><br>
-                                    <small class="text-muted">{{ $enrollment->user->mobile }}</small>
+                                    <strong>{{ optional($enrollment->user)->name ?? 'N/A' }}</strong><br>
+                                    <small class="text-muted">{{ optional($enrollment->user)->mobile }}</small>
                                 </td>
                                 <td>
-                                    <span class="badge badge-info">{{ $enrollment->product->name_en }}</span>
+                                    @if($enrollment->product)
+                                        <span class="badge badge-info">{{ $enrollment->product->name_en ?? $enrollment->product->name_bn }}</span>
+                                    @elseif($enrollment->ebook)
+                                        <span class="badge badge-warning">{{ $enrollment->ebook->title_en ?? $enrollment->ebook->title_bn }} <small>(E-book)</small></span>
+                                    @else
+                                        <span class="text-muted">—</span>
+                                    @endif
                                 </td>
                                 <td>
                                     @if($enrollment->order_id)

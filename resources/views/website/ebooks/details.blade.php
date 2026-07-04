@@ -21,7 +21,7 @@
 /* ── Hero grid ─────────────────────────────── */
 .ebd-hero-grid {
     display:grid;
-    grid-template-columns: 320px 1fr 290px;
+    grid-template-columns: 380px 1fr 290px;
     gap:0;
 }
 .ebd-hero-col { padding:32px; }
@@ -36,7 +36,7 @@
 }
 
 /* ── Cover (3-D fold) ──────────────────────── */
-.eb-scene { perspective:1400px; width:230px; margin:0 auto; }
+.eb-scene { perspective:1400px; width:100%; max-width:300px; margin:0 auto; }
 .eb-book {
     position:relative; width:100%;
     transform-style:preserve-3d; transform:none;
@@ -44,7 +44,7 @@
     filter:drop-shadow(0 10px 24px rgba(43,37,83,.22));
     cursor:pointer;
 }
-.eb-book:hover { transform:rotateY(-24deg) rotateX(4deg); filter:drop-shadow(8px 18px 30px rgba(43,37,83,.34)); }
+.eb-book:hover { transform:rotateY(-16deg) rotateX(3deg); filter:drop-shadow(10px 20px 32px rgba(43,37,83,.34)); }
 .eb-pages {
     position:absolute; top:3px; bottom:3px; right:-10px; width:10px;
     background:linear-gradient(to right,#c5bbad,#f3eee5 50%,#e8e2d6);
@@ -65,11 +65,35 @@
 .eb-book:hover .eb-spine { opacity:1; }
 .eb-front {
     position:relative; width:100%; border-radius:6px; overflow:hidden;
-    transform:translateZ(5px); transition:border-radius .45s ease;
+    transform-origin:left center;
+    transform:translateZ(6px);
+    transition:transform .6s cubic-bezier(.4,0,.2,1), border-radius .45s ease, box-shadow .45s ease;
     box-shadow:inset -2px 0 6px rgba(0,0,0,.1);
+    backface-visibility:hidden;
 }
-.eb-book:hover .eb-front { border-radius:2px 6px 6px 2px; }
+/* Open the front cover from the spine, revealing the page inside */
+.eb-book:hover .eb-front { transform:translateZ(6px) rotateY(-58deg); border-radius:2px 6px 6px 2px; box-shadow:10px 0 26px rgba(0,0,0,.28); }
 .eb-front img { width:100%; display:block; }
+
+/* Inner first page (revealed when the cover opens) */
+.eb-inner-page {
+    position:absolute; inset:0; border-radius:6px; overflow:hidden;
+    background:linear-gradient(120deg,#fffdf9,#efe8d6);
+    transform:translateZ(3px);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:inset 12px 0 18px -12px rgba(0,0,0,.35);
+}
+.eb-inner-lines {
+    position:absolute; left:22px; right:14px; top:24px; bottom:24px;
+    background:repeating-linear-gradient(to bottom, transparent 0, transparent 13px, rgba(43,37,83,.10) 13px, rgba(43,37,83,.10) 14px);
+}
+.eb-inner-cta {
+    position:relative; z-index:2; display:flex; flex-direction:column; align-items:center; gap:6px;
+    color:var(--accent); font-weight:800; font-size:13px; text-align:center;
+    background:rgba(255,255,255,.78); padding:12px 16px; border-radius:12px;
+    box-shadow:0 4px 14px rgba(0,0,0,.08);
+}
+.eb-inner-cta i { font-size:26px; }
 .eb-no-cover {
     width:100%; aspect-ratio:3/4;
     background:linear-gradient(135deg,var(--primary),#4a4180);
@@ -97,7 +121,7 @@
 .eb-disc small { font-size:9px; font-weight:600; letter-spacing:.5px; }
 
 .eb-hint {
-    text-align:center; margin-top:20px;
+    text-align:center; margin-bottom:14px;
     font-size:14px; font-weight:700; color:var(--accent); cursor:pointer; user-select:none;
 }
 .eb-hint i { margin-left:3px; display:inline-block; animation:hintB 1.3s ease infinite; }
@@ -357,6 +381,9 @@
 
         {{-- Col 1: Cover --}}
         <div class="ebd-hero-col">
+          <div class="eb-hint ebook-preview-trigger" data-eid="{{ $ebook->id }}">
+            একটু পড়ে দেখুন <i class="fa-solid fa-arrow-down"></i>
+          </div>
           <div class="eb-scene">
             <div class="eb-book ebook-preview-trigger" data-eid="{{ $ebook->id }}">
               @if($discPct > 0)
@@ -364,6 +391,13 @@
               @endif
               <div class="eb-spine"></div>
               <div class="eb-pages"></div>
+              <div class="eb-inner-page">
+                <div class="eb-inner-lines"></div>
+                <div class="eb-inner-cta">
+                    <i class="fa-solid fa-book-open-reader"></i>
+                    <span>{{ app()->getLocale() == 'bn' ? 'প্রিভিউ পড়ুন' : 'Read Preview' }}</span>
+                </div>
+              </div>
               <div class="eb-front">
                 <div class="eb-peel"></div>
                 @if($ebook->cover_image)
@@ -373,9 +407,6 @@
                 @endif
               </div>
             </div>
-          </div>
-          <div class="eb-hint ebook-preview-trigger" data-eid="{{ $ebook->id }}">
-            একটু পড়ে দেখুন <i class="fa-solid fa-arrow-down"></i>
           </div>
         </div>
 

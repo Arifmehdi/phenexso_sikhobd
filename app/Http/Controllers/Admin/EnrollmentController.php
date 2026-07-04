@@ -12,7 +12,7 @@ class EnrollmentController extends Controller
     {
         menuSubmenu('academy', 'enrollments');
 
-        $query = Enrollment::with(['user', 'product', 'order'])->latest();
+        $query = Enrollment::with(['user', 'product', 'ebook', 'order'])->latest();
 
         if ($request->search) {
             $q = $request->search;

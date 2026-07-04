@@ -31,23 +31,7 @@
                 <span>{{ auth()->user()->email }}</span>
             </div>
         </div>
-        <nav class="dash-nav">
-            <a href="{{ route('user.dashboard') }}#tab-dashboard">
-                <i class="fa-solid fa-house"></i> <span>ড্যাশবোর্ড</span>
-            </a>
-            <a href="{{ route('user.dashboard') }}#tab-courses">
-                <i class="fa-solid fa-graduation-cap"></i> <span>আমার কোর্সসমূহ</span>
-            </a>
-            <a href="{{ route('user.dashboard') }}#tab-orders-inline">
-                <i class="fa-solid fa-cart-shopping"></i> <span>আমার অর্ডারসমূহ</span>
-            </a>
-            <a href="{{ route('exams.index') }}" class="active">
-                <i class="fa-solid fa-file-pen"></i> <span>আমার পরীক্ষাসমূহ</span>
-            </a>
-            <a href="{{ route('logout') }}" style="color: var(--accent); margin-top: auto;">
-                <i class="fa-solid fa-right-from-bracket"></i> <span>লগআউট</span>
-            </a>
-        </nav>
+        @include('user.partials.dash_nav', ['navLinkBase' => route('user.dashboard'), 'activeTab' => 'exams'])
     </aside>
 
     <!-- Main Content -->
@@ -64,10 +48,6 @@
             <h3>আপনার প্রাপ্ত মার্কস</h3>
             <div class="score-box">{{ $attempt->score }} / {{ $exam->question_count }}</div>
             <p class="text-muted">শতকরা হার: {{ number_format(($attempt->score / $exam->question_count) * 100, 2) }}%</p>
-
-            <a href="{{ route('user.exam_certificate', $exam->id) }}" target="_blank" class="btn btn-success mt-2">
-                <i class="fa-solid fa-certificate"></i> সার্টিফিকেট ডাউনলোড করুন
-            </a>
         </div>
 
         <h4 class="mb-4">উত্তরপত্র পর্যালোচনা:</h4>

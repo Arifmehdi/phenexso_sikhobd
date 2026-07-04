@@ -112,8 +112,8 @@ class CertificateController extends Controller
         if ($exam->status !== 'finished') {
             return redirect()->route('exams.result', $exam->id)
                 ->with('error', $isBn
-                    ? 'ফলাফল প্রকাশের পর সার্টিফিকেট পাওয়া যাবে।'
-                    : 'The certificate will be available once results are published.');
+                    ? 'সবার পরীক্ষা শেষ হওয়ার পরে সার্টিফিকেট পাওয়া যাবে।'
+                    : 'The certificate will be available after everyone has finished the exam.');
         }
 
         $score = ($exam->question_count > 0)

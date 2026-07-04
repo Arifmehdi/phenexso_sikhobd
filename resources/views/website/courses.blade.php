@@ -26,7 +26,7 @@
     }
     .elearn-card:hover { transform: translateY(-6px); box-shadow: 0 16px 34px rgba(0,0,0,0.10); border-color: transparent; }
 
-    .elearn-thumb { aspect-ratio: 14 / 15; background: #eef2f7; position: relative; overflow: hidden; }
+    .elearn-thumb { aspect-ratio: 1 / 1; background: #eef2f7; position: relative; overflow: hidden; }
     .elearn-thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform .35s ease; }
     .elearn-card:hover .elearn-thumb img { transform: scale(1.06); }
 

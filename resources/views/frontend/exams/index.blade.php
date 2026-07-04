@@ -77,7 +77,8 @@
             @php
                 $isCompleted = in_array($exam->id, $completedExamIds);
                 $isUpcoming  = $exam->start_time && $exam->start_time->isFuture();
-                $isEnded     = $exam->end_time && $exam->end_time->isPast();
+                // Ended = exam time is over, or admin/teacher finished it
+                $isEnded     = ($exam->end_time && $exam->end_time->isPast()) || $exam->status == 'finished';
             @endphp
             <div class="course-row">
                 <div class="thumb" style="--c1:#6c5ce7;--c2:#a29bfe;">
@@ -91,11 +92,7 @@
                     </div>
                 </div>
                 @if($isCompleted)
-                    @if($exam->status == 'finished')
-                        <a href="{{ route('exams.result', $exam->id) }}" class="btn btn-success btn-sm">{{ __('frontend.exams.view_result') }}</a>
-                    @else
-                        <span class="status-pill status-approved">{{ __('frontend.exams.attended') }}</span>
-                    @endif
+                    <a href="{{ route('exams.result', $exam->id) }}" class="btn btn-success btn-sm">{{ __('frontend.exams.view_result') }}</a>
                 @elseif($isUpcoming)
                     <span class="status-pill status-pending">{{ __('frontend.exams.upcoming') }}</span>
                 @elseif($isEnded)
@@ -134,14 +131,10 @@
                             <td>{{ $attempt->end_time->format('M d, Y') }}</td>
                             <td>{{ $attempt->score }} / {{ $attempt->exam->question_count }}</td>
                             <td>
-                                @if($attempt->exam->status == 'finished')
-                                    <span class="status-pill status-approved">{{ __('frontend.exams.result_published') }}</span>
-                                @else
-                                    <span class="status-pill status-pending">{{ __('frontend.exams.pending') }}</span>
-                                @endif
+                                <span class="status-pill status-approved">{{ __('frontend.exams.result_published') }}</span>
                             </td>
                             <td>
-                                <a href="{{ route('exams.result', $attempt->exam->id) }}" class="btn btn-primary btn-sm">{{ __('frontend.exams.details') }}</a>
+                                <a href="{{ route('exams.result', $attempt->exam->id) }}" class="btn btn-primary btn-sm">{{ __('frontend.exams.view_result') }}</a>
                             </td>
                         </tr>
                         @empty

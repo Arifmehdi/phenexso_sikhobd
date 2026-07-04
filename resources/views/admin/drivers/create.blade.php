@@ -48,6 +48,24 @@
                         </div>
 
                         <div class="form-group">
+                            <label for="agency_name">Agency Name</label>
+                            <input type="text" class="form-control @error('agency_name') is-invalid @enderror" placeholder="e.g. Steadfast, Sundarban..." name="agency_name" value="{{ old('agency_name') }}" list="agency_list">
+                            <datalist id="agency_list">
+                                <option value="Steadfast">
+                                <option value="Sundarban Courier">
+                                <option value="Pathao">
+                                <option value="RedX">
+                                <option value="Paperfly">
+                                <option value="eCourier">
+                                <option value="SA Paribahan">
+                                <option value="Own Delivery">
+                            </datalist>
+                            @error('agency_name')
+                            <p class="text-danger">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="form-group">
                             <label for="license_no">License No</label>
                             <input type="text" class="form-control @error('license_no') is-invalid @enderror" placeholder="License Number" name="license_no" value="{{ old('license_no') }}">
                             @error('license_no')

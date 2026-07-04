@@ -110,46 +110,7 @@
                 <span>{{ auth()->user()->email }}</span>
             </div>
         </div>
-        <nav class="dash-nav" id="dashNav">
-            <a href="#tab-dashboard" data-tab="tab-dashboard" class="{{ ($activeTab == 'dashboard') ? 'active' : '' }}">
-                <i class="fa-solid fa-house"></i> <span>{{ __('frontend.dash.nav_dashboard') }}</span>
-            </a>
-            <a href="#tab-courses" data-tab="tab-courses" class="{{ ($activeTab == 'courses') ? 'active' : '' }}">
-                <i class="fa-solid fa-graduation-cap"></i> <span>{{ __('frontend.dash.nav_courses') }}</span>
-            </a>
-            <a href="#tab-orders-inline" data-tab="tab-orders-inline" class="{{ ($activeTab == 'order') ? 'active' : '' }}">
-                <i class="fa-solid fa-cart-shopping"></i> <span>{{ __('frontend.dash.nav_orders') }}</span>
-            </a>
-            <a href="#tab-ebooks" data-tab="tab-ebooks" class="{{ ($activeTab == 'ebooks') ? 'active' : '' }}">
-                <i class="fa-solid fa-book-open"></i> <span>{{ __('frontend.dash.nav_ebooks') }}</span>
-            </a>
-            <a href="#tab-address" data-tab="tab-address" class="{{ ($activeTab == 'address') ? 'active' : '' }}">
-                <i class="fa-solid fa-location-dot"></i> <span>{{ __('frontend.dash.nav_address') }}</span>
-            </a>
-            <a href="#tab-account" data-tab="tab-account" class="{{ ($activeTab == 'edit') ? 'active' : '' }}">
-                <i class="fa-solid fa-user-gear"></i> <span>{{ __('frontend.dash.nav_profile') }}</span>
-            </a>
-            <a href="#tab-exams" data-tab="tab-exams" class="{{ ($activeTab == 'exams') ? 'active' : '' }}">
-                <i class="fa-solid fa-file-pen"></i> <span>{{ __('frontend.dash.nav_exams') }}</span>
-            </a>
-            @if(auth()->user()->hasRole('instructor') || auth()->user()->role === 'instructor' || auth()->user()->hasRole('teacher') || auth()->user()->role === 'teacher')
-            <div style="padding: 15px 20px 5px; font-size: 11px; font-weight: 800; color: var(--text-soft); text-transform: uppercase; letter-spacing: 1px;">Teacher Area</div>
-            <a href="#tab-teacher-questions" data-tab="tab-teacher-questions" class="{{ ($activeTab == 'teacher_questions') ? 'active' : '' }}">
-                <i class="fa-solid fa-circle-question"></i> <span>Manage Questions</span>
-            </a>
-            <a href="#tab-teacher-exams" data-tab="tab-teacher-exams" class="{{ ($activeTab == 'teacher_exams') ? 'active' : '' }}">
-                <i class="fa-solid fa-file-invoice"></i> <span>Manage Exams</span>
-            </a>
-            @endif
-            @if($enrollments->count() > 0)
-            <a href="#tab-featured" data-tab="tab-featured" class="{{ ($activeTab == 'feature_products') ? 'active' : '' }}">
-                <i class="fa-solid fa-star"></i> <span>{{ __('frontend.dash.nav_featured') }}</span>
-            </a>
-            @endif
-            <a href="{{ route('logout') }}" style="color: var(--accent); margin-top: auto;">
-                <i class="fa-solid fa-right-from-bracket"></i> <span>{{ __('frontend.dash.nav_logout') }}</span>
-            </a>
-        </nav>
+        @include('user.partials.dash_nav')
     </aside>
 
     <!-- Main Content -->
@@ -237,10 +198,10 @@
                     @php
                         $exCompleted = in_array($exam->id, $ovCompletedExamIds);
                         $exUpcoming = $exam->start_time && $exam->start_time->isFuture();
-                        $exEnded = $exam->end_time && $exam->end_time->isPast();
+                        $exEnded = ($exam->end_time && $exam->end_time->isPast()) || $exam->status == 'finished';
                     @endphp
                     @if($exCompleted)
-                        <span class="status-pill status-approved">{{ __('frontend.dash.completed') }}</span>
+                        <a href="{{ route('exams.result', $exam->id) }}" class="btn btn-success btn-sm">{{ __('frontend.dash.view_result') }}</a>
                     @elseif($exUpcoming)
                         <span class="status-pill status-pending">{{ __('frontend.dash.upcoming') }}</span>
                     @elseif($exEnded)
@@ -791,7 +752,8 @@
                 @php
                     $isCompleted = in_array($exam->id, $completedExamIds);
                     $isUpcoming  = $exam->start_time && $exam->start_time->isFuture();
-                    $isEnded     = $exam->end_time && $exam->end_time->isPast();
+                    // Ended = exam time is over, or admin/teacher finished it
+                    $isEnded     = ($exam->end_time && $exam->end_time->isPast()) || $exam->status == 'finished';
                 @endphp
                 <div class="course-row">
                     <div class="thumb" style="--c1:#6c5ce7;--c2:#a29bfe;">
@@ -805,11 +767,7 @@
                         </div>
                     </div>
                     @if($isCompleted)
-                        @if($exam->status == 'finished')
-                            <a href="{{ route('exams.result', $exam->id) }}" class="btn btn-success btn-sm">{{ __('frontend.dash.view_result') }}</a>
-                        @else
-                            <span class="status-pill status-approved">{{ __('frontend.dash.completed') }}</span>
-                        @endif
+                        <a href="{{ route('exams.result', $exam->id) }}" class="btn btn-success btn-sm">{{ __('frontend.dash.view_result') }}</a>
                     @elseif($isUpcoming)
                         <span class="status-pill status-pending">{{ __('frontend.dash.upcoming') }}</span>
                     @elseif($isEnded)
@@ -847,14 +805,10 @@
                                 <td>{{ $attempt->end_time->format('M d, Y') }}</td>
                                 <td>{{ $attempt->score }} / {{ $attempt->exam->question_count }}</td>
                                 <td>
-                                    @if($attempt->exam->status == 'finished')
-                                        <span class="status-pill status-approved">{{ __('frontend.dash.result_published') }}</span>
-                                    @else
-                                        <span class="status-pill status-pending">{{ __('frontend.dash.pending') }}</span>
-                                    @endif
+                                    <span class="status-pill status-approved">{{ __('frontend.dash.completed') }}</span>
                                 </td>
                                 <td>
-                                    <a href="{{ route('exams.result', $attempt->exam->id) }}" class="btn btn-primary btn-sm">{{ __('frontend.dash.details') }}</a>
+                                    <a href="{{ route('exams.result', $attempt->exam->id) }}" class="btn btn-primary btn-sm">{{ __('frontend.dash.view_result') }}</a>
                                     @if($attempt->exam->status == 'finished')
                                         <a href="{{ route('user.exam_certificate', $attempt->exam->id) }}" target="_blank" class="btn btn-success btn-sm">
                                             <i class="fa-solid fa-certificate"></i> {{ __('frontend.dash.certificate') }}

@@ -87,7 +87,7 @@
                                 <label>Cover Image</label>
                                 <input type="file" name="cover_image" class="form-control" accept="image/*">
                                 <small class="form-text text-muted">
-                                    <i class="fas fa-info-circle"></i> Recommended: <strong>260 × 372 px</strong> (portrait, 2× for sharpness). Leave blank to keep current.
+                                    <i class="fas fa-info-circle"></i> Recommended: <strong>600 × 600 px</strong> (1:1 square). Min 300 × 300 px. Leave blank to keep current.
                                 </small>
                                 @if($ebook->cover_image)
                                     <img src="{{ asset('storage/ebook_covers/' . $ebook->cover_image) }}" alt="cover" class="img-thumbnail mt-2" style="max-height: 110px;">

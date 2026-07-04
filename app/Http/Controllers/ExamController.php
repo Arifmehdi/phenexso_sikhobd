@@ -48,6 +48,11 @@ class ExamController extends Controller
             }
         }
 
+        // Exam is answerable only within its scheduled time window.
+        if ($exam->status === 'finished') {
+            return redirect()->route('exams.index')->with('error', 'This exam has been finished.');
+        }
+
         $now = Carbon::now();
         if ($now->lt($exam->start_time) || $now->gt($exam->end_time)) {
             return redirect()->route('exams.index')->with('error', 'Exam is not available at this time.');
@@ -107,7 +112,8 @@ class ExamController extends Controller
             'status' => 'completed'
         ]);
 
-        return redirect()->route('exams.index')->with('success', 'Exam submitted successfully. Results will be available once the admin finishes the exam.');
+        // Show the result to the student right after they submit
+        return redirect()->route('exams.result', $exam->id)->with('success', 'Exam submitted successfully. Here is your result.');
     }
 
     public function result(Exam $exam)
@@ -118,10 +124,7 @@ class ExamController extends Controller
             ->with('answers.question')
             ->firstOrFail();
 
-        if ($exam->status != 'finished') {
-             return view('frontend.exams.pending_result', compact('exam', 'attempt'));
-        }
-
+        // Result is available to the student immediately after submitting.
         return view('frontend.exams.result', compact('exam', 'attempt'));
     }
 }

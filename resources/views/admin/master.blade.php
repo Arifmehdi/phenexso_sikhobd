@@ -253,7 +253,7 @@
                         </ul>
                     </li>
 
-                                        <li class="nav-item {{ session('lsbm') == 'users'? ' menu-open ' : ''}}">
+                    <li class="nav-item {{ session('lsbm') == 'users'? ' menu-open ' : ''}}">
                         <a href="#" class="nav-link {{ session('lsbm') == 'users'? ' active ' : ''}}">
                             <i class="nav-icon fas fa-user-friends"></i>
                             <p>
@@ -333,6 +333,31 @@
                                 <a href="{{ route('admin.productSalesReport') }}" class="nav-link {{ session('lsbsm') == 'productSalesReport' ? 'active' : '' }}">
                                     <i class="far fa-dot-circle nav-icon text-info"></i>
                                     <p>Sales Report</p>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    {{-- Delivery (Riders & Vehicles) --}}
+                    <li class="nav-item {{ in_array(session('lsbm'), ['drivers', 'vehicles']) ? 'menu-open' : '' }}">
+                        <a href="#" class="nav-link {{ in_array(session('lsbm'), ['drivers', 'vehicles']) ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-truck"></i>
+                            <p>
+                            Delivery
+                            <i class="right fas fa-angle-left"></i>
+                            </p>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a href="{{ route('admin.drivers.index') }}" class="nav-link {{ session('lsbsm') == 'allDrivers' ? 'active' : '' }}">
+                                    <i class="fas fa-motorcycle nav-icon"></i>
+                                    <p>Agency</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('admin.vehicles.index') }}" class="nav-link {{ session('lsbsm') == 'allVehicles' ? 'active' : '' }}">
+                                    <i class="fas fa-truck-moving nav-icon text-info"></i>
+                                    <p>Vehicles</p>
                                 </a>
                             </li>
                         </ul>
@@ -576,7 +601,7 @@
 
                         </ul>
                     </li>
-                                        <li class="nav-item {{ session('lsbm') == 'testimonials' ? ' menu-open ' : ''}}">
+                    <li class="nav-item {{ session('lsbm') == 'testimonials' ? ' menu-open ' : ''}}">
                         <a href="#" class="nav-link {{ session('lsbm') == 'testimonials' ? ' active ' : ''}}">
                             <i class="nav-icon fas fa-comment-dots"></i>
                             <p>

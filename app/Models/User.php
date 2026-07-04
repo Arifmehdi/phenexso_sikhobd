@@ -36,6 +36,7 @@ class User extends Authenticatable implements CanResetPassword
         'ssc_registration',
         'blood_group',
         'license_no',
+        'agency_name',
         'image',
         'role',
         'is_approve',

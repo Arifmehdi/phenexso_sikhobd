@@ -5,6 +5,8 @@
             // Use the actual stored delivery cost (dynamic inside/outside Dhaka), not a default
             $shippingCost = (float) ($order->delivery_cost ?? 0);
             $totalWithShipping = (float) ($order->grand_total ?? ($order->subtotal + $shippingCost));
+            // Amount still due — pre-filled so admin can just Save
+            $dueAmount = round(max(0, $totalWithShipping - (float) $order->paid()), 2);
         @endphp
 
     <div class="card shadow">
@@ -65,7 +67,8 @@
                 <div class="form-group input-group-sm mb-1 row w3-light-gray">
                     <label for="paid_amount" class="col-sm-5 col-form-label">Paid Amount</label>
                     <div class="col-sm-7">
-                        <input type="number" class="form-control mt-1 form-control-sm orderTotalAmount" id="paid_amount" value="{{old('paid_amount') ?:  number_format($totalWithShipping + $order->paid(), 2) }}"  name="paid_amount" min="1" step="any" max="{{number_format($totalWithShipping + $order->paid())}}" placeholder="Paid Amount" required>
+                        <input type="number" class="form-control mt-1 form-control-sm orderTotalAmount" id="paid_amount" value="{{ old('paid_amount') ?: $dueAmount }}" name="paid_amount" min="1" step="any" max="{{ $dueAmount }}" placeholder="Paid Amount" required>
+                        <small class="text-muted">Due: ৳{{ number_format($dueAmount, 2) }} (Total ৳{{ number_format($totalWithShipping, 2) }} − Paid ৳{{ number_format($order->paid(), 2) }})</small>
                         @error('paid_amount')
                             <span class="text-danger">{{ $message }}</span>
                         @enderror

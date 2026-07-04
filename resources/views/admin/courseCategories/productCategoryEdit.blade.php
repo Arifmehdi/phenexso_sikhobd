@@ -120,7 +120,10 @@
                                 @if($category->image)
                                     <img src="{{ route('imagecache', ['template' => 'sbixs', 'filename' => $category->fi()]) }}" class="mb-2 w3-round shadow-sm" alt="">
                                 @endif
-                                <input type="file" name="image" class="form-control">
+                                <input type="file" name="image" class="form-control" accept="image/*">
+                                <small class="form-text text-muted">
+                                    <i class="fas fa-info-circle"></i> Recommended: <strong>400 × 400 px</strong> (square). Format: JPG / PNG / WEBP · Max 1 MB.
+                                </small>
                             </div>
                         </div>
 

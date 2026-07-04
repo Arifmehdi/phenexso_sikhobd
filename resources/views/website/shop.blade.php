@@ -5,7 +5,7 @@
 @push('css')
 <style>
     .shop-product-thumb {
-        aspect-ratio: 246 / 400;
+        aspect-ratio: 1 / 1;
         background: #fff;
         position: relative;
         display: flex;
