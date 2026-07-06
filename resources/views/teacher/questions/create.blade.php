@@ -13,9 +13,33 @@
                 <form action="{{ route('teacher.questions.store') }}" method="POST">
                     @csrf
                     <div class="card-body p-4">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label class="fw-bold mb-2">Select Course <small class="text-muted">(optional)</small></label>
+                                    <select name="product_id" id="courseSelect" class="form-select">
+                                        <option value="">— General (no course) —</option>
+                                        @foreach($courses as $course)
+                                            <option value="{{ $course->id }}" {{ request('course_id') == $course->id ? 'selected' : '' }}>
+                                                {{ $course->name_en ?? $course->name_bn }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label class="fw-bold mb-2">Select Class <small class="text-muted">(optional)</small></label>
+                                    <select name="course_lesson_id" id="classSelect" class="form-select" data-selected="{{ request('class_id') }}" disabled>
+                                        <option value="">— Select a course first —</option>
+                                    </select>
+                                    <small class="text-muted">Questions tagged to a class are easy to pick when creating that class's exam.</small>
+                                </div>
+                            </div>
+                        </div>
                         <div class="form-group mb-3">
                             <label class="fw-bold mb-2">Question Text</label>
-                            <textarea name="question_text" class="form-control" rows="3" required placeholder="Enter your question here..."></textarea>
+                            <textarea name="question_text" class="form-control" rows="3" required placeholder="Enter your question here...">{{ old('question_text') }}</textarea>
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
@@ -59,6 +83,7 @@
                     </div>
                     <div class="card-footer bg-light p-4" style="border-radius: 0 0 15px 15px;">
                         <button type="submit" class="btn btn-primary px-4">Save Question</button>
+                        <button type="submit" name="save_and_new" value="1" class="btn btn-success px-4">Save & Add Another</button>
                         <a href="{{ route('user.dashboard') }}#tab-teacher-questions" class="btn btn-outline-secondary px-4">Cancel</a>
                     </div>
                 </form>
@@ -66,4 +91,6 @@
         </div>
     </div>
 </div>
+
+@include('admin.questions._course_class_script')
 @endsection

@@ -79,6 +79,9 @@
                 $isUpcoming  = $exam->start_time && $exam->start_time->isFuture();
                 // Ended = exam time is over, or admin/teacher finished it
                 $isEnded     = ($exam->end_time && $exam->end_time->isPast()) || $exam->status == 'finished';
+                // Locked = exam is bound to a class the student hasn't completed yet
+                $isLocked    = $exam->course_lesson_id && !in_array($exam->course_lesson_id, $completed_lesson_ids ?? []);
+                $className   = $exam->lesson ? ($exam->lesson->title_en ?: $exam->lesson->title_bn) : '';
             @endphp
             <div class="course-row">
                 <div class="thumb" style="--c1:#6c5ce7;--c2:#a29bfe;">
@@ -90,6 +93,19 @@
                         <i class="far fa-clock"></i> {{ $exam->duration }} {{ __('frontend.exams.minutes') }} &middot;
                         <i class="far fa-calendar-alt"></i> {{ __('frontend.exams.ends') }}: {{ $exam->end_time->format('M d, h:i A') }}
                     </div>
+                    @if($exam->course)
+                    <div class="meta">
+                        <i class="fa-solid fa-graduation-cap"></i> {{ __('frontend.exams.course_label') }}: {{ $exam->course->name_en ?? $exam->course->name_bn }}
+                        @if($exam->lesson)
+                            &middot; <i class="fa-solid fa-chalkboard"></i> {{ __('frontend.exams.class_label') }}: {{ $className }}
+                        @endif
+                    </div>
+                    @endif
+                    @if($isLocked && !$isCompleted && !$isEnded)
+                    <div class="meta" style="color: #c2410c;">
+                        <i class="fa-solid fa-lock"></i> {{ __('frontend.exams.complete_class_first', ['class' => $className]) }}
+                    </div>
+                    @endif
                 </div>
                 @if($isCompleted)
                     <a href="{{ route('exams.result', $exam->id) }}" class="btn btn-success btn-sm">{{ __('frontend.exams.view_result') }}</a>
@@ -97,6 +113,14 @@
                     <span class="status-pill status-pending">{{ __('frontend.exams.upcoming') }}</span>
                 @elseif($isEnded)
                     <span class="status-pill status-rejected">{{ __('frontend.exams.expired') }}</span>
+                @elseif($isLocked)
+                    @if($exam->course && $exam->course->slug)
+                        <a href="{{ route('course.play', $exam->course->slug) }}" class="btn btn-outline btn-sm" title="{{ __('frontend.exams.complete_class_first', ['class' => $className]) }}">
+                            <i class="fa-solid fa-lock"></i> {{ __('frontend.exams.go_to_class') }}
+                        </a>
+                    @else
+                        <span class="status-pill status-pending"><i class="fa-solid fa-lock"></i> {{ __('frontend.exams.locked') }}</span>
+                    @endif
                 @else
                     <a href="{{ route('exams.start', $exam->id) }}" class="btn btn-primary btn-sm">{{ __('frontend.exams.participate') }}</a>
                 @endif

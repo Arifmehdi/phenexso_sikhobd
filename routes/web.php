@@ -695,6 +695,7 @@ Route::middleware(['userRole:admin','auth'])->prefix('admin')->group(function(){
     Route::post('order/assign-driver/{order}', [ProductController::class, 'assignDriver'])->name('admin.assignDriver');
     Route::post('order/status/{order}', [ProductController::class, 'orderStatus'])->name('admin.orderStatus');
     Route::post('order/payment/{order}', [ProductController::class, 'orderPayment'])->name('admin.orderPayment');
+    Route::post('order/refund/{order}', [ProductController::class, 'orderRefund'])->name('admin.orderRefund');
     Route::post('order/item/delete/{orderItem}', [ProductController::class, 'orderItemDelete'])->name('admin.orderItemDelete');
     Route::post('update/qty/{item}', [ProductController::class, 'updateQty'])->name('updateQty');
     Route::get('invoice/print/{order}', [ProductController::class, 'orderPrint'])->name('admin.orderPrint');
@@ -790,6 +791,9 @@ Route::get('ebooks/download/{id}', [\App\Http\Controllers\Frontend\EbookControll
 Route::get('exams', [\App\Http\Controllers\ExamController::class, 'index'])->name('exams.index');
 
 Route::middleware(['auth', 'web'])->group(function() {
+    // Classes (lessons) of a course as JSON — for admin/teacher question & exam forms
+    Route::get('ajax/course/{product}/classes', [\App\Http\Controllers\ExamController::class, 'courseClasses'])->name('course.classes.json');
+
     // User Exam Routes
     Route::get('exams/{exam}/start', [\App\Http\Controllers\ExamController::class, 'start'])->name('exams.start');
     Route::post('exams/{exam}/submit', [\App\Http\Controllers\ExamController::class, 'submit'])->name('exams.submit');

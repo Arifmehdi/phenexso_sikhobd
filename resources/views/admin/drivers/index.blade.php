@@ -1,5 +1,5 @@
 @extends('admin.master')
-@section('title',"Admin Dashboard | Drivers")
+@section('title',"Admin Dashboard | Agencies")
 
 @section('body')
 <section class="content py-3">
@@ -14,10 +14,10 @@
             <div class="card mb-2 shadow-lg">
                 <div class="card-header- px-2 py-2 d-flex justify-content-between align-items-center">
                     <h3 class="card-title w3-small text-bold text-muted pt-1">
-                        <i class="fas fa-motorcycle text-primary"></i> Riders (Drivers)
+                        <i class="fas fa-truck text-primary"></i> Delivery Agencies
                     </h3>
                     <a href="{{ route('admin.drivers.create') }}" class="btn btn-outline-primary btn-xs py-1">
-                        <i class="fas fa-plus-square"></i> Add New Driver
+                        <i class="fas fa-plus-square"></i> Add New Agency
                     </a>
                 </div>
             </div>
@@ -27,7 +27,7 @@
                 <div class="card-header pl-2 py-2">
                     <div class="d-flex justify-content-between align-items-center">
                         <h3 class="card-title w3-small text-bold text-muted">
-                            <i class="fas fa-th text-primary pt-1"></i> All Drivers
+                            <i class="fas fa-th text-primary pt-1"></i> All Agencies
                         </h3>
 
                         <!-- Search Box -->
@@ -36,7 +36,7 @@
                                 <div class="input-group input-group-sm">
                                     <input type="search" name="search" value="{{ $search ?? '' }}"
                                         class="form-control border-right-0 border py-2"
-                                        placeholder="Search name, agency, mobile, email, license, NID...">
+                                        placeholder="Search agency, contact name, mobile, email, license, NID...">
                                     <div class="input-group-append">
                                         <button type="submit" class="input-group-text bg-transparent">
                                             <i class="fa fa-search w3-text-orange"></i>
@@ -64,7 +64,7 @@
                                     <tr>
                                         <th width="30">#</th>
                                         <th width="70">Action</th>
-                                        <th>Agency Name</th>
+                                        <th>Agency Name / Contact Person</th>
                                         <th>Mobile</th>
                                         <th>Email</th>
                                         <th>License No</th>
@@ -84,7 +84,7 @@
                                                     </a>
                                                     <div class="dropdown-menu">
                                                         <a href="{{ route('admin.drivers.edit', $driver->id) }}" class="dropdown-item"><i class="fa fa-edit text-info"></i> Edit</a>
-                                                        <form action="{{ route('admin.drivers.destroy', $driver->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this driver?')">
+                                                        <form action="{{ route('admin.drivers.destroy', $driver->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this agency?')">
                                                             @csrf
                                                             @method('DELETE')
                                                             <button type="submit" class="dropdown-item text-danger"><i class="fa fa-trash"></i> Delete</button>
@@ -111,7 +111,7 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="9" class="text-danger h6 text-center py-4">No drivers found.</td>
+                                            <td colspan="9" class="text-danger h6 text-center py-4">No agencies found.</td>
                                         </tr>
                                     @endforelse
                                 </tbody>

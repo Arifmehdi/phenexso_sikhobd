@@ -5,12 +5,52 @@ namespace App\Http\Controllers;
 use App\Models\Exam;
 use App\Models\ExamAttempt;
 use App\Models\ExamAnswer;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
 class ExamController extends Controller
 {
+    /**
+     * Classes (lessons) of a course as JSON — used by the admin/teacher
+     * question & exam forms to cascade Course → Class selects.
+     */
+    public function courseClasses(Product $product)
+    {
+        $classes = $product->sections()
+            ->with(['lessons' => function ($q) {
+                $q->where('active', 1);
+            }])
+            ->get()
+            ->flatMap(function ($section) {
+                return $section->lessons->map(function ($lesson) use ($section) {
+                    return [
+                        'id' => $lesson->id,
+                        'title' => ($lesson->title_en ?: $lesson->title_bn),
+                        'section' => ($section->title_en ?: $section->title_bn),
+                    ];
+                });
+            })
+            ->values();
+
+        // Lessons that are not under any section
+        $orphans = $product->lessons()
+            ->whereNull('course_section_id')
+            ->where('active', 1)
+            ->orderBy('priority')
+            ->get()
+            ->map(function ($lesson) {
+                return [
+                    'id' => $lesson->id,
+                    'title' => ($lesson->title_en ?: $lesson->title_bn),
+                    'section' => null,
+                ];
+            });
+
+        return response()->json(['classes' => $classes->concat($orphans)->values()]);
+    }
+
     public function index()
     {
         $now = Carbon::now();
@@ -26,14 +66,19 @@ class ExamController extends Controller
             $query->visibleToStudent($user_id ?? 0);
         }
 
-        $exams = $query->latest()->paginate(10);
+        $exams = $query->with(['course', 'lesson'])->latest()->paginate(10);
 
         $completed_exams = $user_id ? ExamAttempt::where('user_id', $user_id)
             ->where('status', 'completed')
             ->with('exam')
             ->get() : collect();
 
-        return view('frontend.exams.index', compact('exams', 'completed_exams'));
+        // Classes (lessons) this user has completed — used to lock class-bound exams
+        $completed_lesson_ids = $user_id
+            ? \App\Models\LessonCompletion::where('user_id', $user_id)->pluck('course_lesson_id')->all()
+            : [];
+
+        return view('frontend.exams.index', compact('exams', 'completed_exams', 'completed_lesson_ids'));
     }
 
     public function start(Exam $exam)
@@ -45,6 +90,12 @@ class ExamController extends Controller
             $eligible = Exam::where('id', $exam->id)->visibleToStudent($user->id)->exists();
             if (!$eligible) {
                 return redirect()->route('exams.index')->with('error', 'You are not eligible to take this exam.');
+            }
+
+            // Class-bound exam: the student must finish that class first
+            if (!$exam->isClassCompletedBy($user->id)) {
+                $className = $exam->lesson ? ($exam->lesson->title_en ?: $exam->lesson->title_bn) : '';
+                return redirect()->route('exams.index')->with('error', __('frontend.exams.complete_class_first', ['class' => $className]));
             }
         }
 

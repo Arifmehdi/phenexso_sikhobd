@@ -48,20 +48,38 @@
                             <label>Number of Questions to Select</label>
                             <input type="number" name="question_count" class="form-control" value="{{ $exam->question_count }}" required>
                         </div>
-                        <div class="form-group">
-                            <label>Assign to Courses
-                                <small class="text-muted">— only students enrolled in the selected course(s) will get this exam</small>
-                            </label>
-                            <select name="course_ids[]" id="courseSelect" class="form-control select2" multiple="multiple" data-placeholder="Select Courses" style="width: 100%;">
-                                @foreach($courses as $course)
-                                    <option value="{{ $course->id }}" {{ in_array($course->id, $selected_course_ids) ? 'selected' : '' }}>
-                                        {{ $course->name_en ?? $course->name_bn }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <small class="form-text text-muted">
-                                <i class="fas fa-info-circle"></i> If you leave this empty, the exam becomes <strong>public</strong> (available to everyone).
-                            </small>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Select Course
+                                        <small class="text-muted">— only enrolled students get this exam</small>
+                                    </label>
+                                    <select name="product_id" id="courseSelect" class="form-control">
+                                        <option value="">— No course (public exam) —</option>
+                                        @foreach($courses as $course)
+                                            <option value="{{ $course->id }}" {{ $exam->product_id == $course->id ? 'selected' : '' }}>
+                                                {{ $course->name_en ?? $course->name_bn }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <small class="form-text text-muted">
+                                        <i class="fas fa-info-circle"></i> If you leave this empty, the exam becomes <strong>public</strong> (available to everyone).
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Select Class
+                                        <small class="text-muted">— students must finish this class first</small>
+                                    </label>
+                                    <select name="course_lesson_id" id="classSelect" class="form-control" data-selected="{{ $exam->course_lesson_id }}" disabled>
+                                        <option value="">— Select a course first —</option>
+                                    </select>
+                                    <small class="form-text text-muted">
+                                        <i class="fas fa-lock"></i> The exam unlocks only after the student completes the selected class.
+                                    </small>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="card-footer">
@@ -74,17 +92,15 @@
     </div>
 </section>
 
+@include('admin.questions._course_class_script')
+
 @push('js')
 <script>
     $(document).ready(function() {
-        $('.select2').select2({
-            theme: 'bootstrap4'
-        });
-
         // Warn before submit if no course is selected (exam will be public)
         $('#examForm').on('submit', function(e) {
-            var courses = $('#courseSelect').val();
-            if (!courses || courses.length === 0) {
+            var course = $('#courseSelect').val();
+            if (!course) {
                 if (!confirm('You have not selected any course.\n\nThis exam will be PUBLIC — available to EVERYONE.\n\nDo you want to continue?')) {
                     e.preventDefault();
                 }

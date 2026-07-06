@@ -460,14 +460,21 @@ class AuthController extends Controller
         $teacher_exams_count = 0;
         $teacher_questions = collect();
         $teacher_exams = collect();
+        $teacher_courses = collect();
         if ($user->hasRole('instructor') || $user->role === 'instructor' || $user->hasRole('teacher') || $user->role === 'teacher') {
-            $teacher_questions = \App\Models\Question::where('created_by', $user->id)->latest()->paginate(20, ['*'], 'questions_page');
-            $teacher_exams = \App\Models\Exam::where('created_by', $user->id)->latest()->paginate(20, ['*'], 'exams_page');
+            $teacher_questions = \App\Models\Question::with(['course', 'lesson'])->where('created_by', $user->id)->latest()->paginate(20, ['*'], 'questions_page');
+            $teacher_exams = \App\Models\Exam::with(['course', 'lesson'])->where('created_by', $user->id)->latest()->paginate(20, ['*'], 'exams_page');
             $teacher_questions_count = \App\Models\Question::where('created_by', $user->id)->count();
             $teacher_exams_count = \App\Models\Exam::where('created_by', $user->id)->count();
+            // For the bulk-upload modal's course → class selects
+            $teacher_courses = \App\Models\Product::where('type', 'course')
+                ->where('active', 1)
+                ->where('instructor_id', $user->id)
+                ->orderBy('name_en')
+                ->get();
         }
 
-        return view('user.dashboard', compact('user', 'todayOrdersCount', 'cancelOrdersCount', 'orders', 'orderItems', 'activeTab','featured_products', 'stockRequests', 'products', 'enrollments', 'ebookEnrollments', 'courseProgress', 'userCertificates', 'exams', 'completed_exams', 'teacher_questions_count', 'teacher_exams_count', 'teacher_questions', 'teacher_exams'));
+        return view('user.dashboard', compact('user', 'todayOrdersCount', 'cancelOrdersCount', 'orders', 'orderItems', 'activeTab','featured_products', 'stockRequests', 'products', 'enrollments', 'ebookEnrollments', 'courseProgress', 'userCertificates', 'exams', 'completed_exams', 'teacher_questions_count', 'teacher_exams_count', 'teacher_questions', 'teacher_exams', 'teacher_courses'));
     }
 
     public function orders(Request $request)

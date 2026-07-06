@@ -4,6 +4,7 @@
             <th width="20">SL</th>
             <th width="100">Actions</th>
             <th>Title</th>
+            <th>Course / Class</th>
             <th>Start Time</th>
             <th>End Time</th>
             <th>Questions</th>
@@ -45,6 +46,16 @@
                 </div>
             </td>
             <td>{{ $exam->title }}</td>
+            <td>
+                @if($exam->course)
+                    <span class="badge badge-info">{{ Str::limit($exam->course->name_en ?? $exam->course->name_bn, 25) }}</span>
+                    @if($exam->lesson)
+                        <br><span class="badge badge-primary mt-1">{{ Str::limit($exam->lesson->title_en ?? $exam->lesson->title_bn, 25) }}</span>
+                    @endif
+                @else
+                    <span class="text-muted">Public</span>
+                @endif
+            </td>
             <td>{{ $exam->start_time->format('d M Y, h:i A') }}</td>
             <td>{{ $exam->end_time->format('d M Y, h:i A') }}</td>
             <td>{{ $exam->questions->count() }} / {{ $exam->question_count }}</td>

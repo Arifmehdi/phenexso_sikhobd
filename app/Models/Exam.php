@@ -17,7 +17,9 @@ class Exam extends Model
         'end_time',
         'question_count',
         'status',
-        'created_by'
+        'created_by',
+        'product_id',
+        'course_lesson_id',
     ];
 
     protected $casts = [
@@ -42,6 +44,33 @@ class Exam extends Model
     public function courses()
     {
         return $this->belongsToMany(Product::class, 'course_exam', 'exam_id', 'product_id');
+    }
+
+    /** The single course this exam is set for (course → class flow). */
+    public function course()
+    {
+        return $this->belongsTo(Product::class, 'product_id');
+    }
+
+    /** The class (course lesson) this exam is set for. */
+    public function lesson()
+    {
+        return $this->belongsTo(CourseLesson::class, 'course_lesson_id');
+    }
+
+    /**
+     * Whether the given user has completed this exam's class (lesson).
+     * Exams without a class attached are always considered unlocked.
+     */
+    public function isClassCompletedBy($userId)
+    {
+        if (!$this->course_lesson_id) {
+            return true;
+        }
+
+        return LessonCompletion::where('user_id', $userId)
+            ->where('course_lesson_id', $this->course_lesson_id)
+            ->exists();
     }
 
     /**

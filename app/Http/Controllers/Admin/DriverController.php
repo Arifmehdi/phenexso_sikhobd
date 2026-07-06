@@ -82,7 +82,7 @@ class DriverController extends Controller
         User::create($data);
 
         return redirect()->route('admin.drivers.index')
-                        ->with('success', 'Driver created successfully.');
+                        ->with('success', 'Agency created successfully.');
     }
 
     /**
@@ -120,7 +120,7 @@ class DriverController extends Controller
 
         $driver->update($request->all());
 
-        return redirect()->route('admin.drivers.index')->with('success', 'Driver updated successfully.');
+        return redirect()->route('admin.drivers.index')->with('success', 'Agency updated successfully.');
     }
 
     /**
@@ -132,6 +132,6 @@ class DriverController extends Controller
     public function destroy(User $driver)
     {
         $driver->delete();
-        return redirect()->route('admin.drivers.index')->with('success', 'Driver deleted successfully.');
+        return redirect()->route('admin.drivers.index')->with('success', 'Agency deleted successfully.');
     }
 }

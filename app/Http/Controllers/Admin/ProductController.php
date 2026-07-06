@@ -773,8 +773,14 @@ class ProductController extends Controller
             ]);
         }
 
+        // Keep the previous status for the activity log
+        $previousStatus = $order->order_status;
+
+        // Normalize spelling: dropdown/config uses 'cancelled', DB/logic uses 'canceled'
+        $newStatus = $request->order_status === 'cancelled' ? 'canceled' : $request->order_status;
+
         // Update order status and assign appropriate timestamp
-        switch ($request->order_status) {
+        switch ($newStatus) {
             case 'pending':
                 $order->order_status = 'pending';
                 $order->pending_at = now();
@@ -804,8 +810,23 @@ class ProductController extends Controller
         // Save the updated order
         $order->save();
 
+        // Track the status change in the order activity log
+        $order->logActivity(
+            'status_change',
+            "Order status changed from " . ucfirst($previousStatus ?: 'new') . " to " . ucfirst($newStatus)
+        );
+
+        // If the order is canceled with money already taken, flag the advance for return
+        if ($newStatus === 'canceled' && $order->paid() > 0) {
+            $order->logActivity(
+                'refund_due',
+                "Order canceled — ৳" . number_format($order->paid(), 2) . " (advance/paid amount) must be returned to the customer.",
+                $order->paid()
+            );
+        }
+
         // If order is confirmed/delivered, approve & activate any course/e-book enrollments
-        if (in_array($request->order_status, ['confirmed', 'delivered']) && \App\Models\Enrollment::where('order_id', $order->id)->exists()) {
+        if (in_array($newStatus, ['confirmed', 'delivered']) && \App\Models\Enrollment::where('order_id', $order->id)->exists()) {
             $order->update(['admin_approval' => 'approved']);
 
             // Activate all related enrollments (courses + e-books)
@@ -819,7 +840,7 @@ class ProductController extends Controller
         if ($order->driver_id) {
             $this->createNotification(
                 'Order Status Updated',
-                "Order #{$order->id} status has been updated to {$request->order_status}.",
+                "Order #{$order->id} status has been updated to {$newStatus}.",
                 $order->driver_id,
                 null,
                 'order_status_update'
@@ -852,7 +873,10 @@ class ProductController extends Controller
             'payment_date'    => 'required|date',
             'payment_method'  => 'required|string|max:255',
             'paid_amount'     => 'required|numeric|min:0.01',
+            'payment_type'    => 'nullable|in:payment,advance',
         ]);
+
+        $paymentType = $request->payment_type ?: 'payment';
 
         // Initialize new Payment instance and assign values
         $payment                      = new Payment();
@@ -860,6 +884,7 @@ class ProductController extends Controller
         $payment->user_id            = $order->user_id;
         $payment->note               = $request->note;
         $payment->payment_method     = $request->payment_method;
+        $payment->payment_type       = $paymentType;
         $payment->transaction_id     = $request->transaction_id;
         $payment->previous_due_amount = $order->due();
         $payment->paid_amount        = $request->paid_amount;
@@ -874,6 +899,13 @@ class ProductController extends Controller
         $order->payment_status = $order->due() > 0.99 ? 'partial' : 'paid';
         $order->editedby_id    = Auth::id(); // Fix: assignment operator should be '='
         $order->save();
+
+        // Track the payment in the order activity log
+        $order->logActivity(
+            $paymentType === 'advance' ? 'advance_payment' : 'payment',
+            ($paymentType === 'advance' ? 'Advance' : 'Payment') . " of ৳{$request->paid_amount} received via {$request->payment_method}" . ($request->transaction_id ? " (Trx: {$request->transaction_id})" : ''),
+            $request->paid_amount
+        );
 
         // Automatic Enrollment for Courses & E-books once the order is paid
         if ($order->payment_status === 'paid') {
@@ -904,6 +936,71 @@ class ProductController extends Controller
         toast('Order payment successfully added.', 'success');
 
         // Redirect back to the previous page
+        return redirect()->back();
+    }
+
+
+    /**
+     * Return advance/paid money for a canceled order and track it.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Order  $order
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function orderRefund(Request $request, Order $order)
+    {
+        $request->validate([
+            'refund_date'    => 'required|date',
+            'refund_method'  => 'required|string|max:255',
+            'refund_amount'  => 'required|numeric|min:0.01',
+            'transaction_id' => 'nullable|string|max:255',
+            'note'           => 'nullable|string|max:2000',
+        ]);
+
+        // Refunds are only allowed for canceled orders
+        if ($order->order_status !== 'canceled') {
+            toast('Refund is only possible for canceled orders.', 'warning');
+            return redirect()->back();
+        }
+
+        // Cannot return more than what the customer has actually paid
+        $refundable = $order->paid();
+        if ($request->refund_amount > $refundable) {
+            toast('Refund amount cannot exceed the paid amount (৳' . number_format($refundable, 2) . ').', 'warning');
+            return redirect()->back();
+        }
+
+        // Record the refund as a payment row so it stays in the transaction history
+        $payment                       = new Payment();
+        $payment->order_id             = $order->id;
+        $payment->user_id              = $order->user_id;
+        $payment->note                 = $request->note;
+        $payment->payment_method       = $request->refund_method;
+        $payment->payment_type         = 'refund';
+        $payment->transaction_id       = $request->transaction_id;
+        $payment->previous_due_amount  = $order->due();
+        $payment->paid_amount          = $request->refund_amount;
+        $payment->due_amount           = $order->due() + $request->refund_amount;
+        $payment->payment_date         = $request->refund_date;
+        $payment->payment_status       = 'refunded';
+        $payment->addedby_id           = Auth::id();
+        $payment->save();
+
+        // Update the order's payment summary
+        $order->paid_amount    = max(0, $order->paid_amount - $request->refund_amount);
+        $order->payment_status = $order->paid() > 0 ? 'partial' : 'refunded';
+        $order->editedby_id    = Auth::id();
+        $order->save();
+
+        // Track the refund in the order activity log
+        $order->logActivity(
+            'refund',
+            "Refund of ৳{$request->refund_amount} returned to customer via {$request->refund_method}" . ($request->transaction_id ? " (Trx: {$request->transaction_id})" : ''),
+            $request->refund_amount
+        );
+
+        toast('Refund recorded successfully.', 'success');
+
         return redirect()->back();
     }
 

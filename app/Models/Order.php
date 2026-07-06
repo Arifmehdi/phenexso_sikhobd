@@ -80,15 +80,41 @@ class Order extends Model
        
     }
 
-    public function due()
+    public function activities()
     {
-        return $this->grand_total - $this->payments()->sum('paid_amount');
-       
+        return $this->hasMany(OrderActivity::class)->latest();
     }
 
+    public function due()
+    {
+        return $this->grand_total - $this->paid();
+    }
+
+    // Net amount currently held (payments + advances − refunds)
     public function paid()
     {
-        return  $this->payments()->sum('paid_amount');
+        return $this->payments()->where('payment_type', '!=', 'refund')->sum('paid_amount')
+             - $this->refunded();
+    }
+
+    public function advancePaid()
+    {
+        return $this->payments()->where('payment_type', 'advance')->sum('paid_amount');
+    }
+
+    public function refunded()
+    {
+        return $this->payments()->where('payment_type', 'refund')->sum('paid_amount');
+    }
+
+    public function logActivity($type, $description, $amount = null)
+    {
+        return $this->activities()->create([
+            'user_id'       => auth()->id(),
+            'activity_type' => $type,
+            'description'   => $description,
+            'amount'        => $amount,
+        ]);
     }
 
     public function driver()

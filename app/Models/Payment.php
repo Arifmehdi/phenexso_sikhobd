@@ -14,6 +14,7 @@ class Payment extends Model
         'user_id',
         'note',
         'payment_method',
+        'payment_type',
         'transaction_id',
         'previous_due_amount',
         'paid_amount',

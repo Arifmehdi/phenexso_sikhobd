@@ -56,6 +56,20 @@
                         </div>
                     </div>
 
+                    <div class="form-group input-group-sm row w3-light-gray mb-1">
+                        <label for="payment_type" class="col-sm-5 col-form-label">Payment Type</label>
+                        <div class="col-sm-7">
+                            <select name="payment_type" id="payment_type" class="form-control mt-1 form-control-sm" required>
+                                <option value="payment" {{ old('payment_type') == 'payment' ? 'selected' : '' }}>Regular Payment</option>
+                                <option value="advance" {{ old('payment_type') == 'advance' ? 'selected' : '' }}>Advance Payment</option>
+                            </select>
+                            <small class="text-muted">Advance is returned to the customer if the order is canceled.</small>
+                        </div>
+                        @error('payment_type')
+                            <span class="text-danger">{{ $message }}</span>
+                        @enderror
+                    </div>
+
                 </div>
             </div>
             

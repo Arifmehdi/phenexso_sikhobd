@@ -1,5 +1,5 @@
 @extends('admin.master')
-@section('title',"Admin Dashboard | Create Driver")
+@section('title',"Admin Dashboard | Create Agency")
 
 @section('body')
 <br>
@@ -15,37 +15,13 @@
 <section class="pt-3">
     <div class="card">
         <div class="card-header bg-info">
-            <div class="card-title">Create New Driver</div>
+            <div class="card-title">Create New Agency</div>
         </div>
         <form action="{{ route('admin.drivers.store') }}" method="POST">
             @csrf
             <div class="card-body w3-light-gray">
                 <div class="row py-2">
                     <div class="col-12 col-md-12 m-auto card p-5">
-
-                        <div class="form-group">
-                            <label for="name">Name</label>
-                            <input type="text" class="form-control @error('name') is-invalid @enderror" placeholder="Driver Name" name="name" value="{{ old('name') }}">
-                            @error('name')
-                            <p class="text-danger">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div class="form-group">
-                            <label for="mobile">Mobile</label>
-                            <input type="text" class="form-control @error('mobile') is-invalid @enderror" placeholder="Mobile Number" name="mobile" value="{{ old('mobile') }}">
-                            @error('mobile')
-                            <p class="text-danger">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div class="form-group">
-                            <label for="email">Email</label>
-                            <input type="email" class="form-control @error('email') is-invalid @enderror" placeholder="Email Number" name="email" value="{{ old('email') }}">
-                            @error('email')
-                            <p class="text-danger">{{ $message }}</p>
-                            @enderror
-                        </div>
 
                         <div class="form-group">
                             <label for="agency_name">Agency Name</label>
@@ -61,6 +37,30 @@
                                 <option value="Own Delivery">
                             </datalist>
                             @error('agency_name')
+                            <p class="text-danger">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="form-group">
+                            <label for="name">Contact Person Name</label>
+                            <input type="text" class="form-control @error('name') is-invalid @enderror" placeholder="Contact Person Name" name="name" value="{{ old('name') }}">
+                            @error('name')
+                            <p class="text-danger">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="form-group">
+                            <label for="mobile">Mobile</label>
+                            <input type="text" class="form-control @error('mobile') is-invalid @enderror" placeholder="Mobile Number" name="mobile" value="{{ old('mobile') }}">
+                            @error('mobile')
+                            <p class="text-danger">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" class="form-control @error('email') is-invalid @enderror" placeholder="Email Address" name="email" value="{{ old('email') }}">
+                            @error('email')
                             <p class="text-danger">{{ $message }}</p>
                             @enderror
                         </div>
@@ -120,7 +120,7 @@
             </div>
 
             <div class="card-footer text-right">
-                <input type="submit" class="btn btn-success mt-2" value="Save Driver">
+                <input type="submit" class="btn btn-success mt-2" value="Save Agency">
             </div>
         </form>
     </div>

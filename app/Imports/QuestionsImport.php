@@ -9,10 +9,14 @@ use Maatwebsite\Excel\Concerns\WithHeadingRow;
 class QuestionsImport implements ToModel, WithHeadingRow
 {
     private $userId;
+    private $productId;
+    private $courseLessonId;
 
-    public function __construct($userId = null)
+    public function __construct($userId = null, $productId = null, $courseLessonId = null)
     {
         $this->userId = $userId;
+        $this->productId = $productId;
+        $this->courseLessonId = $courseLessonId;
     }
 
     /**
@@ -33,6 +37,8 @@ class QuestionsImport implements ToModel, WithHeadingRow
             'option_d'      => trim($row['option_d']),
             'correct_option'=> trim(strtolower($row['correct_answer'])),
             'created_by'    => $this->userId,
+            'product_id'    => $this->productId,
+            'course_lesson_id' => $this->courseLessonId,
         ]);
     }
 }

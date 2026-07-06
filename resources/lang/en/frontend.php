@@ -504,6 +504,11 @@ return [
         'nav_orders'       => 'My Orders',
         'nav_exams'        => 'My Exams',
         'nav_logout'       => 'Logout',
+        'course_label'     => 'Course',
+        'class_label'      => 'Class',
+        'locked'           => 'Locked',
+        'complete_class_first' => 'Complete the class ":class" to unlock this exam',
+        'go_to_class'      => 'Go to Class',
     ],
 
     /* ── E-books ─────────────────────────────────────────────── */

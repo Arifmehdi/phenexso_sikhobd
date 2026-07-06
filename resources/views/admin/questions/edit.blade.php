@@ -16,6 +16,29 @@
                     @csrf
                     @method('PUT')
                     <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Select Course <small class="text-muted">(optional)</small></label>
+                                    <select name="product_id" id="courseSelect" class="form-control">
+                                        <option value="">— General (no course) —</option>
+                                        @foreach($courses as $course)
+                                            <option value="{{ $course->id }}" {{ $question->product_id == $course->id ? 'selected' : '' }}>
+                                                {{ $course->name_en ?? $course->name_bn }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Select Class <small class="text-muted">(optional)</small></label>
+                                    <select name="course_lesson_id" id="classSelect" class="form-control" data-selected="{{ $question->course_lesson_id }}" disabled>
+                                        <option value="">— Select a course first —</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
                         <div class="form-group">
                             <label>Question Text</label>
                             <textarea name="question_text" class="form-control" rows="3" required>{{ $question->question_text }}</textarea>
@@ -69,4 +92,6 @@
         </div>
     </div>
 </section>
+
+@include('admin.questions._course_class_script')
 @endsection

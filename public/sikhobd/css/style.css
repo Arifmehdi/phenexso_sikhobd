@@ -621,6 +621,8 @@ main { padding-top: 0; }
   .lang-switch button { padding: 5px 9px; font-size: 11px; }
 }
 
-/* Ensure Quick View Modals are always above sticky header */
-#quickViewModal, #ebookQuickViewModal { z-index: 9999 !important; }
-.modal-backdrop.show { z-index: 9990 !important; }
+/* Ensure ALL Bootstrap modals are above sticky header (1100) and drawers
+   (1300-2100), and always above their own backdrop. Backdrop must stay
+   BELOW the modal, otherwise the modal appears dimmed/blurred behind it. */
+.modal { z-index: 9010 !important; }
+.modal-backdrop, .modal-backdrop.show { z-index: 9000 !important; }

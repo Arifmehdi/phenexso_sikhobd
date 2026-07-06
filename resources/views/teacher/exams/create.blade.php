@@ -46,18 +46,34 @@
                             <input type="number" name="question_count" class="form-control" required min="1">
                             <small class="text-muted">Total questions students will see.</small>
                         </div>
-                        <div class="form-group mb-3">
-                            <label class="fw-bold mb-2">Assign to Courses
-                                <small class="text-muted">— only students enrolled in the selected course(s) will get this exam</small>
-                            </label>
-                            <select name="course_ids[]" id="courseSelect" class="form-select select2" multiple="multiple" data-placeholder="Select your courses" style="width: 100%;">
-                                @forelse($courses as $course)
-                                    <option value="{{ $course->id }}">{{ $course->name_en ?? $course->name_bn }}</option>
-                                @empty
-                                    <option value="" disabled>You have no assigned courses</option>
-                                @endforelse
-                            </select>
-                            <small class="text-muted">Only the courses assigned to you are shown. Leave empty to make it public.</small>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label class="fw-bold mb-2">Select Course
+                                        <small class="text-muted">— only enrolled students get this exam</small>
+                                    </label>
+                                    <select name="product_id" id="courseSelect" class="form-select">
+                                        <option value="">— No course (public exam) —</option>
+                                        @forelse($courses as $course)
+                                            <option value="{{ $course->id }}" {{ old('product_id') == $course->id ? 'selected' : '' }}>{{ $course->name_en ?? $course->name_bn }}</option>
+                                        @empty
+                                            <option value="" disabled>You have no assigned courses</option>
+                                        @endforelse
+                                    </select>
+                                    <small class="text-muted">Only the courses assigned to you are shown. Leave empty to make it public.</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label class="fw-bold mb-2">Select Class
+                                        <small class="text-muted">— students must finish this class first</small>
+                                    </label>
+                                    <select name="course_lesson_id" id="classSelect" class="form-select" data-selected="{{ old('course_lesson_id') }}" disabled>
+                                        <option value="">— Select a course first —</option>
+                                    </select>
+                                    <small class="text-muted">The exam unlocks only after the student completes the selected class.</small>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="card-footer bg-light p-4" style="border-radius: 0 0 15px 15px;">
@@ -71,12 +87,4 @@
 </div>
 @endsection
 
-@push('js')
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-<script>
-    $(document).ready(function() {
-        $('.select2').select2();
-    });
-</script>
-@endpush
+@include('admin.questions._course_class_script')

@@ -1,5 +1,5 @@
 @extends('admin.master')
-@section('title',"Admin Dashboard | Edit Driver")
+@section('title',"Admin Dashboard | Edit Agency")
 
 @section('body')
 <br>
@@ -15,7 +15,7 @@
 <section class="pt-3">
     <div class="card">
         <div class="card-header bg-info">
-            <div class="card-title">Edit Driver</div>
+            <div class="card-title">Edit Agency</div>
         </div>
         <form action="{{ route('admin.drivers.update', $driver->id) }}" method="POST">
             @csrf
@@ -25,8 +25,26 @@
                     <div class="col-12 col-md-12 m-auto card p-5">
 
                         <div class="form-group">
-                            <label for="name">Name</label>
-                            <input type="text" class="form-control @error('name') is-invalid @enderror" placeholder="Driver Name" name="name" value="{{ old('name', $driver->name) }}">
+                            <label for="agency_name">Agency Name</label>
+                            <input type="text" class="form-control @error('agency_name') is-invalid @enderror" placeholder="e.g. Steadfast, Sundarban..." name="agency_name" value="{{ old('agency_name', $driver->agency_name) }}" list="agency_list">
+                            <datalist id="agency_list">
+                                <option value="Steadfast">
+                                <option value="Sundarban Courier">
+                                <option value="Pathao">
+                                <option value="RedX">
+                                <option value="Paperfly">
+                                <option value="eCourier">
+                                <option value="SA Paribahan">
+                                <option value="Own Delivery">
+                            </datalist>
+                            @error('agency_name')
+                            <p class="text-danger">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="form-group">
+                            <label for="name">Contact Person Name</label>
+                            <input type="text" class="form-control @error('name') is-invalid @enderror" placeholder="Contact Person Name" name="name" value="{{ old('name', $driver->name) }}">
                             @error('name')
                             <p class="text-danger">{{ $message }}</p>
                             @enderror
@@ -43,24 +61,6 @@
                             <label for="mobile">Mobile</label>
                             <input type="text" class="form-control @error('mobile') is-invalid @enderror" placeholder="Mobile Number" name="mobile" value="{{ old('mobile', $driver->mobile) }}">
                             @error('mobile')
-                            <p class="text-danger">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div class="form-group">
-                            <label for="agency_name">Agency Name</label>
-                            <input type="text" class="form-control @error('agency_name') is-invalid @enderror" placeholder="e.g. Steadfast, Sundarban..." name="agency_name" value="{{ old('agency_name', $driver->agency_name) }}" list="agency_list">
-                            <datalist id="agency_list">
-                                <option value="Steadfast">
-                                <option value="Sundarban Courier">
-                                <option value="Pathao">
-                                <option value="RedX">
-                                <option value="Paperfly">
-                                <option value="eCourier">
-                                <option value="SA Paribahan">
-                                <option value="Own Delivery">
-                            </datalist>
-                            @error('agency_name')
                             <p class="text-danger">{{ $message }}</p>
                             @enderror
                         </div>
@@ -120,7 +120,7 @@
             </div>
 
             <div class="card-footer text-right">
-                <input type="submit" class="btn btn-success mt-2" value="Update Driver">
+                <input type="submit" class="btn btn-success mt-2" value="Update Agency">
             </div>
         </form>
     </div>

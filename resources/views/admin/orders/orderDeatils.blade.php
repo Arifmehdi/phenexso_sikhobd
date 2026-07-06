@@ -34,13 +34,21 @@
                         {{-- List of all ordered items --}}
                         @include('admin.orders.sections.order_items', ['order' => $order])
 
-                        {{-- Show payment form only if order has due --}}
-                        @if($order->due() > 0)
-                            @include('admin.orders.sections.order_payment_form', ['order' => $order])    
+                        {{-- Show payment form only if order has due and is not canceled --}}
+                        @if($order->due() > 0 && $order->order_status !== 'canceled')
+                            @include('admin.orders.sections.order_payment_form', ['order' => $order])
+                        @endif
+
+                        {{-- Show refund form when a canceled order still holds customer money --}}
+                        @if($order->order_status === 'canceled' && $order->paid() > 0)
+                            @include('admin.orders.sections.refund_form', ['order' => $order])
                         @endif
 
                         {{-- Display payment/transaction history --}}
                         @include('admin.orders.sections.transaction_history', ['order' => $order])
+
+                        {{-- Display order activity log (payments, advances, refunds, status changes) --}}
+                        @include('admin.orders.sections.activity_log', ['order' => $order])
 
                  
                 </div>

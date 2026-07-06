@@ -350,7 +350,7 @@
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
                                 <a href="{{ route('admin.drivers.index') }}" class="nav-link {{ session('lsbsm') == 'allDrivers' ? 'active' : '' }}">
-                                    <i class="fas fa-motorcycle nav-icon"></i>
+                                    <i class="fas fa-building nav-icon"></i>
                                     <p>Agency</p>
                                 </a>
                             </li>

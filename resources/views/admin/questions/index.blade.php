@@ -47,6 +47,25 @@
                         </div>
                     </div>
 
+                    <div class="card-body py-2 border-bottom">
+                        <form method="GET" action="{{ route('admin.questions.index') }}" class="form-inline">
+                            <label class="mr-2 mb-0"><i class="fas fa-filter text-muted"></i> Filter:</label>
+                            <select name="course_id" id="courseSelect" class="form-control form-control-sm mr-2" style="max-width: 250px;">
+                                <option value="">All Courses</option>
+                                @foreach($courses as $course)
+                                    <option value="{{ $course->id }}" {{ request('course_id') == $course->id ? 'selected' : '' }}>
+                                        {{ $course->name_en ?? $course->name_bn }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <select name="class_id" id="classSelect" class="form-control form-control-sm mr-2" style="max-width: 250px;" data-selected="{{ request('class_id') }}" {{ request('course_id') ? '' : 'disabled' }}>
+                                <option value="">All Classes</option>
+                            </select>
+                            <button type="submit" class="btn btn-sm btn-primary mr-2">Apply</button>
+                            <a href="{{ route('admin.questions.index') }}" class="btn btn-sm btn-outline-secondary">Reset</a>
+                        </form>
+                    </div>
+
                     <div class="card-body p-0 mb-0">
                         <div class="table-responsive data-container">
                             @include('admin.questions.search_data')
@@ -72,6 +91,21 @@
         </div>
         <div class="modal-body">
           <div class="form-group">
+            <label>Select Course <small class="text-muted">(optional — all imported questions get tagged to it)</small></label>
+            <select name="product_id" id="bulkCourseSelect" class="form-control">
+                <option value="">— General (no course) —</option>
+                @foreach($courses as $course)
+                    <option value="{{ $course->id }}">{{ $course->name_en ?? $course->name_bn }}</option>
+                @endforeach
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Select Class <small class="text-muted">(optional)</small></label>
+            <select name="course_lesson_id" id="bulkClassSelect" class="form-control" disabled>
+                <option value="">— Select a course first —</option>
+            </select>
+          </div>
+          <div class="form-group">
             <label>Select Excel/CSV/TXT File</label>
             <input type="file" name="file" class="form-control" required>
             <small class="text-muted">Supported formats: .xlsx, .xls, .csv, .txt</small>
@@ -85,11 +119,32 @@
     </div>
   </div>
 </div>
+@include('admin.questions._course_class_script')
 @endsection
 
 @push('js')
 <script>
     $(document).ready(function() {
+        // Course → Class cascade for the Bulk Upload modal
+        var bulkUrlTemplate = "{{ route('course.classes.json', ['product' => 'PRODUCT_ID']) }}";
+        $('#bulkCourseSelect').on('change', function () {
+            var courseId = $(this).val();
+            var $class = $('#bulkClassSelect');
+            if (!courseId) {
+                $class.prop('disabled', true).html('<option value="">— Select a course first —</option>');
+                return;
+            }
+            $class.prop('disabled', true).html('<option value="">Loading classes...</option>');
+            $.get(bulkUrlTemplate.replace('PRODUCT_ID', courseId), function (res) {
+                var options = '<option value="">— Whole course (no specific class) —</option>';
+                (res.classes || []).forEach(function (c) {
+                    var label = (c.section ? c.section + ' › ' : '') + c.title;
+                    options += '<option value="' + c.id + '">' + $('<div>').text(label).html() + '</option>';
+                });
+                $class.html(options).prop('disabled', false);
+            });
+        });
+
         $(document).on('keyup', ".global-search", function(e){
             e.preventDefault();
             var that = $( this );

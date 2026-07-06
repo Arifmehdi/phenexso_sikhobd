@@ -1026,6 +1026,18 @@
         .swal2-container {
             z-index: 9999 !important;
         }
+
+        /* Bootstrap modals default to z-index 1055 which is BELOW the sticky
+           .site-header (1100, with backdrop-filter blur) and the drawers/overlays
+           (1300–2100). Lift them above all site chrome, but keep them under
+           SweetAlert (9999) so confirm dialogs can appear over a modal. */
+        .modal-backdrop,
+        .modal-backdrop.show {
+            z-index: 9000 !important;
+        }
+        .modal {
+            z-index: 9010 !important;
+        }
     </style>
 
     @stack('css')

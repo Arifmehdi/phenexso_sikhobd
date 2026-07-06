@@ -4,6 +4,8 @@
             <th width="20">SL</th>
             <th width="100">Action</th>
             <th>Question</th>
+            <th>Course</th>
+            <th>Class</th>
             <th>Correct Option</th>
         </tr>
     </thead>
@@ -29,6 +31,20 @@
                 </div>
             </td>
             <td>{{ Str::limit($question->question_text, 100) }}</td>
+            <td>
+                @if($question->course)
+                    <span class="badge badge-info">{{ Str::limit($question->course->name_en ?? $question->course->name_bn, 30) }}</span>
+                @else
+                    <span class="text-muted">General</span>
+                @endif
+            </td>
+            <td>
+                @if($question->lesson)
+                    <span class="badge badge-primary">{{ Str::limit($question->lesson->title_en ?? $question->lesson->title_bn, 30) }}</span>
+                @else
+                    <span class="text-muted">—</span>
+                @endif
+            </td>
             <td><span class="badge badge-success">{{ strtoupper($question->correct_option) }}</span></td>
         </tr>
         @endforeach
