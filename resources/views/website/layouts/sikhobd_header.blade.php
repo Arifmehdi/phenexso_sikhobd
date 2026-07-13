@@ -39,8 +39,8 @@
 
       {{-- Desktop: Language pill --}}
       <div class="lang-switch sh-lang-pill sh-dsk" role="group" aria-label="Language">
-        <button data-lang="bn">বাং</button>
-        <button data-lang="en">EN</button>
+        <button data-lang="bn" class="{{ app()->getLocale() == 'bn' ? 'active' : '' }}">বাং</button>
+        <button data-lang="en" class="{{ app()->getLocale() == 'en' ? 'active' : '' }}">EN</button>
       </div>
 
       {{-- Desktop: User dropdown --}}

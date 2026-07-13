@@ -337,8 +337,13 @@ document.addEventListener('click', (e) => {
   }
 });
 
+// The server session (via /language/change) is the source of truth for language.
+// <html lang="..."> reflects it on every page load; localStorage is only a
+// fallback and must NOT override it (a stale "en" would force English on a
+// site whose default/session locale is Bangla).
 const savedLang = (() => { try { return localStorage.getItem('lang'); } catch (_) { return null; } })();
-applyLang(savedLang || document.documentElement.lang || 'bn');
+const serverLang = (document.documentElement.lang || '').slice(0, 2);
+applyLang(serverLang || savedLang || 'bn');
 
 /* ---------- Course detail tabs ---------- */
 document.querySelectorAll('.cd-tabs button').forEach((b) => {

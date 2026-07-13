@@ -82,6 +82,7 @@
                                         <label for="feature_image" class="col-sm-4 col-form-label">Feature Image</label>
                                         <div class="col-sm-6">
                                             <input type="file" class="form-control-file" id="feature_image" name="feature_image" value="{{old('feature_image')}}">
+                                            <small class="form-text text-muted">Image size <strong>750 x 422</strong> pixels.</small>
                                         </div>
                                         @error('feature_image')
                                         <span style="color: red">{{ $message }}</span>
@@ -109,7 +110,6 @@
 @push('js')
 <script>
     $(document).ready(function(){
-   
 
      $(document).on('click', '.copyboard', function(e) {
             e.preventDefault();

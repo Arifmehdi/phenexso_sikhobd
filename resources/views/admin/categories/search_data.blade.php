@@ -1,28 +1,32 @@
-<table id="example1" class="table table-sm table-bordered table-striped">
-    <thead>
+<table class="table table-striped table-bordered table-hover table-md">
+    <thead class="w3-small text-muted thead-light">
     <tr>
-        <th width="20">SL</th>
-        <th width="100">Action</th>
-        <th>Name</th>
-        <th>Active</th>
+        <th scope="col" width="30">SL</th>
+        <th scope="col" width="60">Action</th>
+        <th scope="col">Name</th>
+        <th scope="col">Active</th>
     </tr>
     </thead>
     <tbody>
         <?php $i = (($categories->currentPage() - 1) * $categories->perPage() + 1); ?>
-    @foreach($categories as $category)
+    @forelse($categories as $category)
         <tr>
-            <td>{{$i++}}</td>
-            <td>
-                <a href="{{route('categories.show',$category->id)}}" class="btn btn-xs btn-outline-info mr-1 float-left"><i class="fa fa-eye"></i></a>
-                <a href="{{route('categories.edit',$category->id)}}" class="btn btn-xs btn-outline-primary mr-1 float-left"><i class="fa fa-edit"></i></a>
-
-                <form action="{{route('categories.destroy',$category->id)}}" method="post" onclick="return confirm('Are you sure you want to delete this item?');">
-                    @csrf
-                    @method('DELETE')
-
-                    <button type="submit" class="btn btn-xs btn-outline-danger mr-1 float-left" style="cursor: pointer;"><i class="fa fa-trash"></i></button>
-
-                </form>
+            <td scope="row">{{$i++}}</td>
+            <td scope="row">
+                <div class="dropdown show">
+                    <a class="btn btn-primary btn-xs dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Action
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                        <a href="{{ route('categories.show', $category->id) }}" class="dropdown-item"><i class="fa fa-eye"></i> View</a>
+                        <a href="{{ route('categories.edit', $category->id) }}" class="dropdown-item"><i class="fa fa-edit"></i> Edit</a>
+                        <form action="{{ route('categories.destroy', $category->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this item?')">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="dropdown-item"><i class="fa fa-trash"></i> Delete</button>
+                        </form>
+                    </div>
+                </div>
             </td>
             <td>{{$category->name}}</td>
             <td>
@@ -30,7 +34,11 @@
             </td>
 
         </tr>
-    @endforeach
+    @empty
+        <tr>
+            <td colspan="4" class="text-danger h5 text-center">No Category Found</td>
+        </tr>
+    @endforelse
     </tbody>
 </table>
 

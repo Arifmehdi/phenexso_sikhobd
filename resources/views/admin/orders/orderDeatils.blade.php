@@ -39,9 +39,21 @@
                             @include('admin.orders.sections.order_payment_form', ['order' => $order])
                         @endif
 
-                        {{-- Show refund form when a canceled order still holds customer money --}}
-                        @if($order->order_status === 'canceled' && $order->paid() > 0)
-                            @include('admin.orders.sections.refund_form', ['order' => $order])
+                        {{-- Canceled order: refund form while customer money is held, otherwise explain why there is nothing to refund --}}
+                        @if($order->order_status === 'canceled')
+                            @if($order->paid() > 0)
+                                @include('admin.orders.sections.refund_form', ['order' => $order])
+                            @elseif($order->refunded() > 0)
+                                <div class="alert alert-success py-2 mb-3">
+                                    <i class="fas fa-check-circle"></i> This order is <strong>canceled</strong> and the customer's money has been
+                                    <strong>fully refunded</strong> (৳{{ number_format($order->refunded(), 2) }}). See the transaction history below.
+                                </div>
+                            @else
+                                <div class="alert alert-secondary py-2 mb-3">
+                                    <i class="fas fa-info-circle"></i> This order is <strong>canceled</strong>. No payment was recorded for it,
+                                    so there is nothing to refund.
+                                </div>
+                            @endif
                         @endif
 
                         {{-- Display payment/transaction history --}}

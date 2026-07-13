@@ -77,8 +77,8 @@ class PostController extends Controller
             $image = $request->file('feature_image');
             $image_ex =  $image->getClientOriginalExtension();
             $file_path = date('ymdhis') . '.' . $image_ex;
-            Image::make($image)->resize(1200, 500);
-            $image->storeAs('post_images', $file_path, 'public');
+            $resized = Image::make($image)->fit(750, 422)->encode($image_ex);
+            Storage::disk('public')->put('post_images/' . $file_path, $resized);
         } else {
             $file_path =  null;
         }
@@ -166,7 +166,8 @@ class PostController extends Controller
                 $image = $request->file('feature_image');
                 $image_ex =  $image->getClientOriginalExtension();
                 $file_path = date('ymdhis') . '.' . $image_ex;
-                $image->storeAs('post_images', $file_path, 'public');
+                $resized = Image::make($image)->fit(750, 422)->encode($image_ex);
+                Storage::disk('public')->put('post_images/' . $file_path, $resized);
             } else {
                 $file_path =  $blogPost->feature_image;
             }

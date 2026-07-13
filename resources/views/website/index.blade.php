@@ -753,8 +753,9 @@
     transition: all .25s;
   }
   .blog-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
-  .blog-thumb { aspect-ratio: 16 / 9; overflow: hidden; }
-  .blog-thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform .5s; }
+  /* contain (not cover) so any uploaded image size shows fully, never cropped */
+  .blog-thumb { aspect-ratio: 16 / 9; overflow: hidden; background: #f1f5f9; }
+  .blog-thumb img { width: 100%; height: 100%; object-fit: contain; transition: transform .5s; }
   .blog-card:hover .blog-thumb img { transform: scale(1.05); }
   .blog-body { padding: 20px; }
   .blog-cat { font-size: 12px; font-weight: 700; color: var(--accent); text-transform: uppercase; display: block; margin-bottom: 8px; }

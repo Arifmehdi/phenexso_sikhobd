@@ -1,28 +1,34 @@
-<table id="example1" class="table table-sm table-bordered table-striped">
-    <thead>
+<table class="table table-striped table-bordered table-hover table-md">
+    <thead class="w3-small text-muted thead-light">
     <tr>
-        <th width="20">SL</th>
-        <th width="100">Action</th>
-        <th>Title</th>
-        <th>Image</th>
-        <th>Active</th>
-        <th>Status</th>
+        <th scope="col" width="30">SL</th>
+        <th scope="col" width="60">Action</th>
+        <th scope="col">Title</th>
+        <th scope="col">Image</th>
+        <th scope="col">Active</th>
+        <th scope="col">Status</th>
     </tr>
     </thead>
     <tbody>
         <?php $i = (($newses->currentPage() - 1) * $newses->perPage() + 1); ?>
-    @foreach($newses as $news)
+    @forelse($newses as $news)
         <tr>
-            <td>{{$i++}}</td>
-            <td>
-                <a href="{{route('news.show',$news->id)}}" class="btn btn-xs btn-outline-info mr-1 float-left"><i class="fa fa-eye"></i></a>
-                <a href="{{route('news.edit',$news->id)}}" class="btn btn-xs btn-outline-primary mr-1 float-left"><i class="fa fa-edit"></i></a>
-
-                <form action="{{route('news.destroy',$news->id)}}" method="post" onclick="return confirm('Are you sure you want to delete this item?');">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-xs btn-outline-danger mr-1 float-left" style="cursor: pointer;"><i class="fa fa-trash"></i></button>
-                </form>
+            <td scope="row">{{$i++}}</td>
+            <td scope="row">
+                <div class="dropdown show">
+                    <a class="btn btn-primary btn-xs dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Action
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                        <a href="{{ route('news.show', $news->id) }}" class="dropdown-item"><i class="fa fa-eye"></i> View</a>
+                        <a href="{{ route('news.edit', $news->id) }}" class="dropdown-item"><i class="fa fa-edit"></i> Edit</a>
+                        <form action="{{ route('news.destroy', $news->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this item?')">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="dropdown-item"><i class="fa fa-trash"></i> Delete</button>
+                        </form>
+                    </div>
+                </div>
             </td>
             <td>{{$news->title}}</td>
             <td>
@@ -34,10 +40,11 @@
             <td>{{$news->status}}</td>
 
         </tr>
-    @endforeach
+    @empty
+        <tr>
+            <td colspan="6" class="text-danger h5 text-center">No News Found</td>
+        </tr>
+    @endforelse
     </tbody>
 </table>
 {{ $newses->render() }}
-
-
-

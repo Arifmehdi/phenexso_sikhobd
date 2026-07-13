@@ -757,7 +757,6 @@
                 @endphp
                 <div class="course-row">
                     <div class="thumb" style="--c1:#6c5ce7;--c2:#a29bfe;">
-                        E
                     </div>
                     <div class="body">
                         <h4>{{ $exam->title }}</h4>
@@ -851,6 +850,7 @@
                         <thead>
                             <tr>
                                 <th>Question Text</th>
+                                <th>Course / Class</th>
                                 <th>Correct Option</th>
                                 <th>Action</th>
                             </tr>
@@ -859,6 +859,16 @@
                             @forelse($teacher_questions as $question)
                             <tr>
                                 <td>{{ Str::limit($question->question_text, 100) }}</td>
+                                <td style="font-size: 12px;">
+                                    @if($question->course)
+                                        {{ Str::limit($question->course->name_en ?? $question->course->name_bn, 25) }}
+                                        @if($question->lesson)
+                                            <br><span style="color: var(--text-soft);">{{ Str::limit($question->lesson->title_en ?? $question->lesson->title_bn, 25) }}</span>
+                                        @endif
+                                    @else
+                                        <span style="color: var(--text-soft);">General</span>
+                                    @endif
+                                </td>
                                 <td><span class="status-pill status-approved">{{ strtoupper($question->correct_option) }}</span></td>
                                 <td>
                                     <div class="btn-group-custom">
@@ -872,7 +882,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="3" class="empty-state">You haven't created any questions yet.</td>
+                                <td colspan="4" class="empty-state">You haven't created any questions yet.</td>
                             </tr>
                             @endforelse
                         </tbody>
@@ -968,6 +978,21 @@
                     <div class="alert alert-info" style="font-size: 13px;">
                         <i class="fa-solid fa-circle-info"></i> Please use our demo CSV format. The first row should be headers: <strong>Question, Option_A, Option_B, Option_C, Option_D, Correct_Answer</strong>.
                     </div>
+                    <div class="form-group mb-3">
+                        <label class="custom-label">Select Course <small class="text-muted">(optional — every imported question gets tagged to it)</small></label>
+                        <select name="product_id" id="bulkCourseSelect" class="form-select">
+                            <option value="">— General (no course) —</option>
+                            @foreach($teacher_courses ?? [] as $tCourse)
+                                <option value="{{ $tCourse->id }}">{{ $tCourse->name_en ?? $tCourse->name_bn }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label class="custom-label">Select Class <small class="text-muted">(optional)</small></label>
+                        <select name="course_lesson_id" id="bulkClassSelect" class="form-select" disabled>
+                            <option value="">— Select a course first —</option>
+                        </select>
+                    </div>
                     <div class="form-group">
                         <label class="custom-label">Select File (.csv, .xlsx, .xls)</label>
                         <input type="file" name="file" class="custom-input" required accept=".csv, .xlsx, .xls">
@@ -983,6 +1008,49 @@
 </div>
 
 <script>
+    // Course → Class cascade for the Bulk Upload modal (vanilla JS)
+    (function () {
+        var courseSel = document.getElementById('bulkCourseSelect');
+        var classSel = document.getElementById('bulkClassSelect');
+        if (!courseSel || !classSel) return;
+
+        var urlTemplate = "{{ route('course.classes.json', ['product' => 'PRODUCT_ID']) }}";
+
+        courseSel.addEventListener('change', function () {
+            var courseId = courseSel.value;
+            if (!courseId) {
+                classSel.disabled = true;
+                classSel.innerHTML = '<option value="">— Select a course first —</option>';
+                return;
+            }
+            classSel.disabled = true;
+            classSel.innerHTML = '<option value="">Loading classes...</option>';
+
+            fetch(urlTemplate.replace('PRODUCT_ID', courseId), { headers: { 'Accept': 'application/json' } })
+                .then(function (res) { return res.json(); })
+                .then(function (data) {
+                    var classes = data.classes || [];
+                    var html = '<option value="">— Whole course (no specific class) —</option>';
+                    classes.forEach(function (c) {
+                        var label = (c.section ? c.section + ' › ' : '') + c.title;
+                        var opt = document.createElement('option');
+                        opt.value = c.id;
+                        opt.textContent = label;
+                        html += opt.outerHTML;
+                    });
+                    if (classes.length === 0) {
+                        html = '<option value="">— This course has no classes yet —</option>';
+                    }
+                    classSel.innerHTML = html;
+                    classSel.disabled = false;
+                })
+                .catch(function () {
+                    classSel.innerHTML = '<option value="">Could not load classes</option>';
+                    classSel.disabled = false;
+                });
+        });
+    })();
+
     // Tab switching
     function switchOrderView(view) {
         var inv = document.getElementById('orders-view-invoice');

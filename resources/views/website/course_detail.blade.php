@@ -114,12 +114,16 @@
                   return $l->is_free && ($l->video_url || $l->video_file);
               });
           @endphp
-          <div class="cd-hero" style="background-image: url('{{ route('imagecache', ['template' => 'large', 'filename' => $product->fi()]) }}'); background-size: contain; background-repeat: no-repeat; background-position: center; position: relative; margin-bottom: 30px;">
+          {{-- The box height follows the uploaded image, so any size/ratio shows FULLY (no crop, no empty bars) --}}
+          <div class="cd-hero" style="position: relative; margin-bottom: 30px; aspect-ratio: auto; display: block; height: auto;">
+            <img src="{{ route('imagecache', ['template' => 'original', 'filename' => $product->fi()]) }}"
+                 alt="{{ lp($product, 'name') }}"
+                 style="display:block; width:100%; height:auto;">
             @if($previewLesson)
-            <div class="play" onclick="window.renderLesson({{ $previewLesson->id }})" style="cursor:pointer;" title="{{ app()->getLocale() == 'bn' ? 'ফ্রি প্রিভিউ দেখুন' : 'Watch free preview' }}">
+            <div class="play" onclick="window.renderLesson({{ $previewLesson->id }})" style="cursor:pointer; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); z-index:1;" title="{{ app()->getLocale() == 'bn' ? 'ফ্রি প্রিভিউ দেখুন' : 'Watch free preview' }}">
                 <i class="fa-solid fa-play"></i>
             </div>
-            <span style="position:absolute; bottom:14px; left:14px; background:rgba(0,0,0,0.6); color:#fff; font-size:12px; font-weight:600; padding:4px 12px; border-radius:20px;">
+            <span style="position:absolute; bottom:14px; left:14px; z-index:1; background:rgba(0,0,0,0.6); color:#fff; font-size:12px; font-weight:600; padding:4px 12px; border-radius:20px;">
                 <i class="fa-solid fa-circle-play"></i> {{ app()->getLocale() == 'bn' ? 'ফ্রি প্রিভিউ' : 'Free Preview' }}
             </span>
             @endif

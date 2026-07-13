@@ -63,11 +63,11 @@ class SearchController extends Controller
         }
         elseif($type == 'post')
         {
-             $blog_posts = BlogPost::where('title', 'like', "%". $q."%")
+             $newses = BlogPost::where('title', 'like', "%". $q."%")
              ->orWhere('id', 'like', "%". $q ."%")
-             ->orderBy('title')
-             ->paginate(100);
-             $html = view('admin.blog-post.search_data', ['blog_posts' => $blog_posts]);
+             ->latest()
+             ->paginate(50);
+             $html = view('admin.news.search_data', ['newses' => $newses]);
         }
 
         elseif($type == 'category')

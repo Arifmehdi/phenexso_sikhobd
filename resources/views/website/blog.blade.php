@@ -32,7 +32,7 @@
                     <article class="blog-item-large">
                         <div class="bil-thumb">
                             <a href="{{ route('singleNews', $post->id) }}">
-                                <img src="{{ route('imagecache', ['template'=>'medium','filename' => $post->fi()]) }}" alt="{{$post->title}}">
+                                <img src="{{ route('imagecache', ['template'=>'original','filename' => $post->fi()]) }}" alt="{{$post->title}}">
                             </a>
                             <span class="bil-cat">{{ $post->category->name_en ?? 'News' }}</span>
                         </div>
@@ -117,8 +117,9 @@
         overflow: hidden; margin-bottom: 40px; transition: all 0.3s;
     }
     .blog-item-large:hover { box-shadow: var(--shadow-md); transform: translateY(-4px); }
-    .bil-thumb { position: relative; aspect-ratio: 21/9; overflow: hidden; }
-    .bil-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    /* 16:9 box (matches the recommended 750x422) + contain so any size shows fully */
+    .bil-thumb { position: relative; aspect-ratio: 16/9; overflow: hidden; background: #f1f5f9; }
+    .bil-thumb img { width: 100%; height: 100%; object-fit: contain; }
     .bil-cat { 
         position: absolute; top: 20px; left: 20px; background: var(--accent); color: #fff;
         padding: 4px 12px; border-radius: var(--radius-full); font-size: 12px; font-weight: 700;

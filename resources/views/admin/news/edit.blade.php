@@ -102,6 +102,7 @@
                                     <label for="feature_image" class="col-sm-4 col-form-label">Feature Image</label>
                                     <div class="col-sm-6">
                                         <input type="file" class="form-control-file" id="feature_image" name="feature_image">
+                                        <small class="form-text text-muted">Image size <strong>750 x 422</strong> pixels.</small>
                                     </div>
                                    <img  src="{{ route('imagecache', ['template' => 'ppsm', 'filename' => $news->fi()]) }}" alt="news">
                                     @error('feature_image')
@@ -130,6 +131,7 @@
 @push('js')
 <script>
     $(document).ready(function(){
+
      $('[data-category-id]').on('change',function(){
         console.clear();
         if(this.checked){

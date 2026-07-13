@@ -69,6 +69,16 @@
                 <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
             </li>
 
+            @if(!empty($ws))
+            <li class="nav-item d-flex align-items-center">
+                {{-- Same logo the frontend header uses (looks right on white background) --}}
+                <a class="nav-link py-0" href="{{ route('admin.dashboard') }}" title="{{ $ws->name ?? 'Dashboard' }}">
+                    <img src="{{ route('imagecache', ['template' => 'original', 'filename' => $ws->logo_alt()]) }}"
+                         alt="{{ $ws->name ?? 'Logo' }}" style="max-height: 38px; width: auto;">
+                </a>
+            </li>
+            @endif
+
             <li class="nav-item">
                <a class="nav-link" target="_blank"  href="{{ url('/') }}" style="color:rgb(119, 154, 250)">
                   <i class="fas fa-globe"></i>
@@ -109,6 +119,15 @@
 
 
     <aside class="main-sidebar sidebar-dark-primary elevation-4">
+
+        @if(!empty($ws))
+        {{-- Same logo + white-invert trick the frontend footer uses on its dark background --}}
+        <a href="{{ route('admin.dashboard') }}" class="brand-link text-center" style="padding: 10px;">
+            <img src="{{ route('imagecache', ['template' => 'original', 'filename' => $ws->logo()]) }}"
+                 alt="{{ $ws->name ?? 'Logo' }}"
+                 style="max-height: 48px; max-width: 85%; width: auto; filter: brightness(0) invert(1);">
+        </a>
+        @endif
 
         <div class="sidebar">
 
