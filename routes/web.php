@@ -64,7 +64,6 @@ Route::get('/debug-sentry', function () {
     throw new Exception('Sentry is working!');
 });
 
-
 // // SSLCOMMERZ Start
 // Route::get('/example1', [SslCommerzPaymentController::class, 'exampleEasyCheckout']);
 // Route::get('/example2', [SslCommerzPaymentController::class, 'exampleHostedCheckout']);

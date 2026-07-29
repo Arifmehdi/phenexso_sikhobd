@@ -73,6 +73,11 @@
                                     </label>
                                     <textarea name="facebook_pixel_code" class="form-control" rows="10" id="facebook_pixel_code" placeholder="Facebook Pixel Code (Tracking Code)">{{ old('facebook_pixel_code') ?: $websiteParameter->facebook_pixel_code ?? '' }}</textarea>
                                 </div>
+
+                                <div class="form-group ">
+                                    <label for="iframe_map" class="  control-label">Iframe Map</label>
+                                    <input type="text" name="iframe_map" class="form-control" value="{{ old('iframe_map') ?: $websiteParameter->iframe_map ?? '' }}" id="iframe_map" placeholder="Iframe Map" autocomplete="off">
+                                </div>
                             </div>
                         </div>
 
@@ -90,6 +95,16 @@
                                 <div class="form-group ">
                                     <label for="meta_description" class="control-label">Meta Description </label>
                                     <textarea name="meta_description" class="form-control" rows="4" id="meta_description" placeholder="Meta Description for SEO of Website">{{ old('meta_description') ?: $websiteParameter->meta_description ?? '' }}</textarea>
+                                </div>
+
+                                <div class="form-group ">
+                                    <label for="footer_about_en" class="control-label">Footer About Text (English)</label>
+                                    <textarea name="footer_about_en" class="form-control" rows="4" id="footer_about_en" placeholder="Short about text shown in the website footer (English)">{{ old('footer_about_en') ?: $websiteParameter->footer_about_en ?? '' }}</textarea>
+                                </div>
+
+                                <div class="form-group ">
+                                    <label for="footer_about_bn" class="control-label">Footer About Text (Bangla)</label>
+                                    <textarea name="footer_about_bn" class="form-control" rows="4" id="footer_about_bn" placeholder="ফুটারে দেখানো সংক্ষিপ্ত পরিচিতি (বাংলা)">{{ old('footer_about_bn') ?: $websiteParameter->footer_about_bn ?? '' }}</textarea>
                                 </div>
 
                                 {{--<div class="form-group ">
@@ -137,10 +152,6 @@
                                     <label for="whatsapp" class="  control-label">WhatsApp Number</label>
                                     <input type="text" name="whatsapp" class="form-control" value="{{ old('whatsapp') ?: $websiteParameter->whatsapp ?? '' }}" id="whatsapp" placeholder="+8801XXXXXXXXX" autocomplete="off">
                                     <small class="text-muted">Enter number with country code (e.g., +8801700000000) for the floating button.</small>
-                                </div>
-                                <div class="form-group ">
-                                    <label for="iframe_map" class="  control-label">Iframe Map</label>
-                                    <input type="text" name="iframe_map" class="form-control" value="{{ old('iframe_map') ?: $websiteParameter->iframe_map ?? '' }}" id="iframe_map" placeholder="Iframe Map" autocomplete="off">
                                 </div>
 
                             </div>

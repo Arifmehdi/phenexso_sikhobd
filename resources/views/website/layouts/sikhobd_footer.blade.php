@@ -5,7 +5,12 @@
         <a href="{{ route('home') }}" class="logo">
           <img src="{{ route('imagecache', ['template' => 'original', 'filename' => $ws->logo()]) }}" alt="{{ $ws->website_title ?? 'Qalam HR' }}" style="max-height: 70px;">
         </a>
-        <p class="footer-about">{{ __('frontend.footer.about') }}</p>
+        @php
+            $footerAbout = app()->getLocale() == 'bn'
+                ? ($ws->footer_about_bn ?? null)
+                : ($ws->footer_about_en ?? null);
+        @endphp
+        <p class="footer-about">{{ $footerAbout ?: __('frontend.footer.about') }}</p>
         <div class="social-links">
           <a href="#" class="social-icon"><i class="fa-brands fa-facebook-f"></i></a>
           <a href="#" class="social-icon"><i class="fa-brands fa-youtube"></i></a>

@@ -255,12 +255,20 @@
                         <span class="review-count"><i class="fa-solid fa-check-circle" style="color: var(--success);"></i> {{ __('frontend.pdp.in_stock') }}</span>
                     </div>
 
+                    @php
+                        $pdHasDiscount = ($product->discount ?? 0) > 0 && $product->selling_price > 0;
+                        $pdOffPercent  = $pdHasDiscount ? round(($product->discount / $product->selling_price) * 100) : 0;
+                    @endphp
                     <div class="price-section">
                         <div class="d-flex align-items-center">
-                            <span class="price-now-lg">৳{{ number_format($product->selling_price) }}</span>
-                            @if($product->discount > 0)
-                            <span class="price-was-lg">৳{{ number_format($product->price) }}</span>
-                            <span class="discount-tag-lg">{{ $product->discount }}% OFF</span>
+                            @if($pdHasDiscount)
+                            <span class="price-now-lg">৳{{ number_format($product->discounted_price) }}</span>
+                            <span class="price-was-lg">৳{{ number_format($product->regular_price) }}</span>
+                            @if($pdOffPercent > 0)
+                            <span class="discount-tag-lg">{{ $pdOffPercent }}% OFF</span>
+                            @endif
+                            @else
+                            <span class="price-now-lg">৳{{ number_format($product->regular_price) }}</span>
                             @endif
                         </div>
                     </div>
@@ -383,8 +391,8 @@
                 @foreach($relatedProducts->take(3) as $related)
                 <article class="course-card">
                   <div class="shop-product-thumb">
-                    @if($related->discount > 0)
-                    <span class="course-tag">{{ $related->discount }}% OFF</span>
+                    @if($related->discount > 0 && $related->selling_price > 0)
+                    <span class="course-tag">{{ round(($related->discount / $related->selling_price) * 100) }}% OFF</span>
                     @elseif($related->feature)
                     <span class="course-tag">HOT</span>
                     @endif
@@ -401,9 +409,11 @@
                     
                     <div class="course-foot" style="border: none; padding-top: 10px;">
                       <div class="shop-price-box">
-                        <span class="price">৳{{ number_format($related->selling_price) }}</span>
                         @if($related->discount > 0)
-                        <span class="old-price-sm">৳{{ number_format($related->price) }}</span>
+                        <span class="price">৳{{ number_format($related->discounted_price) }}</span>
+                        <span class="old-price-sm">৳{{ number_format($related->regular_price) }}</span>
+                        @else
+                        <span class="price">৳{{ number_format($related->regular_price) }}</span>
                         @endif
                       </div>
                     </div>

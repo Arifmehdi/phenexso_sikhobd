@@ -392,8 +392,8 @@
                <div class="shop-product-thumb">
                  @if($isInCart)
                  <span class="in-cart-badge"><i class="fa-solid fa-check-circle"></i> {{ __('frontend.shopx.in_cart') }}</span>
-                 @elseif($product->discount > 0)
-                 <span class="course-tag">{{ $product->discount }}% OFF</span>
+                 @elseif($product->discount > 0 && $product->selling_price > 0)
+                 <span class="course-tag">{{ round(($product->discount / $product->selling_price) * 100) }}% OFF</span>
                  @elseif($product->feature)
                  <span class="course-tag">HOT</span>
                  @endif

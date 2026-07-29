@@ -477,13 +477,24 @@
                                     <select name="product" class="form-select" id="course-select-dropdown" required>
                                         <option value="" selected disabled>{{ app()->getLocale() == 'bn' ? 'আপনার কোর্সটি বেছে নিন' : 'Choose your course' }}</option>
                                         @foreach($feature_products as $product)
+                                            @php
+                                                $hasDiscount = ($product->discount ?? 0) > 0 && $product->selling_price > 0;
+                                                $finalPrice  = $hasDiscount ? $product->discounted_price : $product->selling_price;
+                                                $offPercent  = $hasDiscount ? round(($product->discount / $product->selling_price) * 100) : 0;
+                                            @endphp
                                             <option value="{{ $product->id }}"
                                                     data-slug="{{ $product->slug }}"
                                                     data-name="{{ app()->getLocale() == 'bn' ? ($product->name_bn ?? $product->name_en) : ($product->name_en ?? $product->name_bn) }}"
-                                                    data-price="{{ $product->selling_price }}"
+                                                    data-price="{{ $finalPrice }}"
+                                                    data-regular-price="{{ $product->selling_price }}"
+                                                    data-discount="{{ $product->discount ?? 0 }}"
                                                     data-image="{{ $product->featured_image ? route('imagecache', ['template' => 'medium', 'filename' => $product->featured_image]) : '' }}"
                                                     data-feature="{{ $product->feature ? 'true' : 'false' }}">
-                                                {{ app()->getLocale() == 'bn' ? ($product->name_bn ?? $product->name_en) : ($product->name_en ?? $product->name_bn) }} - ৳ {{ number_format($product->selling_price) }}
+                                                {{ app()->getLocale() == 'bn' ? ($product->name_bn ?? $product->name_en) : ($product->name_en ?? $product->name_bn) }}
+                                                - ৳ {{ number_format($finalPrice) }}
+                                                @if($hasDiscount)
+                                                    ({{ app()->getLocale() == 'bn' ? 'রেগুলার' : 'regular' }} ৳ {{ number_format($product->selling_price) }} — {{ $offPercent }}% {{ app()->getLocale() == 'bn' ? 'ছাড়' : 'OFF' }})
+                                                @endif
                                             </option>
                                         @endforeach
                                     </select>

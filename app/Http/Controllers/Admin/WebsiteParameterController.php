@@ -49,6 +49,8 @@ class WebsiteParameterController extends Controller
 
         $wp->about_title  = $request->about_title;
         $wp->about_subtitle = $request->about_subtitle;
+        $wp->footer_about_en = $request->footer_about_en;
+        $wp->footer_about_bn = $request->footer_about_bn;
         $wp->about_img = $request->about_us_image;
         $wp->iframe_map = $request->iframe_map;
 

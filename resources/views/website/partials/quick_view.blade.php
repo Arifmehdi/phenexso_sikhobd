@@ -6,9 +6,13 @@
 
     <!-- Left: Image -->
     <div class="col-md-5" style="background: var(--bg-soft); display: flex; align-items: center; justify-content: center; min-height: 380px; position: relative;">
-        @if($product->discount > 0)
+        @php
+            $qvHasDiscount = ($product->discount ?? 0) > 0 && $product->selling_price > 0;
+            $qvOffPercent  = $qvHasDiscount ? round(($product->discount / $product->selling_price) * 100) : 0;
+        @endphp
+        @if($qvHasDiscount && $qvOffPercent > 0)
             <span style="position: absolute; top: 16px; left: 16px; background: var(--accent); color: #fff; padding: 4px 12px; border-radius: 20px; font-weight: 700; font-size: 12px; z-index: 10;">
-                {{ $product->discount }}% OFF
+                {{ $qvOffPercent }}% OFF
             </span>
         @endif
         <img src="{{ route('imagecache', ['template' => 'pnimd', 'filename' => $product->fi()]) }}" alt="{{ $product->name_en }}" style="max-height: 320px; max-width: 80%; object-fit: contain; padding: 20px;">
@@ -36,9 +40,11 @@
 
         <div style="background: var(--bg-soft); padding: 14px 18px; border-radius: 12px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
             <div class="d-flex align-items-baseline gap-2">
-                <span style="font-size: 28px; font-weight: 900; color: var(--primary);">৳{{ number_format($product->selling_price) }}</span>
-                @if($product->discount > 0)
-                    <span style="font-size: 16px; color: var(--text-muted); text-decoration: line-through;">৳{{ number_format($product->price) }}</span>
+                @if($qvHasDiscount)
+                    <span style="font-size: 28px; font-weight: 900; color: var(--primary);">৳{{ number_format($product->discounted_price) }}</span>
+                    <span style="font-size: 16px; color: var(--text-muted); text-decoration: line-through;">৳{{ number_format($product->regular_price) }}</span>
+                @else
+                    <span style="font-size: 28px; font-weight: 900; color: var(--primary);">৳{{ number_format($product->regular_price) }}</span>
                 @endif
             </div>
             <span style="font-size: 12px; color: #28a745; font-weight: 600;">
